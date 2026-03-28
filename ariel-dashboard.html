@@ -796,11 +796,11 @@
           <ul class="checklist" id="ariel-checklist">
             <li class="done" onclick="toggle(this)">
               <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Birth certificate (acte de naissance)</span><span class="item-note">✅ Obtained + apostille — digital format</span></div>
+              <div class="item-meta"><span class="item-text">Birth certificate (acte de naissance)</span><span class="item-note">Obtained + apostille — digital format</span></div>
             </li>
             <li class="done" onclick="toggle(this)">
               <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Extended registration extract (תעודת רישום)</span><span class="item-note">✅ Obtained + apostille — digital format</span></div>
+              <div class="item-meta"><span class="item-text">Extended registration extract (תעודת רישום)</span><span class="item-note">Obtained + apostille — digital format</span></div>
             </li>
             <li onclick="toggle(this)">
               <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -1919,7 +1919,7 @@ function flRenderProjects(cid) {
     <span id="fl-proj-arrow-${cid}-${p.id}" class="fl-proj-arrow">${p.open?'▾':'▸'}</span>
     <span class="fl-proj-name">${p.name}</span>
     <span class="fl-proj-stats" id="fl-proj-stats-${cid}-${p.id}">${statsStr}</span>
-    <button onclick="flDeleteProject(${cid},${p.id});event.stopPropagation()" class="fl-act-btn" title="Remove project" style="margin-left:8px">✕</button>
+    <button onclick="flDeleteProject(${cid},${p.id});event.stopPropagation()" class="fl-act-btn" title="Remove project" style="margin-left:8px">&times;</button>
   </div>
   <div class="fl-project-body" id="fl-proj-body-${cid}-${p.id}" style="display:${p.open?'block':'none'}">
     <div class="fl-timer-box" style="margin-bottom:10px">
@@ -1963,8 +1963,8 @@ function flRenderProjectEntries(cid, pid) {
       <div class="fl-entry-desc" style="flex:1">${e.desc||'—'}</div>
       <span class="fl-entry-hours">${e.hours}h · ₪${Math.round(e.hours*c.rate).toLocaleString()}</span>
       <div class="fl-entry-actions">
-        <button onclick="flEditEntry(${cid},${pid},${e.id})" class="fl-act-btn">✎</button>
-        <button onclick="flDeleteEntry(${cid},${pid},${e.id})" class="fl-act-btn">✕</button>
+        <button onclick="flEditEntry(${cid},${pid},${e.id})" class="fl-act-btn">Edit</button>
+        <button onclick="flDeleteEntry(${cid},${pid},${e.id})" class="fl-act-btn">&times;</button>
       </div>
     </div>`).join('');
 }
@@ -2036,7 +2036,7 @@ function flRenderBriefs(id) {
     <div class="fl-brief-item">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--muted)"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
       ${b.url ? `<a href="${b.url}" target="_blank" class="fl-brief-title">${b.title}</a>` : `<span class="fl-brief-title">${b.title}</span>`}
-      <button onclick="flDeleteBrief(${id},${b.id})" class="fl-act-btn">✕</button>
+      <button onclick="flDeleteBrief(${id},${b.id})" class="fl-act-btn">&times;</button>
     </div>`).join('');
 }
 
@@ -2054,7 +2054,7 @@ function flRenderTasks(id) {
         ${t.desc?`<div class="fl-task-desc">${t.desc}</div>`:''}
         ${t.notes?`<div class="fl-task-notes">${t.notes}</div>`:''}
       </div>
-      <button onclick="flDeleteTask(${id},${t.id})" class="fl-act-btn" style="flex-shrink:0">✕</button>
+      <button onclick="flDeleteTask(${id},${t.id})" class="fl-act-btn" style="flex-shrink:0">&times;</button>
     </div>`).join('');
 }
 
@@ -2094,8 +2094,8 @@ function flClientCardHTML(c) {
     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
       <input type="color" value="${c.color}" title="Brand color" onchange="flUpdateColor(${c.id},this.value)" style="width:22px;height:22px;border:none;border-radius:50%;cursor:pointer;padding:0;background:none"/>
       <span id="fl-client-status-${c.id}" class="tag ${statusClass}">${c.status}</span>
-      <button onclick="flToggleEditPanel(${c.id})" class="fl-act-btn" title="Edit client info" style="padding:3px 8px">✎ Edit</button>
-      <button onclick="flRemoveClient(${c.id})" class="fl-act-btn" title="Remove client">✕</button>
+      <button onclick="flToggleEditPanel(${c.id})" class="fl-act-btn" title="Edit client info" style="padding:3px 8px"> Edit</button>
+      <button onclick="flRemoveClient(${c.id})" class="fl-act-btn" title="Remove client">&times;</button>
     </div>
   </div>
   <div id="fl-edit-panel-${c.id}" class="fl-edit-panel" style="display:none">
@@ -2392,7 +2392,7 @@ function schRender() {
         ${!gone && counting > 0 ? `<div style="font-size:11px;color:var(--muted)">${counting} active</div>` : ''}
       </div>
       <div style="flex-shrink:0">${badge}</div>
-      <button onclick="schDeleteTrip(${t.id})" class="fl-act-btn">✕</button>
+      <button onclick="schDeleteTrip(${t.id})" class="fl-act-btn">&times;</button>
     </div>`;
   }).join('');
 }
