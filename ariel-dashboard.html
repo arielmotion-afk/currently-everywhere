@@ -1607,7 +1607,7 @@ function flUpdateColor(id, color) {
   if (!c) return;
   c.color = color;
   const card = document.getElementById(`fl-card-${id}`);
-  if (card) card.style.borderLeftColor = color;
+  if (card) { card.style.borderLeftColor = color; card.style.background = color + '26'; }
   if (!c.logo) {
     const el = document.getElementById(`fl-logo-${id}`);
     if (el) { el.style.background=color+'22'; el.style.borderColor=color; const sp=el.querySelector('span'); if(sp) sp.style.color=color; }
@@ -2021,7 +2021,7 @@ function flClientCardHTML(c) {
   const logoStyle = c.logo ? `background-image:url(${c.logo});background-size:contain;background-repeat:no-repeat;background-position:center;background-color:#ffffff` : `background:${c.color}22;border-color:${c.color}`;
   const logoInner = c.logo ? '' : `<span style="font-size:18px;color:${c.color}">＋</span>`;
 
-  return `<div class="card fl-client-card" id="fl-card-${c.id}" style="margin-bottom:20px;border-left-color:${c.color}">
+  return `<div class="card fl-client-card" id="fl-card-${c.id}" style="margin-bottom:20px;border-left-color:${c.color};background:${c.color}26">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
     <div id="fl-logo-${c.id}" class="fl-logo" style="${logoStyle}" onclick="document.getElementById('fl-logo-input-${c.id}').click()" title="Click to upload logo">${logoInner}</div>
     <input type="file" id="fl-logo-input-${c.id}" accept="image/*" style="display:none" onchange="flUploadLogo(${c.id},this)"/>
