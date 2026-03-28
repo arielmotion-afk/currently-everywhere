@@ -1,0 +1,2156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Currently: Everywhere</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5e8e4;
+    --surface: #fdf7f6;
+    --border: #e8d0ca;
+    --text: #282828;
+    --muted: #7a776e;
+    --accent: #1e1e1e;
+    --accent-light: #ece8e7;
+    --green: #4d7c62;
+    --green-light: #e8f2ec;
+    --red: #a84d4d;
+    --red-light: #faecec;
+    --blue: #3d6680;
+    --blue-light: #e8eff5;
+    --yellow: #b09040;
+    --yellow-light: #f8f2e0;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(249,246,239,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 56px;
+  }
+  .nav-logo {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    color: var(--text);
+    margin-right: auto;
+    letter-spacing: -0.02em;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links {
+    display: flex; gap: 2px;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 400;
+    padding: 6px 14px;
+    border-radius: 20px;
+    transition: all 0.15s;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--text);
+    background: var(--border);
+  }
+  .nav-data {
+    display: flex; gap: 6px; margin-left: 16px; padding-left: 16px;
+    border-left: 1px solid var(--border);
+  }
+  .nav-data button {
+    font-size: 12px; font-family: 'DM Sans', sans-serif;
+    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.15s; background: transparent;
+    color: var(--muted);
+  }
+  .nav-data button:hover { background: var(--border); color: var(--text); }
+  .nav-data .btn-import { }
+  .nav-data .btn-export { }
+
+  /* LAYOUT */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* SECTIONS */
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    margin-bottom: 28px;
+  }
+  .section-header h1 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .section-header p {
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-weight: 500;
+    font-size: 13.5px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .card-title-left {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* STATUS TAGS */
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11.5px; font-weight: 500;
+    padding: 3px 9px; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .tag-green { background: var(--green-light); color: var(--green); }
+  .tag-yellow { background: var(--yellow-light); color: var(--yellow); }
+  .tag-red { background: var(--red-light); color: var(--red); }
+  .tag-blue { background: var(--blue-light); color: var(--blue); }
+  .tag-muted { background: var(--border); color: var(--muted); }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+    font-size: 13px;
+  }
+  .checklist li:hover { background: var(--bg); }
+  .checklist li.done { opacity: 0.5; }
+  .checklist li.done .item-text { text-decoration: line-through; }
+  .check-box {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .checklist li.done .check-box {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .check-box svg { display: none; }
+  .checklist li.done .check-box svg { display: block; }
+  .item-meta {
+    display: flex; flex-direction: column; gap: 2px; flex: 1;
+  }
+  .item-text { font-weight: 400; }
+  .item-note { font-size: 11.5px; color: var(--muted); }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 20px; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 6px; top: 8px; bottom: 8px;
+    width: 1.5px; background: var(--border);
+  }
+  .timeline-item {
+    position: relative; padding-left: 24px; margin-bottom: 20px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute; left: -14px; top: 5px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--border); border: 2px solid var(--surface);
+  }
+  .timeline-item.done::before { background: var(--green); }
+  .timeline-item.active::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .timeline-item.pending::before { background: var(--border); }
+  .timeline-label {
+    font-weight: 500; font-size: 13px; margin-bottom: 2px;
+  }
+  .timeline-sub { font-size: 12px; color: var(--muted); }
+
+  /* STAT CARDS */
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-family: 'Lora', serif; font-size: 28px; letter-spacing: -0.04em; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin: 8px 0 4px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .progress-bar { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s ease; }
+  .progress-fill.green { background: var(--green); }
+  .progress-fill.blue { background: var(--blue); }
+
+  /* FREELANCE TABLE */
+  .client-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .client-table th {
+    text-align: left; font-weight: 500; font-size: 11.5px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 0 12px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .client-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .client-table tr:last-child td { border-bottom: none; }
+  .client-table tr:hover td { background: var(--bg); }
+
+  /* TIME ENTRY */
+  .time-log { display: flex; flex-direction: column; gap: 8px; }
+  .time-entry {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .time-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .time-client { font-weight: 500; flex: 1; }
+  .time-desc { color: var(--muted); flex: 2; }
+  .time-dur { font-weight: 500; color: var(--accent); white-space: nowrap; }
+
+  /* BUTTON */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    padding: 8px 16px; border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--bg); border-color: var(--text); }
+  .btn-primary {
+    background: var(--text); color: var(--bg); border-color: var(--text);
+  }
+  .btn-primary:hover { background: #333; border-color: #333; }
+
+  /* INPUT */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 0.15s;
+    outline: none;
+    resize: vertical;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--accent);
+  }
+
+  /* INLINE FLEX ROW */
+  .row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .row:last-child { margin-bottom: 0; }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* NOTES */
+  .note-block {
+    background: var(--yellow-light);
+    border-left: 3px solid var(--yellow);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #6b5b1a;
+  }
+
+  /* HOME */
+  .home-greeting {
+    font-family: 'Lora', serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    margin-bottom: 6px;
+  }
+  .home-greeting em { color: var(--accent); font-style: italic; }
+  .home-sub { color: var(--muted); margin-bottom: 36px; font-size: 14px; }
+  .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .overview-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .overview-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
+  .overview-card .icon { font-size: 22px; margin-bottom: 10px; }
+  .overview-card .oc-title { font-weight: 500; font-size: 13px; margin-bottom: 4px; }
+  .overview-card .oc-sub { color: var(--muted); font-size: 12px; }
+  .urgent-list { display: flex; flex-direction: column; gap: 8px; }
+  .urgent-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .urgent-item:hover { background: var(--bg); }
+  .urgent-area { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+  /* MODAL/FORM overlays */
+  .form-row { display: flex; gap: 12px; }
+  .form-row .field { flex: 1; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tab-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    padding: 8px 18px 10px;
+    border: none; background: none; cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+  /* SVG ICONS */
+  .svg-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+  .section-header h1 { display: flex; align-items: center; gap: 10px; }
+  .overview-card .icon { line-height: 1; }
+
+  /* FREELANCE CLIENT CARDS */
+  .fl-client-card { border-left: 4px solid var(--accent); }
+  .fl-logo {
+    width: 44px; height: 44px; border-radius: 10px;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; overflow: hidden; flex-shrink: 0;
+    transition: opacity 0.15s;
+    background-color: #ffffff;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+  }
+  .fl-logo:hover { opacity: 0.8; }
+  .fl-link-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 500;
+    padding: 5px 11px; border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--bg); color: var(--text);
+    text-decoration: none; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .fl-link-chip:hover { border-color: var(--text); background: var(--surface); }
+  .fl-link-empty { color: var(--muted); font-style: italic; }
+  .fl-link-edit { color: var(--muted); }
+  .fl-month-pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    padding: 5px 10px; border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--muted);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .fl-month-pill:hover { color: var(--text); border-color: var(--muted); }
+  .fl-month-pill.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .fl-month-pill.has-hours { border-color: var(--accent); color: var(--text); }
+  .fl-entry {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px;
+    border: 1px solid var(--border); font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .fl-entry:hover { background: var(--bg); }
+  .fl-entry-date { color: var(--muted); font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+  .fl-entry-desc { flex: 1; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fl-entry-hours { font-weight: 500; white-space: nowrap; }
+  .fl-entry-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .fl-act-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px; padding: 3px 7px; border-radius: 5px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); cursor: pointer; transition: all 0.1s; line-height: 1.4;
+  }
+  .fl-act-btn:hover { color: var(--text); border-color: var(--muted); }
+  .fl-brief-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 12px; border-radius: 8px;
+    border: 1px solid var(--border); font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .fl-brief-item:hover { background: var(--bg); }
+  .fl-brief-title {
+    flex: 1; color: var(--text); text-decoration: none; font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  a.fl-brief-title:hover { color: var(--blue); text-decoration: underline; }
+  .fl-task-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .fl-task-item.done { opacity: 0.5; }
+  .fl-task-item.done .fl-task-name { text-decoration: line-through; }
+  .fl-task-item.done .check-box { background: var(--green); border-color: var(--green); }
+  .fl-task-item.done .check-box svg { display: block; }
+  .fl-task-name { font-weight: 500; line-height: 1.4; }
+  .fl-task-desc { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .fl-task-notes { color: var(--blue); font-size: 12px; margin-top: 3px; word-break: break-all; }
+  .fl-section-label {
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px;
+  }
+  .fl-timer-box {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .fl-timer-display {
+    font-family: 'Lora', serif; font-size: 30px;
+    letter-spacing: -0.04em; min-width: 115px;
+  }
+  .fl-manual-box {
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 14px; margin-bottom: 12px;
+  }
+  /* PROJECT ACCORDION */
+  .fl-project-row {
+    border: 1.5px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 8px; overflow: hidden;
+  }
+  .fl-project-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; cursor: pointer; user-select: none;
+    transition: background 0.12s; border-left: 3px solid var(--accent);
+    background: var(--surface);
+  }
+  .fl-project-header:hover { background: var(--bg); }
+  .fl-proj-arrow { font-size: 10px; color: var(--muted); flex-shrink: 0; width: 12px; }
+  .fl-proj-name { font-weight: 500; font-size: 14px; flex: 1; min-width: 0; }
+  .fl-proj-stats { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .fl-project-body {
+    padding: 14px 16px; background: var(--bg);
+    border-top: 1.5px solid var(--border);
+  }
+  /* CLIENT EDIT PANEL */
+  .fl-edit-panel {
+    background: var(--bg); border-radius: 8px;
+    padding: 14px; margin-bottom: 14px;
+    border: 1.5px solid var(--border);
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 16px; }
+    main { padding: 24px 16px 60px; }
+    .overview-grid { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .nav-links a { padding: 6px 10px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Currently<span>: Everywhere</span></div>
+  <div class="nav-links">
+    <a href="#" class="active" data-section="home">Home</a>
+    <a href="#" data-section="relocation">Relocation</a>
+    <a href="#" data-section="finances">Finances</a>
+    <a href="#" data-section="freelance">Freelance</a>
+    <a href="#" data-section="work">Work</a>
+    <a href="#" data-section="german">German</a>
+  </div>
+  <div class="nav-data">
+    <button class="btn-export" onclick="dataExport()">↓ Export</button>
+    <button class="btn-import" onclick="document.getElementById('data-import-input').click()">↑ Import</button>
+    <input type="file" id="data-import-input" accept=".json" style="display:none" onchange="dataImport(this)"/>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HOME -->
+  <div class="section active" id="home">
+    <p class="home-greeting">Currently: <em>Everywhere.</em></p>
+    <p class="home-sub">But at least it's organized.</p>
+
+    <div class="overview-grid">
+      <div class="overview-card" onclick="navigate('relocation')">
+        <div class="icon">✈️</div>
+        <div class="oc-title">Relocation</div>
+        <div class="oc-sub"><span class="tag tag-yellow">In progress</span></div>
+      </div>
+      <div class="overview-card" onclick="navigate('finances')">
+        <div class="icon">📊</div>
+        <div class="oc-title">Finances</div>
+        <div class="oc-sub"><span class="tag tag-blue">Tracking</span></div>
+      </div>
+      <div class="overview-card" onclick="navigate('work')">
+        <div class="icon">💼</div>
+        <div class="oc-title">Work</div>
+        <div class="oc-sub"><span class="tag tag-green">Active</span></div>
+      </div>
+      <div class="overview-card" onclick="navigate('german')">
+        <div class="icon">🇩🇪</div>
+        <div class="oc-title">German</div>
+        <div class="oc-sub"><span class="tag tag-muted">Learning</span></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--red)"></div>Needs attention</div>
+        </div>
+        <div class="urgent-list" id="urgent-list">
+          <div class="urgent-item" onclick="navigate('relocation')">
+            <span>📄</span>
+            <div>
+              <div style="font-weight:500">Acte de naissance — confirm digital apostille OK with Mulhouse mairie</div>
+              <div style="font-size:12px;color:var(--muted)">Verify before sending dossier</div>
+            </div>
+            <span class="urgent-area">Relocation</span>
+          </div>
+          <div class="urgent-item" onclick="navigate('relocation')">
+            <span>📋</span>
+            <div>
+              <div style="font-weight:500">Book appointment at Migrationsamt St. Gallen</div>
+              <div style="font-size:12px;color:var(--muted)">Book once arrival date is confirmed</div>
+            </div>
+            <span class="urgent-area">Relocation</span>
+          </div>
+          <div class="urgent-item" onclick="navigate('finances')">
+            <span>📝</span>
+            <div>
+              <div style="font-weight:500">Clarify tax residency start date with Israeli accountant</div>
+              <div style="font-size:12px;color:var(--muted)">Impacts both IL and CH obligations</div>
+            </div>
+            <span class="urgent-area">Finances</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Overall progress</div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>✈️ Relocation</span><span>35%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>📊 Finances</span><span>15%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:15%;background:var(--blue)"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>💼 Work setup</span><span>60%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:60%;background:var(--green)"></div></div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>🇩🇪 German</span><span>0%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--yellow)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELOCATION -->
+  <div class="section" id="relocation">
+    <div class="section-header">
+      <h1>✈️ Relocation</h1>
+      <p>Swiss residency permit + French civil marriage process</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('relocation', 'residency', this)">🇨🇭 Swiss Residency</button>
+      <button class="tab-btn" onclick="switchTab('relocation', 'marriage', this)">💍 French Marriage</button>
+    </div>
+
+    <!-- TAB: RESIDENCY -->
+    <div class="tab-panel active" id="tab-relocation-residency">
+
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Application timeline</div>
+          </div>
+          <div class="timeline">
+            <div class="timeline-item done">
+              <div class="timeline-label">Decision to relocate</div>
+              <div class="timeline-sub">St. Gallen confirmed as destination</div>
+            </div>
+            <div class="timeline-item done">
+              <div class="timeline-label">Partner's work permit confirmed</div>
+              <div class="timeline-sub">Liechtenstein employer, cross-border</div>
+            </div>
+            <div class="timeline-item active">
+              <div class="timeline-label">Gather documents for B permit</div>
+              <div class="timeline-sub">In progress — see checklist</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">Book Migrationsamt appointment</div>
+              <div class="timeline-sub">St. Gallen — do after arrival</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">Submit application</div>
+              <div class="timeline-sub">Within 14 days of arrival</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">Receive B permit</div>
+              <div class="timeline-sub">Typically 4–8 weeks processing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Document checklist</div>
+            <span id="residency-progress" class="tag tag-blue">0 / 8 done</span>
+          </div>
+          <ul class="checklist" id="residency-checklist">
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Valid passport</span><span class="item-note">Israeli passport, must be valid 6+ months</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Biometric photos</span><span class="item-note">2 passport-style photos</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Proof of relationship / marriage certificate</span><span class="item-note">Or engagement + cohabitation proof if not yet married</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Partner's permit / EU ID</span><span class="item-note">Copy of partner's French passport + work permit</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Proof of shared residence</span><span class="item-note">Rental contract in St. Gallen</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Proof of income / employment</span><span class="item-note">Remote work contract or payslips (last 3 months)</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Health insurance proof</span><span class="item-note">Swiss health insurance mandatory — must enroll within 3 months</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Anmeldeformular (registration form)</span><span class="item-note">Fill out at the Einwohnerkontrolle</span></div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="note-block" style="margin-top:16px">
+          ⚠️ As spouse of an EU citizen, you qualify for a B permit (family reunification). You must register within 14 days of moving in. The permit is initially for 5 years.
+        </div>
+      </div>
+    </div>
+    </div><!-- end tab-relocation-residency -->
+
+    <!-- TAB: MARRIAGE -->
+    <div class="tab-panel" id="tab-relocation-marriage">
+
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--green)"></div>Your documents (Ariel)</div>
+            <span id="ariel-progress" class="tag tag-green">0 / 6 done</span>
+          </div>
+          <ul class="checklist" id="ariel-checklist">
+            <li class="done" onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Birth certificate (acte de naissance)</span><span class="item-note">✅ Obtained + apostille — digital format</span></div>
+            </li>
+            <li class="done" onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Extended registration extract (תעודת רישום)</span><span class="item-note">✅ Obtained + apostille — digital format</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Valid passport (copy)</span><span class="item-note">Original + certified copy required</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Proof of domicile</span><span class="item-note">Recent utility bill or certificate of residence</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Certificat de coutume (certificate of celibacy)</span><span class="item-note">Issued by Israeli consulate in France — confirms you're free to marry</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Certified French translation of all Hebrew documents</span><span class="item-note">Must be done by sworn translator (traducteur assermenté)</span></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Partner's documents</div>
+            <span id="partner-progress" class="tag tag-blue">0 / 5 done</span>
+          </div>
+          <ul class="checklist" id="partner-checklist">
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Birth certificate (acte de naissance intégral)</span><span class="item-note">Must be dated within 3 months of ceremony</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Valid passport (copy)</span><span class="item-note">French passport</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Proof of domicile in Mulhouse</span><span class="item-note">Or family connection proof if using family home</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Certificat de célibat / non-PACS</span><span class="item-note">Confirmation he's not currently PACSed</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Witness list (2 witnesses minimum)</span><span class="item-note">Name, DOB, ID number for each witness</span></div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Next steps with the Mairie</div>
+          </div>
+          <div class="timeline">
+            <div class="timeline-item active">
+              <div class="timeline-label">Confirm digital apostille acceptance</div>
+              <div class="timeline-sub">Contact Mairie de Mulhouse directly to verify</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">File dossier de mariage</div>
+              <div class="timeline-sub">Can be done in person or by post</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">Publication des bans</div>
+              <div class="timeline-sub">Posted for 10 days — mandatory waiting period</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">Ceremony date confirmed</div>
+              <div class="timeline-sub">Set by the Mairie after dossier accepted</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-block" style="margin-top:4px">
+      📌 All Hebrew documents need a certified French translation by a <em>traducteur assermenté</em>. Keep originals + translations together. Digital apostilles are increasingly accepted but always confirm with the specific mairie.
+    </div>
+    </div><!-- end tab-relocation-marriage -->
+  </div><!-- end relocation section -->
+
+  <!-- FINANCES -->
+  <div class="section" id="finances">
+    <div class="section-header">
+      <h1>📊 Finances</h1>
+      <p>Tax obligations, insurance setup, and managing mom's affairs remotely</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('finances', 'tax', this)">🧾 Tax</button>
+      <button class="tab-btn" onclick="switchTab('finances', 'insurance', this)">🛡️ Insurance</button>
+      <button class="tab-btn" onclick="switchTab('finances', 'mom', this)">👩 Mom</button>
+    </div>
+
+    <!-- TAB: TAX -->
+    <div class="tab-panel active" id="tab-finances-tax">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>🇮🇱 Israel</div>
+            <span class="tag tag-blue">Active</span>
+          </div>
+          <ul class="checklist" id="il-checklist">
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Clarify tax residency end date with accountant</span><span class="item-note">Israel taxes residents on worldwide income</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">File final Israeli tax return (departure year)</span><span class="item-note">Required when ceasing Israeli tax residency</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Notify employer of status change</span><span class="item-note">Affects payroll tax / bituach leumi deductions</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Confirm bituach leumi implications</span><span class="item-note">NII contributions may continue or end depending on arrangement</span></div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>🇨🇭 Switzerland</div>
+            <span class="tag tag-yellow">Upcoming</span>
+          </div>
+          <ul class="checklist" id="ch-checklist">
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Understand Quellensteuer (withholding tax) rules</span><span class="item-note">As a foreign employee earning remotely, may apply</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Register with St. Gallen canton tax authority</span><span class="item-note">Done via Migrationsamt registration process</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Check IL–CH double tax treaty implications</span><span class="item-note">Israel and Switzerland have a DTA — avoid double taxation</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">File first Swiss tax declaration</span><span class="item-note">Due by March 31 of year following residence start</span></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:0">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--muted)"></div>Notes & reminders</div>
+        </div>
+        <textarea class="field" style="width:100%;font-size:13px;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);resize:vertical;min-height:80px;outline:none" placeholder="Add notes, accountant contact, key dates..."></textarea>
+      </div>
+
+      <div class="note-block" style="margin-top:4px">
+        🔑 Key risk area: Israel taxes residents on worldwide income. Your Swiss tax residency start date directly affects when Israeli obligations end. Consult both an Israeli and Swiss accountant before moving — ideally at the same time.
+      </div>
+    </div><!-- end tab-finances-tax -->
+
+    <!-- TAB: INSURANCE -->
+    <div class="tab-panel" id="tab-finances-insurance">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>🇨🇭 Switzerland</div>
+            <span id="ch-insurance-progress" class="tag tag-yellow">0 / 4 done</span>
+          </div>
+          <ul class="checklist" id="ch-insurance-checklist">
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Enroll in Krankenkasse (basic health insurance)</span><span class="item-note">Mandatory — must register within 3 months of arrival. Compare via priminfo.admin.ch</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Check supplemental coverage (Zusatzversicherung)</span><span class="item-note">Optional add-ons: dental, private room, alternative medicine</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Get Privathaftpflicht (personal liability insurance)</span><span class="item-note">~CHF 100–150/yr — highly recommended, covers accidental damage to others</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Open 3rd pillar account (Säule 3a)</span><span class="item-note">Tax-deductible pension savings — worth starting once you have Swiss income. Max CHF 7,056/yr (2024)</span></div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>🇮🇱 Israel — exit</div>
+            <span id="il-insurance-progress" class="tag tag-blue">0 / 3 done</span>
+          </div>
+          <ul class="checklist" id="il-insurance-checklist">
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Notify kupat holim of emigration</span><span class="item-note">Formally exit your Israeli health fund to stop monthly charges</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Understand bituach leumi export / continuation rights</span><span class="item-note">Check if voluntary contributions abroad make sense for future Israeli pension entitlements</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Handle existing Israeli insurance policies</span><span class="item-note">Life insurance, pension (קרן פנסיה) — check transfer or pause options</span></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="note-block" style="margin-top:4px">
+        ⚠️ Swiss Krankenkasse is mandatory and expensive (~CHF 350–500/month). You can choose your own deductible (franchise): higher deductible = lower premium. Haftpflicht is cheap and essential — landlords often require it.
+      </div>
+    </div><!-- end tab-finances-insurance -->
+
+    <!-- TAB: MOM -->
+    <div class="tab-panel" id="tab-finances-mom">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Health insurance (Israel)</div>
+            <span id="mom-insurance-progress" class="tag tag-blue">0 / 4 done</span>
+          </div>
+          <ul class="checklist" id="mom-insurance-checklist">
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Confirm active kupat holim membership + fund name</span><span class="item-note">Know which fund and membership tier she's on</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Check supplemental (mushlam / zahav) tier status</span><span class="item-note">Upgrade if needed — especially relevant for specialists, medication</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Set up digital access to her kupat holim account</span><span class="item-note">Needed to manage remotely — referrals, prescriptions, appointments</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Confirm bituach leumi pension payments</span><span class="item-note">Verify she's receiving her full entitlement and bank details are current</span></div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--green)"></div>Documents & remote access</div>
+            <span id="mom-docs-progress" class="tag tag-green">0 / 4 done</span>
+          </div>
+          <ul class="checklist" id="mom-docs-checklist">
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Scan and store all key documents digitally</span><span class="item-note">ID, passport, bank cards, insurance cards, medical history</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Set up power of attorney (ייפוי כוח) if needed</span><span class="item-note">Allows you to act on her behalf remotely for financial/medical matters</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Identify trusted contact in Israel for in-person help</span><span class="item-note">Someone who can assist with appointments, forms, post</span></div>
+            </li>
+            <li onclick="toggle(this)">
+              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="item-meta"><span class="item-text">Set up bank account access / monitoring</span><span class="item-note">Online banking access to track and help manage her finances remotely</span></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:0">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--muted)"></div>Notes</div>
+        </div>
+        <textarea class="field" style="width:100%;font-size:13px;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);resize:vertical;min-height:80px;outline:none" placeholder="Doctors, contacts, medications, account numbers, key dates..."></textarea>
+      </div>
+
+      <div class="note-block" style="margin-top:4px">
+        📱 Managing remotely is doable with the right setup: Zoom/WhatsApp for coordination, digital access to health fund and banking, and one reliable person on the ground. Power of attorney makes the bureaucratic parts much easier.
+      </div>
+    </div><!-- end tab-finances-mom -->
+
+  </div><!-- end finances section -->
+
+  <!-- FREELANCE -->
+  <div class="section" id="freelance">
+    <div class="section-header">
+      <h1>🎬 Freelance</h1>
+      <p>Client tracker — time, billing, briefs, and tasks</p>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-label">This month</div>
+        <div class="stat-value" id="fl-stat-hours">0h</div>
+        <div class="stat-sub">logged hours</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active clients</div>
+        <div class="stat-value" id="fl-stat-clients">0</div>
+        <div class="stat-sub">current projects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Month income</div>
+        <div class="stat-value" id="fl-stat-income"><span style="font-family:'DM Sans',sans-serif;font-size:0.72em;vertical-align:0.08em;opacity:0.8">₪</span>0</div>
+        <div class="stat-sub">estimated</div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <p style="color:var(--muted);font-size:13px" id="fl-empty-hint">Add your first client to get started.</p>
+      <button class="btn btn-primary" onclick="flOpenNewClient()">+ New client</button>
+    </div>
+
+    <div id="fl-new-client-form" class="card" style="display:none;margin-bottom:20px">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>New client</div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Client name</label><input type="text" id="fl-nc-name" placeholder="Studio XYZ"/></div>
+        <div class="field"><label>Rate (₪/hr)</label><input type="number" id="fl-nc-rate" placeholder="350" min="0"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Brand color</label><input type="color" id="fl-nc-color" value="#193497" style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;padding:2px"/></div>
+        <div class="field">
+          <label>Status</label>
+          <select id="fl-nc-status">
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>G Drive — client's folder</label><input type="url" id="fl-nc-gdrive-client" placeholder="https://drive.google.com/..."/></div>
+      <div class="field"><label>G Drive — my folder for them</label><input type="url" id="fl-nc-gdrive-mine" placeholder="https://drive.google.com/..."/></div>
+      <div class="field"><label>Frame.io link</label><input type="url" id="fl-nc-frameio" placeholder="https://app.frame.io/..."/></div>
+      <div class="field"><label>Figma link</label><input type="url" id="fl-nc-figma" placeholder="https://www.figma.com/..."/></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="flSaveNewClient()">Save client</button>
+        <button class="btn" onclick="flCloseNewClient()">Cancel</button>
+      </div>
+    </div>
+
+    <div id="fl-client-cards"></div>
+  </div><!-- end freelance section -->
+
+  <!-- WORK -->
+  <div class="section" id="work">
+    <div class="section-header">
+      <h1>💼 Work</h1>
+      <p>Remote setup (Israeli employer) + freelance time tracking</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--green)"></div>Remote work setup checklist</div>
+        <span id="work-progress" class="tag tag-green">0 / 5 done</span>
+      </div>
+      <div class="grid-2" style="margin-top:4px">
+        <ul class="checklist" id="work-checklist">
+          <li onclick="toggle(this)">
+            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="item-meta"><span class="item-text">Inform employer of relocation to Switzerland</span><span class="item-note">Get written agreement for remote work arrangement</span></div>
+          </li>
+          <li onclick="toggle(this)">
+            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="item-meta"><span class="item-text">Update employment contract (remote clause)</span><span class="item-note">Document that work location is Switzerland</span></div>
+          </li>
+          <li onclick="toggle(this)">
+            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="item-meta"><span class="item-text">Clarify salary payment method from IL to CH</span><span class="item-note">Wire to Israeli account or Swiss? Currency and fees</span></div>
+          </li>
+          <li onclick="toggle(this)">
+            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="item-meta"><span class="item-text">Open Swiss bank account</span><span class="item-note">Needed for local expenses; required by many Swiss landlords</span></div>
+          </li>
+          <li onclick="toggle(this)">
+            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="item-meta"><span class="item-text">Check if employer is exposed to Swiss PE risk</span><span class="item-note">Permanent establishment risk if you're in CH long-term</span></div>
+          </li>
+        </ul>
+        <div>
+          <div class="note-block">
+            💡 Working from Switzerland for an Israeli employer is legally straightforward as long as you hold a valid permit. The main risks are tax and the employer's potential PE exposure. Most tech companies handle this fine — just get written confirmation.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end work section -->
+
+  <!-- GERMAN -->
+  <div class="section" id="german">
+    <div class="section-header">
+      <h1>🇩🇪 German</h1>
+      <p>Learning tracker — target B2 for local job market in Switzerland</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Current level</div>
+        </div>
+        <div style="margin-bottom:20px">
+          <div class="progress-label" style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px"><span>Where you are</span><span>Target: B2</span></div>
+          <div style="display:flex;gap:6px;margin-bottom:4px">
+            <div id="lev-a1" onclick="setLevel('a1')" style="flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s">A1</div>
+            <div id="lev-a2" onclick="setLevel('a2')" style="flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s">A2</div>
+            <div id="lev-b1" onclick="setLevel('b1')" style="flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s">B1</div>
+            <div id="lev-b2" onclick="setLevel('b2')" style="flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s">B2</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Click to set your current level</div>
+        </div>
+
+        <div class="field">
+          <label>Current course / resource</label>
+          <input type="text" placeholder="e.g. Volkshochschule St. Gallen, Duolingo, Pimsleur..." />
+        </div>
+        <div class="field">
+          <label>Next milestone</label>
+          <input type="text" placeholder="e.g. Finish A2 by September" />
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <textarea rows="3" placeholder="Vocabulary to practice, grammar notes, resources..."></textarea>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Milestones & goals</div>
+          </div>
+          <div class="timeline">
+            <div class="timeline-item active">
+              <div class="timeline-label">Start learning (A0 → A1)</div>
+              <div class="timeline-sub">Basic greetings, numbers, orientation</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">A2 — Daily life</div>
+              <div class="timeline-sub">Groceries, transport, simple conversations with neighbours</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">B1 — Functional</div>
+              <div class="timeline-sub">Handle appointments, understand forms, basic work meetings</div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-label">B2 — Job-ready</div>
+              <div class="timeline-sub">Apply to local design studios in St. Gallen / Basel</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-block" style="margin-top:16px">
+          🏛️ Swiss German (Schweizerdeutsch) is spoken locally but Standard German (Hochdeutsch) is used in writing, school, and work. Focus on Hochdeutsch for your B2 exam — locals will switch for you.
+        </div>
+      </div>
+    </div>
+  </div><!-- end german section -->
+
+</main>
+
+<script>
+// ── NAVIGATION ──
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+function navigate(id) {
+  sections.forEach(s => s.classList.remove('active'));
+  navLinks.forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const link = document.querySelector(`[data-section="${id}"]`);
+  if (link) link.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+navLinks.forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    navigate(a.dataset.section);
+  });
+});
+
+// ── TABS ──
+function switchTab(section, tab, btn) {
+  // deactivate all panels and buttons in this section
+  const panels = document.querySelectorAll(`[id^="tab-${section}-"]`);
+  panels.forEach(p => p.classList.remove('active'));
+  const btns = btn.parentElement.querySelectorAll('.tab-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  // activate chosen
+  document.getElementById(`tab-${section}-${tab}`).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── CHECKLIST ──
+function toggle(el) {
+  el.classList.toggle('done');
+  updateProgress();
+}
+
+function updateProgress() {
+  const checklists = [
+    { id: 'residency-checklist', badge: 'residency-progress' },
+    { id: 'ariel-checklist', badge: 'ariel-progress' },
+    { id: 'partner-checklist', badge: 'partner-progress' },
+    { id: 'il-checklist', badge: null },
+    { id: 'ch-checklist', badge: null },
+    { id: 'ch-insurance-checklist', badge: 'ch-insurance-progress' },
+    { id: 'il-insurance-checklist', badge: 'il-insurance-progress' },
+    { id: 'mom-insurance-checklist', badge: 'mom-insurance-progress' },
+    { id: 'mom-docs-checklist', badge: 'mom-docs-progress' },
+    { id: 'work-checklist', badge: 'work-progress' },
+  ];
+  checklists.forEach(({ id, badge }) => {
+    const ul = document.getElementById(id);
+    if (!ul) return;
+    const items = ul.querySelectorAll('li');
+    const done = ul.querySelectorAll('li.done').length;
+    if (badge) {
+      const el = document.getElementById(badge);
+      if (el) el.textContent = `${done} / ${items.length} done`;
+    }
+  });
+
+  // Home progress bars (bar 0=Relocation, 1=Finances, 2=Work, 3=German)
+  const homeBars = [
+    { bar: 0, lists: ['residency-checklist', 'ariel-checklist', 'partner-checklist'] },
+    { bar: 1, lists: ['il-checklist', 'ch-checklist', 'ch-insurance-checklist', 'il-insurance-checklist'] },
+    { bar: 2, lists: ['work-checklist'] },
+    // bar 3 (German) has no checklist — stays at 0%
+  ];
+  const fills = document.querySelectorAll('.progress-fill');
+  const labels = document.querySelectorAll('.progress-label span:last-child');
+  homeBars.forEach(({ bar, lists }) => {
+    let total = 0, done = 0;
+    lists.forEach(id => {
+      const ul = document.getElementById(id);
+      if (!ul) return;
+      total += ul.querySelectorAll('li').length;
+      done += ul.querySelectorAll('li.done').length;
+    });
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    if (fills[bar]) fills[bar].style.width = pct + '%';
+    if (labels[bar]) labels[bar].textContent = pct + '%';
+  });
+}
+
+updateProgress();
+
+// ── GERMAN LEVEL ──
+function setLevel(lev) {
+  ['a1','a2','b1','b2'].forEach(l => {
+    const el = document.getElementById('lev-' + l);
+    el.style.background = '';
+    el.style.borderColor = 'var(--border)';
+    el.style.color = 'var(--text)';
+  });
+  const sel = document.getElementById('lev-' + lev);
+  sel.style.background = 'var(--accent)';
+  sel.style.borderColor = 'var(--accent)';
+  sel.style.color = '#fff';
+}
+
+// ── FREELANCE ──
+let flClients = [];
+let flTimerInterval = null;
+const FL_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function flMakeClient(data) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const months = {};
+  for (let m = 1; m <= 12; m++) {
+    months[`${year}-${String(m).padStart(2,'0')}`] = { logged: false, requested: false, emailed: false, invoiced: false };
+  }
+  return {
+    id: Date.now(),
+    name: data.name,
+    logo: null,
+    color: data.color || '#c07848',
+    rate: parseFloat(data.rate) || 0,
+    status: data.status || 'active',
+    links: { gdriveClient: data.gdriveClient||'', gdriveMine: data.gdriveMine||'', frameio: data.frameio||'', figma: data.figma||'' },
+    projects: [],
+    months,
+    selectedMonth: `${year}-${String(now.getMonth()+1).padStart(2,'0')}`,
+    activeTab: 'time',
+    briefs: [],
+    todos: []
+  };
+}
+
+function flMakeProject(name) {
+  return { id: Date.now(), name, entries: [], timerAccum: 0, timerStart: null, open: false };
+}
+
+function flCurrentMonthKey() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+}
+
+function flFormatSeconds(s) {
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function flElapsedProject(p) {
+  return (p.timerAccum||0) + (p.timerStart ? Math.floor((Date.now()-p.timerStart)/1000) : 0);
+}
+
+function flMonthHours(c, mk) {
+  let h = 0;
+  (c.projects||[]).forEach(p => (p.entries||[]).forEach(e => { if (e.date && e.date.startsWith(mk)) h += e.hours; }));
+  return h;
+}
+
+function flTotalHours(c) {
+  let h = 0;
+  (c.projects||[]).forEach(p => (p.entries||[]).forEach(e => h += e.hours));
+  return h;
+}
+
+function flStartInterval() {
+  if (flTimerInterval) return;
+  flTimerInterval = setInterval(() => {
+    flClients.forEach(c => {
+      (c.projects||[]).forEach(p => {
+        if (!p.timerStart) return;
+        const el = document.getElementById(`fl-timer-${c.id}-${p.id}`);
+        if (el) el.textContent = flFormatSeconds(flElapsedProject(p));
+      });
+    });
+  }, 1000);
+}
+
+function flToggleTimer(cid, pid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  if (p.timerStart) {
+    p.timerAccum += Math.floor((Date.now()-p.timerStart)/1000);
+    p.timerStart = null;
+    const btn = document.getElementById(`fl-tbtn-${cid}-${pid}`);
+    if (btn) btn.innerHTML = '▶ Resume';
+  } else {
+    p.timerStart = Date.now();
+    flStartInterval();
+    const btn = document.getElementById(`fl-tbtn-${cid}-${pid}`);
+    if (btn) btn.innerHTML = '⏸ Pause';
+  }
+}
+
+function flStopTimer(cid, pid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  if (p.timerStart) { p.timerAccum += Math.floor((Date.now()-p.timerStart)/1000); p.timerStart = null; }
+  const secs = p.timerAccum||0;
+  if (secs < 60) return;
+  const hours = Math.round(secs/3600*4)/4;
+  p.timerAccum = 0;
+  const today = new Date().toISOString().slice(0,10);
+  p.entries.unshift({ id: Date.now(), date: today, hours, desc: 'Timer session' });
+  const timerEl = document.getElementById(`fl-timer-${cid}-${pid}`);
+  if (timerEl) timerEl.textContent = '00:00:00';
+  const btn = document.getElementById(`fl-tbtn-${cid}-${pid}`);
+  if (btn) btn.innerHTML = '▶ Start';
+  flRenderProjectEntries(cid, pid);
+  flUpdateProjectStats(cid, pid);
+  flRenderTimeTab(cid); flUpdateStats(); flSave();
+}
+
+function flManualLog(cid, pid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  const dateEl = document.getElementById(`fl-mdate-${cid}-${pid}`);
+  const hoursEl = document.getElementById(`fl-mhours-${cid}-${pid}`);
+  const descEl = document.getElementById(`fl-mdesc-${cid}-${pid}`);
+  const date = dateEl ? dateEl.value : '';
+  const hours = parseFloat(hoursEl ? hoursEl.value : '');
+  const desc = descEl ? descEl.value.trim() : '';
+  if (!date || !hours || hours <= 0) return;
+  p.entries.unshift({ id: Date.now(), date, hours, desc });
+  if (hoursEl) hoursEl.value = '';
+  if (descEl) descEl.value = '';
+  flRenderProjectEntries(cid, pid);
+  flUpdateProjectStats(cid, pid);
+  flRenderTimeTab(cid); flUpdateStats(); flSave();
+}
+
+function flEditEntry(cid, pid, eid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  const e = p.entries.find(x => x.id===eid);
+  if (!e) return;
+  const h = parseFloat(prompt('Hours:', e.hours));
+  if (!isNaN(h) && h > 0) e.hours = h;
+  const d = prompt('Description:', e.desc);
+  if (d !== null) e.desc = d;
+  flRenderProjectEntries(cid, pid);
+  flUpdateProjectStats(cid, pid);
+  flRenderTimeTab(cid); flUpdateStats(); flSave();
+}
+
+function flDeleteEntry(cid, pid, eid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  p.entries = p.entries.filter(e => e.id!==eid);
+  flRenderProjectEntries(cid, pid);
+  flUpdateProjectStats(cid, pid);
+  flRenderTimeTab(cid); flUpdateStats(); flSave();
+}
+
+function flSelectMonth(id, mk) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  c.selectedMonth = mk;
+  document.querySelectorAll(`[data-mpill="${id}"]`).forEach(p => {
+    p.classList.toggle('active', p.dataset.mk === mk);
+  });
+  flRenderMonthly(id);
+}
+
+function flToggleMonthCheck(id, mk, field) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  if (!c.months[mk]) c.months[mk] = { logged:false, requested:false, emailed:false, invoiced:false };
+  c.months[mk][field] = !c.months[mk][field];
+  flRenderMonthly(id); flSave();
+}
+
+function flAddBrief(id) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  const title = document.getElementById(`fl-btitle-${id}`).value.trim();
+  const url = document.getElementById(`fl-burl-${id}`).value.trim();
+  if (!title) return;
+  c.briefs.push({ id: Date.now(), title, url });
+  document.getElementById(`fl-btitle-${id}`).value = '';
+  document.getElementById(`fl-burl-${id}`).value = '';
+  flRenderBriefs(id); flSave();
+}
+
+function flDeleteBrief(cid, bid) {
+  const c = flClients.find(x => x.id===cid);
+  if (!c) return;
+  c.briefs = c.briefs.filter(b => b.id!==bid);
+  flRenderBriefs(cid); flSave();
+}
+
+function flAddTask(id) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  const name = document.getElementById(`fl-tname-${id}`).value.trim();
+  if (!name) return;
+  c.todos.push({ id: Date.now(), name,
+    desc: document.getElementById(`fl-tdesc-${id}`).value.trim(),
+    notes: document.getElementById(`fl-tnotes-${id}`).value.trim(),
+    done: false });
+  ['fl-tname-','fl-tdesc-','fl-tnotes-'].forEach(p => { const el = document.getElementById(p+id); if(el) el.value=''; });
+  document.getElementById(`fl-add-task-form-${id}`).style.display = 'none';
+  flRenderTasks(id); flSave();
+}
+
+function flToggleTask(cid, tid) {
+  const c = flClients.find(x => x.id===cid);
+  const t = c && c.todos.find(x => x.id===tid);
+  if (t) { t.done = !t.done; flRenderTasks(cid); flSave(); }
+}
+
+function flDeleteTask(cid, tid) {
+  const c = flClients.find(x => x.id===cid);
+  if (!c) return;
+  c.todos = c.todos.filter(t => t.id!==tid);
+  flRenderTasks(cid); flSave();
+}
+
+function flSwitchClientTab(id, tab, btn) {
+  ['time','monthly','briefs','tasks'].forEach(t => {
+    const p = document.getElementById(`fl-ctab-${id}-${t}`);
+    if (p) p.style.display = t===tab ? 'block' : 'none';
+  });
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const c = flClients.find(x => x.id===id);
+  if (c) c.activeTab = tab;
+}
+
+function flUploadLogo(id, input) {
+  const c = flClients.find(x => x.id===id);
+  if (!c || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    c.logo = e.target.result;
+    const el = document.getElementById(`fl-logo-${id}`);
+    if (el) { el.style.backgroundImage=`url(${c.logo})`; el.style.backgroundSize='contain'; el.style.backgroundRepeat='no-repeat'; el.style.backgroundPosition='center'; el.style.backgroundColor='#ffffff'; el.innerHTML=''; }
+    flSave();
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function flUpdateColor(id, color) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  c.color = color;
+  const card = document.getElementById(`fl-card-${id}`);
+  if (card) card.style.borderLeftColor = color;
+  if (!c.logo) {
+    const el = document.getElementById(`fl-logo-${id}`);
+    if (el) { el.style.background=color+'22'; el.style.borderColor=color; const sp=el.querySelector('span'); if(sp) sp.style.color=color; }
+  }
+  flSave();
+}
+
+function flEditLinks(id) {
+  const f = document.getElementById(`fl-links-form-${id}`);
+  if (f) f.style.display = f.style.display==='none' ? 'block' : 'none';
+}
+
+function flSaveLinks(id) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  c.links.gdriveClient = document.getElementById(`fl-le-gc-${id}`).value.trim();
+  c.links.gdriveMine = document.getElementById(`fl-le-gm-${id}`).value.trim();
+  c.links.frameio = document.getElementById(`fl-le-fi-${id}`).value.trim();
+  c.links.figma = document.getElementById(`fl-le-fg-${id}`).value.trim();
+  document.getElementById(`fl-links-form-${id}`).style.display = 'none';
+  const area = document.getElementById(`fl-links-area-${id}`);
+  if (area) area.innerHTML = flLinkChipsHTML(c);
+  flSave();
+}
+
+function flRemoveClient(id) {
+  if (!confirm('Remove this client and all their data?')) return;
+  flClients = flClients.filter(x => x.id!==id);
+  const card = document.getElementById(`fl-card-${id}`);
+  if (card) card.remove();
+  flUpdateStats(); flSave();
+}
+
+// ── PROJECT MANAGEMENT ──
+
+function flOpenNewProject(cid) {
+  const form = document.getElementById(`fl-new-proj-form-${cid}`);
+  const btn = document.getElementById(`fl-np-btn-${cid}`);
+  if (form) form.style.display = 'block';
+  if (btn) btn.style.display = 'none';
+  const inp = document.getElementById(`fl-np-name-${cid}`);
+  if (inp) inp.focus();
+}
+
+function flCloseNewProject(cid) {
+  const form = document.getElementById(`fl-new-proj-form-${cid}`);
+  const btn = document.getElementById(`fl-np-btn-${cid}`);
+  if (form) { form.style.display = 'none'; const inp = document.getElementById(`fl-np-name-${cid}`); if (inp) inp.value = ''; }
+  if (btn) btn.style.display = '';
+}
+
+function flAddProject(cid) {
+  const c = flClients.find(x => x.id===cid);
+  if (!c) return;
+  const nameEl = document.getElementById(`fl-np-name-${cid}`);
+  const name = nameEl ? nameEl.value.trim() : '';
+  if (!name) return;
+  const p = flMakeProject(name);
+  c.projects.push(p);
+  flCloseNewProject(cid);
+  flRenderProjects(cid);
+  flSave();
+}
+
+function flDeleteProject(cid, pid) {
+  const c = flClients.find(x => x.id===cid);
+  if (!c) return;
+  const p = c.projects.find(x => x.id===pid);
+  const entryCount = (p && p.entries) ? p.entries.length : 0;
+  if (entryCount > 0 && !confirm(`Remove "${p.name}" and its ${entryCount} logged entries?`)) return;
+  c.projects = c.projects.filter(x => x.id!==pid);
+  flRenderProjects(cid);
+  flUpdateStats(); flSave();
+}
+
+function flToggleProject(cid, pid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  p.open = !p.open;
+  const body = document.getElementById(`fl-proj-body-${cid}-${pid}`);
+  const arrow = document.getElementById(`fl-proj-arrow-${cid}-${pid}`);
+  if (body) body.style.display = p.open ? 'block' : 'none';
+  if (arrow) arrow.textContent = p.open ? '▾' : '▸';
+  if (p.open) {
+    const di = document.getElementById(`fl-mdate-${cid}-${pid}`);
+    if (di && !di.value) di.valueAsDate = new Date();
+  }
+}
+
+// ── CLIENT INFO EDITING ──
+
+function flToggleEditPanel(id) {
+  const panel = document.getElementById(`fl-edit-panel-${id}`);
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  if (!open) {
+    const c = flClients.find(x => x.id===id);
+    if (!c) return;
+    const n = document.getElementById(`fl-edit-name-${id}`);
+    const r = document.getElementById(`fl-edit-rate-${id}`);
+    const s = document.getElementById(`fl-edit-status-${id}`);
+    if (n) n.value = c.name;
+    if (r) r.value = c.rate;
+    if (s) s.value = c.status;
+  }
+}
+
+function flSaveClientInfo(id) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  const newName = (document.getElementById(`fl-edit-name-${id}`)?.value || '').trim();
+  const newRate = parseFloat(document.getElementById(`fl-edit-rate-${id}`)?.value);
+  const newStatus = document.getElementById(`fl-edit-status-${id}`)?.value;
+  if (newName) c.name = newName;
+  if (!isNaN(newRate) && newRate >= 0) c.rate = newRate;
+  if (newStatus) c.status = newStatus;
+  // Update displayed values
+  const nameEl = document.getElementById(`fl-client-name-${id}`);
+  if (nameEl) nameEl.textContent = c.name;
+  const rateEl = document.getElementById(`fl-client-rate-${id}`);
+  if (rateEl) rateEl.textContent = `₪${c.rate}/hr`;
+  const statusEl = document.getElementById(`fl-client-status-${id}`);
+  if (statusEl) { statusEl.textContent = c.status; statusEl.className = `tag ${c.status==='active'?'tag-green':'tag-yellow'}`; }
+  document.getElementById(`fl-edit-panel-${id}`).style.display = 'none';
+  flRenderTimeTab(id);
+  flUpdateStats(); flSave();
+}
+
+function flUpdateStats() {
+  const mk = flCurrentMonthKey();
+  let mh=0, mi=0, ac=0;
+  flClients.forEach(c => {
+    if (c.status==='active') ac++;
+    const h = flMonthHours(c, mk); mh+=h; mi+=h*c.rate;
+  });
+  const hEl = document.getElementById('fl-stat-hours');
+  const cEl = document.getElementById('fl-stat-clients');
+  const iEl = document.getElementById('fl-stat-income');
+  if (hEl) hEl.textContent = mh%1===0 ? mh+'h' : mh.toFixed(1)+'h';
+  if (cEl) cEl.textContent = ac;
+  if (iEl) iEl.innerHTML = '<span style="font-family:\'DM Sans\',sans-serif;font-size:0.72em;vertical-align:0.08em;opacity:0.8">₪</span>'+Math.round(mi).toLocaleString();
+  const hint = document.getElementById('fl-empty-hint');
+  if (hint) hint.style.display = flClients.length>0 ? 'none' : '';
+}
+
+// ── PERSISTENCE ──
+function flSave() {
+  try {
+    const data = flClients.map(c => {
+      const saved = {...c};
+      // Strip per-project timer starts (can't resume across sessions), keep accum
+      saved.projects = (saved.projects||[]).map(p => ({...p, timerStart: null}));
+      return saved;
+    });
+    localStorage.setItem('currently_fl', JSON.stringify(data));
+  } catch(e) { console.warn('flSave error', e); }
+}
+
+function flLoad() {
+  const raw = localStorage.getItem('currently_fl');
+  if (!raw) { flUpdateStats(); return; }
+  let saved;
+  try { saved = JSON.parse(raw); } catch(e) { flUpdateStats(); return; }
+  saved.forEach(c => {
+    try {
+      c.briefs = c.briefs || [];
+      c.todos = c.todos || [];
+      c.months = c.months || {};
+      if (c.links) c.links.figma = c.links.figma || '';
+      // ── Migrate flat entries → projects ──
+      if (!c.projects || c.projects.length === 0) {
+        c.projects = [];
+        const oldEntries = c.entries || [];
+        if (oldEntries.length > 0) {
+          const pmap = {};
+          oldEntries.forEach(e => {
+            const pname = (e.project && e.project.trim()) || 'General';
+            if (!pmap[pname]) pmap[pname] = { id: Date.now() + Object.keys(pmap).length * 7, name: pname, entries: [], timerAccum: 0, timerStart: null, open: false };
+            pmap[pname].entries.push({ id: e.id, date: e.date, hours: e.hours, desc: e.desc });
+          });
+          c.projects = Object.values(pmap);
+        }
+        // Migrate client-level accumulated timer to a General project
+        if ((c.timerAccum||0) > 0) {
+          let gen = c.projects.find(p => p.name === 'General');
+          if (!gen) { gen = { id: Date.now()+1, name: 'General', entries: [], timerAccum: 0, timerStart: null, open: false }; c.projects.push(gen); }
+          gen.timerAccum = c.timerAccum;
+        }
+      }
+      // Normalize project objects
+      c.projects.forEach(p => {
+        p.entries = p.entries || [];
+        p.timerAccum = p.timerAccum || 0;
+        p.timerStart = null;
+        if (p.open === undefined) p.open = false;
+      });
+      flClients.push(c);
+      const wrap = document.createElement('div');
+      wrap.innerHTML = flClientCardHTML(c);
+      document.getElementById('fl-client-cards').appendChild(wrap.firstElementChild);
+      flRenderProjects(c.id);
+      flRenderMonthly(c.id);
+      flRenderBriefs(c.id);
+      flRenderTasks(c.id);
+    } catch(e) { console.warn('Error loading client', c.name, e); }
+  });
+  flUpdateStats(); // safe — never calls flSave() now
+}
+
+window.addEventListener('beforeunload', flSave);
+
+// ── RENDER FUNCTIONS ──
+
+function flRenderTimeTab(id) {
+  // Updates the stats summary at the top of the time tab only
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  const mk = flCurrentMonthKey();
+  const mh = flMonthHours(c, mk);
+  const th = flTotalHours(c);
+  const mhEl = document.getElementById(`fl-month-hours-${id}`);
+  const thEl = document.getElementById(`fl-total-hours-${id}`);
+  const incEl = document.getElementById(`fl-month-income-${id}`);
+  if (mhEl) mhEl.textContent = mh.toFixed(1)+'h';
+  if (thEl) thEl.textContent = th.toFixed(1)+'h';
+  if (incEl) incEl.innerHTML = '<span style="font-family:\'DM Sans\',sans-serif;font-size:0.88em;opacity:0.8">₪</span>'+Math.round(mh*c.rate).toLocaleString();
+}
+
+function flRenderProjects(cid) {
+  const c = flClients.find(x => x.id===cid);
+  const el = document.getElementById(`fl-projects-${cid}`);
+  if (!c || !el) return;
+  flRenderTimeTab(cid);
+  const mk = flCurrentMonthKey();
+  if ((c.projects||[]).length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">No projects yet — add one below</div>';
+    return;
+  }
+  el.innerHTML = c.projects.map(p => {
+    const pmh = (p.entries||[]).filter(e => e.date && e.date.startsWith(mk)).reduce((s,e)=>s+e.hours,0);
+    const pth = (p.entries||[]).reduce((s,e)=>s+e.hours,0);
+    const statsStr = [pmh>0?pmh.toFixed(1)+'h this month':'', pth>0?pth.toFixed(1)+'h total':''].filter(Boolean).join(' · ');
+    return `<div class="fl-project-row" id="fl-proj-${cid}-${p.id}">
+  <div class="fl-project-header" onclick="flToggleProject(${cid},${p.id})" style="border-left-color:${c.color}">
+    <span id="fl-proj-arrow-${cid}-${p.id}" class="fl-proj-arrow">${p.open?'▾':'▸'}</span>
+    <span class="fl-proj-name">${p.name}</span>
+    <span class="fl-proj-stats" id="fl-proj-stats-${cid}-${p.id}">${statsStr}</span>
+    <button onclick="flDeleteProject(${cid},${p.id});event.stopPropagation()" class="fl-act-btn" title="Remove project" style="margin-left:8px">✕</button>
+  </div>
+  <div class="fl-project-body" id="fl-proj-body-${cid}-${p.id}" style="display:${p.open?'block':'none'}">
+    <div class="fl-timer-box" style="margin-bottom:10px">
+      <div id="fl-timer-${cid}-${p.id}" class="fl-timer-display">${flFormatSeconds(flElapsedProject(p))}</div>
+      <button id="fl-tbtn-${cid}-${p.id}" onclick="flToggleTimer(${cid},${p.id})" class="btn btn-primary">${p.timerStart?'⏸ Pause':(p.timerAccum>0?'▶ Resume':'▶ Start')}</button>
+      <button onclick="flStopTimer(${cid},${p.id})" class="btn" title="Stop and log entry">⏹ Stop & Log</button>
+    </div>
+    <div class="fl-manual-box">
+      <div class="fl-section-label">Log hours manually</div>
+      <div class="form-row">
+        <div class="field" style="margin-bottom:8px"><label>Date</label><input type="date" id="fl-mdate-${cid}-${p.id}"/></div>
+        <div class="field" style="margin-bottom:8px"><label>Hours</label><input type="number" id="fl-mhours-${cid}-${p.id}" min="0.25" step="0.25" placeholder="2.5"/></div>
+      </div>
+      <div class="field" style="margin-bottom:10px"><label>Description</label><input type="text" id="fl-mdesc-${cid}-${p.id}" placeholder="What specifically did you work on?"/></div>
+      <button class="btn btn-primary" onclick="flManualLog(${cid},${p.id})" style="font-size:12px;padding:6px 14px">Save entry</button>
+    </div>
+    <div class="fl-section-label" style="margin-top:4px">Entries</div>
+    <div id="fl-entries-${cid}-${p.id}"></div>
+  </div>
+</div>`;
+  }).join('');
+  // Init dates and render entries for open projects
+  c.projects.forEach(p => {
+    if (p.open) {
+      const di = document.getElementById(`fl-mdate-${cid}-${p.id}`);
+      if (di && !di.value) di.valueAsDate = new Date();
+    }
+    flRenderProjectEntries(cid, p.id);
+  });
+}
+
+function flRenderProjectEntries(cid, pid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  const el = document.getElementById(`fl-entries-${cid}-${pid}`);
+  if (!p || !el) return;
+  if (p.entries.length===0) { el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">No entries yet</div>'; return; }
+  el.innerHTML = p.entries.map(e => `
+    <div class="fl-entry">
+      <span class="fl-entry-date">${e.date}</span>
+      <div class="fl-entry-desc" style="flex:1">${e.desc||'—'}</div>
+      <span class="fl-entry-hours">${e.hours}h · ₪${Math.round(e.hours*c.rate).toLocaleString()}</span>
+      <div class="fl-entry-actions">
+        <button onclick="flEditEntry(${cid},${pid},${e.id})" class="fl-act-btn">✎</button>
+        <button onclick="flDeleteEntry(${cid},${pid},${e.id})" class="fl-act-btn">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function flUpdateProjectStats(cid, pid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  const el = document.getElementById(`fl-proj-stats-${cid}-${pid}`);
+  if (!p || !el) return;
+  const mk = flCurrentMonthKey();
+  const pmh = (p.entries||[]).filter(e => e.date && e.date.startsWith(mk)).reduce((s,e)=>s+e.hours,0);
+  const pth = (p.entries||[]).reduce((s,e)=>s+e.hours,0);
+  el.textContent = [pmh>0?pmh.toFixed(1)+'h this month':'', pth>0?pth.toFixed(1)+'h total':''].filter(Boolean).join(' · ');
+}
+
+function flRenderMonthly(id) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  const mk = c.selectedMonth;
+  if (!c.months[mk]) c.months[mk] = { logged:false, requested:false, emailed:false, invoiced:false };
+  const m = c.months[mk];
+  const mh = flMonthHours(c, mk);
+  const income = Math.round(mh * c.rate);
+  const monthLabel = FL_MONTHS[parseInt(mk.slice(5,7))-1]+' '+mk.slice(0,4);
+  const el = document.getElementById(`fl-monthly-detail-${id}`);
+  if (!el) return;
+  const checkSVG = `<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const li = (field, label, note='') => `
+    <li class="${m[field]?'done':''}" onclick="flToggleMonthCheck(${id},'${mk}','${field}')">
+      <div class="check-box">${checkSVG}</div>
+      <div class="item-meta"><span class="item-text">${label}</span>${note?`<span class="item-note">${note}</span>`:''}</div>
+    </li>`;
+  // Build per-project breakdown for this month
+  const projectRows = (c.projects||[]).map(p => {
+    const ph = (p.entries||[]).filter(e => e.date && e.date.startsWith(mk)).reduce((s,e)=>s+e.hours,0);
+    if (!ph) return '';
+    return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${p.name}</span>
+      <span style="font-size:13px;font-weight:500;white-space:nowrap;margin-left:16px">${ph.toFixed(1)}h &nbsp; ₪${Math.round(ph*c.rate).toLocaleString()}</span>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  el.innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="font-weight:500;font-size:14px">${monthLabel}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">${mh.toFixed(1)}h total · ₪${income.toLocaleString()}</div>
+    </div>
+    ${projectRows ? `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:16px">
+      <div class="fl-section-label" style="margin-bottom:8px">By project — for invoice</div>
+      ${projectRows}
+      <div style="display:flex;justify-content:space-between;padding:7px 0 2px;font-weight:500;font-size:13px">
+        <span>Total</span><span>${mh.toFixed(1)}h &nbsp; ₪${income.toLocaleString()}</span>
+      </div>
+    </div>` : ''}
+    <ul class="checklist" style="gap:8px">
+      ${li('logged','Hours finalized & logged')}
+      ${li('requested','Payment request printed')}
+      ${li('emailed','Sent via email')}
+      ${li('invoiced','Invoice sent','After payment received')}
+    </ul>`;
+}
+
+function flRenderBriefs(id) {
+  const c = flClients.find(x => x.id===id);
+  const el = document.getElementById(`fl-briefs-list-${id}`);
+  if (!c||!el) return;
+  if (c.briefs.length===0) { el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:6px 0">No briefs yet</div>'; return; }
+  el.innerHTML = c.briefs.map(b => `
+    <div class="fl-brief-item">
+      <span>📎</span>
+      ${b.url ? `<a href="${b.url}" target="_blank" class="fl-brief-title">${b.title}</a>` : `<span class="fl-brief-title">${b.title}</span>`}
+      <button onclick="flDeleteBrief(${id},${b.id})" class="fl-act-btn">✕</button>
+    </div>`).join('');
+}
+
+function flRenderTasks(id) {
+  const c = flClients.find(x => x.id===id);
+  const el = document.getElementById(`fl-tasks-list-${id}`);
+  if (!c||!el) return;
+  if (c.todos.length===0) { el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:6px 0">No tasks yet</div>'; return; }
+  const checkSVG = `<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  el.innerHTML = c.todos.map(t => `
+    <div class="fl-task-item ${t.done?'done':''}">
+      <div class="check-box" onclick="flToggleTask(${id},${t.id})" style="cursor:pointer;flex-shrink:0;margin-top:2px">${checkSVG}</div>
+      <div style="flex:1;min-width:0">
+        <div class="fl-task-name">${t.name}</div>
+        ${t.desc?`<div class="fl-task-desc">${t.desc}</div>`:''}
+        ${t.notes?`<div class="fl-task-notes">${t.notes}</div>`:''}
+      </div>
+      <button onclick="flDeleteTask(${id},${t.id})" class="fl-act-btn" style="flex-shrink:0">✕</button>
+    </div>`).join('');
+}
+
+// ── CLIENT CARD HTML ──
+
+function flLinkChipsHTML(c) {
+  const chip = (url, icon, label) => url
+    ? `<a href="${url}" target="_blank" class="fl-link-chip">${icon} ${label}</a>`
+    : `<span class="fl-link-chip fl-link-empty" onclick="flEditLinks(${c.id})">${icon} ${label}</span>`;
+  return `${chip(c.links.gdriveClient,'📁','Client Drive')}
+          ${chip(c.links.gdriveMine,'📂','My Drive')}
+          ${chip(c.links.frameio,'🎬','Frame.io')}
+          ${chip(c.links.figma||'','🖼','Figma')}
+          <button onclick="flEditLinks(${c.id})" class="fl-link-chip fl-link-edit">⚙ Links</button>`;
+}
+
+function flClientCardHTML(c) {
+  const year = new Date().getFullYear();
+  const monthPills = FL_MONTHS.map((m,i) => {
+    const mk = `${year}-${String(i+1).padStart(2,'0')}`;
+    const sel = mk===c.selectedMonth;
+    const hasH = (c.projects||[]).some(p => (p.entries||[]).some(e => e.date && e.date.startsWith(mk)));
+    return `<button class="fl-month-pill${sel?' active':''}${hasH&&!sel?' has-hours':''}" data-mpill="${c.id}" data-mk="${mk}" onclick="flSelectMonth(${c.id},'${mk}')">${m}</button>`;
+  }).join('');
+  const statusClass = c.status==='active' ? 'tag-green' : 'tag-yellow';
+  const logoStyle = c.logo ? `background-image:url(${c.logo});background-size:contain;background-repeat:no-repeat;background-position:center;background-color:#ffffff` : `background:${c.color}22;border-color:${c.color}`;
+  const logoInner = c.logo ? '' : `<span style="font-size:18px;color:${c.color}">＋</span>`;
+
+  return `<div class="card fl-client-card" id="fl-card-${c.id}" style="margin-bottom:20px;border-left-color:${c.color}">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+    <div id="fl-logo-${c.id}" class="fl-logo" style="${logoStyle}" onclick="document.getElementById('fl-logo-input-${c.id}').click()" title="Click to upload logo">${logoInner}</div>
+    <input type="file" id="fl-logo-input-${c.id}" accept="image/*" style="display:none" onchange="flUploadLogo(${c.id},this)"/>
+    <div style="flex:1;min-width:0">
+      <div id="fl-client-name-${c.id}" style="font-weight:500;font-size:15px">${c.name}</div>
+      <div id="fl-client-rate-${c.id}" style="font-size:12px;color:var(--muted)">₪${c.rate}/hr</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <input type="color" value="${c.color}" title="Brand color" onchange="flUpdateColor(${c.id},this.value)" style="width:22px;height:22px;border:none;border-radius:50%;cursor:pointer;padding:0;background:none"/>
+      <span id="fl-client-status-${c.id}" class="tag ${statusClass}">${c.status}</span>
+      <button onclick="flToggleEditPanel(${c.id})" class="fl-act-btn" title="Edit client info" style="padding:3px 8px">✎ Edit</button>
+      <button onclick="flRemoveClient(${c.id})" class="fl-act-btn" title="Remove client">✕</button>
+    </div>
+  </div>
+  <div id="fl-edit-panel-${c.id}" class="fl-edit-panel" style="display:none">
+    <div class="form-row">
+      <div class="field" style="margin-bottom:8px"><label>Client name</label><input type="text" id="fl-edit-name-${c.id}" value="${c.name}"/></div>
+      <div class="field" style="margin-bottom:8px"><label>Rate (₪/hr)</label><input type="number" id="fl-edit-rate-${c.id}" value="${c.rate}" min="0"/></div>
+    </div>
+    <div class="field" style="margin-bottom:10px">
+      <label>Status</label>
+      <select id="fl-edit-status-${c.id}">
+        <option value="active" ${c.status==='active'?'selected':''}>Active</option>
+        <option value="paused" ${c.status==='paused'?'selected':''}>Paused</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="flSaveClientInfo(${c.id})" style="font-size:12px;padding:6px 12px">Save changes</button>
+      <button class="btn" onclick="flToggleEditPanel(${c.id})" style="font-size:12px;padding:6px 12px">Cancel</button>
+    </div>
+  </div>
+
+  <div id="fl-links-area-${c.id}" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+    ${flLinkChipsHTML(c)}
+  </div>
+
+  <div id="fl-links-form-${c.id}" style="display:none;background:var(--bg);border-radius:8px;padding:12px;margin-bottom:12px">
+    <div class="field" style="margin-bottom:8px"><label>Client G Drive</label><input type="url" id="fl-le-gc-${c.id}" value="${c.links.gdriveClient}" placeholder="https://drive.google.com/..."/></div>
+    <div class="field" style="margin-bottom:8px"><label>My G Drive (for them)</label><input type="url" id="fl-le-gm-${c.id}" value="${c.links.gdriveMine}" placeholder="https://drive.google.com/..."/></div>
+    <div class="field" style="margin-bottom:8px"><label>Frame.io</label><input type="url" id="fl-le-fi-${c.id}" value="${c.links.frameio}" placeholder="https://app.frame.io/..."/></div>
+    <div class="field" style="margin-bottom:8px"><label>Figma</label><input type="url" id="fl-le-fg-${c.id}" value="${c.links.figma||''}" placeholder="https://www.figma.com/..."/></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="flSaveLinks(${c.id})" style="font-size:12px;padding:6px 12px">Save</button>
+      <button class="btn" onclick="flEditLinks(${c.id})" style="font-size:12px;padding:6px 12px">Cancel</button>
+    </div>
+  </div>
+
+  <div class="tabs" style="margin-bottom:16px">
+    <button class="tab-btn active" onclick="flSwitchClientTab(${c.id},'time',this)">⏱ Time</button>
+    <button class="tab-btn" onclick="flSwitchClientTab(${c.id},'monthly',this)">📅 Monthly</button>
+    <button class="tab-btn" onclick="flSwitchClientTab(${c.id},'briefs',this)">📎 Briefs</button>
+    <button class="tab-btn" onclick="flSwitchClientTab(${c.id},'tasks',this)">✓ Tasks</button>
+  </div>
+
+  <div id="fl-ctab-${c.id}-time">
+    <div class="fl-timer-box" style="gap:20px;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Month</div>
+        <div style="font-weight:500;font-size:15px"><span id="fl-month-hours-${c.id}">0h</span></div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Total</div>
+        <div style="font-weight:500;font-size:15px"><span id="fl-total-hours-${c.id}">0h</span></div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Income this month</div>
+        <div style="font-weight:500;font-size:15px"><span id="fl-month-income-${c.id}"><span style="font-family:'DM Sans',sans-serif;font-size:0.88em;opacity:0.8">₪</span>0</span></div>
+      </div>
+    </div>
+    <div id="fl-projects-${c.id}"></div>
+    <div style="margin-top:6px">
+      <button id="fl-np-btn-${c.id}" class="btn" onclick="flOpenNewProject(${c.id})" style="font-size:12px;padding:6px 14px">+ Add project</button>
+      <div id="fl-new-proj-form-${c.id}" style="display:none;margin-top:10px;border:1.5px solid var(--border);border-radius:8px;padding:14px">
+        <div class="field" style="margin-bottom:10px"><label>Project name</label><input type="text" id="fl-np-name-${c.id}" placeholder="e.g. Brand identity, Social templates…" onkeydown="if(event.key==='Enter')flAddProject(${c.id})"/></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="flAddProject(${c.id})" style="font-size:12px;padding:6px 12px">Save project</button>
+          <button class="btn" onclick="flCloseNewProject(${c.id})" style="font-size:12px;padding:6px 12px">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fl-ctab-${c.id}-monthly" style="display:none">
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px">${monthPills}</div>
+    <div id="fl-monthly-detail-${c.id}"></div>
+  </div>
+
+  <div id="fl-ctab-${c.id}-briefs" style="display:none">
+    <div id="fl-briefs-list-${c.id}" style="margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+      <div class="field" style="flex:1;min-width:140px;margin-bottom:0"><label>Brief name</label><input type="text" id="fl-btitle-${c.id}" placeholder="Q2 Brand Refresh"/></div>
+      <div class="field" style="flex:2;min-width:180px;margin-bottom:0"><label>URL</label><input type="url" id="fl-burl-${c.id}" placeholder="https://..."/></div>
+      <button class="btn" onclick="flAddBrief(${c.id})" style="flex-shrink:0">+ Add</button>
+    </div>
+  </div>
+
+  <div id="fl-ctab-${c.id}-tasks" style="display:none">
+    <div id="fl-tasks-list-${c.id}" style="margin-bottom:12px"></div>
+    <button class="btn" onclick="document.getElementById('fl-add-task-form-${c.id}').style.display='block';this.style.display='none'">+ Add task</button>
+    <div id="fl-add-task-form-${c.id}" style="display:none;margin-top:12px;border:1.5px solid var(--border);border-radius:8px;padding:14px">
+      <div class="field" style="margin-bottom:8px"><label>Task name</label><input type="text" id="fl-tname-${c.id}"/></div>
+      <div class="field" style="margin-bottom:8px"><label>Description</label><input type="text" id="fl-tdesc-${c.id}" placeholder="Optional short description"/></div>
+      <div class="field" style="margin-bottom:10px"><label>Notes / links</label><textarea id="fl-tnotes-${c.id}" rows="2" placeholder="Links, context, references..."></textarea></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="flAddTask(${c.id})" style="font-size:12px;padding:6px 12px">Save task</button>
+        <button class="btn" onclick="document.getElementById('fl-add-task-form-${c.id}').style.display='none'" style="font-size:12px;padding:6px 12px">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+// ── ADD CLIENT ──
+
+function flOpenNewClient() { document.getElementById('fl-new-client-form').style.display='block'; }
+function flCloseNewClient() {
+  document.getElementById('fl-new-client-form').style.display='none';
+  ['fl-nc-name','fl-nc-rate','fl-nc-gdrive-client','fl-nc-gdrive-mine','fl-nc-frameio','fl-nc-figma'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+}
+
+function flSaveNewClient() {
+  const name = document.getElementById('fl-nc-name').value.trim();
+  if (!name) return;
+  const c = flMakeClient({
+    name,
+    rate: document.getElementById('fl-nc-rate').value,
+    color: document.getElementById('fl-nc-color').value,
+    status: document.getElementById('fl-nc-status').value,
+    gdriveClient: document.getElementById('fl-nc-gdrive-client').value.trim(),
+    gdriveMine: document.getElementById('fl-nc-gdrive-mine').value.trim(),
+    frameio: document.getElementById('fl-nc-frameio').value.trim(),
+    figma: document.getElementById('fl-nc-figma').value.trim()
+  });
+  flClients.push(c);
+  flCloseNewClient();
+  const wrap = document.createElement('div');
+  wrap.innerHTML = flClientCardHTML(c);
+  document.getElementById('fl-client-cards').appendChild(wrap.firstElementChild);
+  flRenderProjects(c.id);
+  flRenderMonthly(c.id);
+  flRenderBriefs(c.id);
+  flRenderTasks(c.id);
+  flUpdateStats(); flSave();
+}
+
+// ── EXPORT / IMPORT ──
+function dataExport() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    data[key] = localStorage.getItem(key);
+  }
+  const date = new Date().toISOString().slice(0,10);
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `currently-everywhere-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function dataImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!confirm('This will replace all current data with the backup. Continue?')) {
+        input.value = ''; return;
+      }
+      localStorage.clear();
+      Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v));
+      location.reload();
+    } catch(err) {
+      alert('Could not read backup file — make sure it\'s a valid Currently: Everywhere export.');
+      input.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+flLoad();
+</script>
+</body>
+</html>
