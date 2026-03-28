@@ -691,6 +691,7 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('relocation', 'residency', this)">🇨🇭 Swiss Residency</button>
       <button class="tab-btn" onclick="switchTab('relocation', 'marriage', this)">💍 French Marriage</button>
+      <button class="tab-btn" onclick="switchTab('relocation', 'schengen', this)">🗓 Schengen</button>
     </div>
 
     <!-- TAB: RESIDENCY -->
@@ -879,6 +880,65 @@
       📌 All Hebrew documents need a certified French translation by a <em>traducteur assermenté</em>. Keep originals + translations together. Digital apostilles are increasingly accepted but always confirm with the specific mairie.
     </div>
     </div><!-- end tab-relocation-marriage -->
+
+  <!-- TAB: SCHENGEN -->
+  <div class="tab-panel" id="tab-relocation-schengen">
+
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-label">Days used (rolling 180)</div>
+        <div class="stat-value" id="sch-days-used">—</div>
+        <div class="stat-sub">out of 90 allowed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Days remaining</div>
+        <div class="stat-value" id="sch-days-remaining">—</div>
+        <div class="stat-sub">before hitting limit</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Next drop-off</div>
+        <div class="stat-value" id="sch-next-dropoff" style="font-size:22px;line-height:1.3;margin-top:2px">—</div>
+        <div class="stat-sub" id="sch-dropoff-sub">—</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>90-day quota</div>
+        <span id="sch-quota-tag" class="tag tag-green">OK</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label"><span id="sch-window-range" style="color:var(--muted)">—</span><span id="sch-bar-label">0 / 90</span></div>
+        <div class="progress-bar" style="height:8px"><div id="sch-progress-fill" class="progress-fill" style="width:0%;background:var(--blue)"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Trip log</div>
+        <button class="btn" onclick="schOpenAddTrip()" style="font-size:12px;padding:5px 12px">+ Add trip</button>
+      </div>
+
+      <div id="sch-add-form" style="display:none;background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px;border:1.5px solid var(--border)">
+        <div class="form-row">
+          <div class="field" style="margin-bottom:8px"><label>Entry date</label><input type="date" id="sch-entry"/></div>
+          <div class="field" style="margin-bottom:8px"><label>Exit date</label><input type="date" id="sch-exit"/></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="schSaveTrip()" style="font-size:12px;padding:6px 14px">Save trip</button>
+          <button class="btn" onclick="schOpenAddTrip()" style="font-size:12px;padding:6px 14px">Cancel</button>
+        </div>
+      </div>
+
+      <div id="sch-trip-list"></div>
+    </div>
+
+    <div class="note-block" style="margin-top:16px">
+      ℹ️ The 90/180 rule applies until your Swiss B permit is issued. Once registered as a resident, these days no longer count against your Schengen quota.
+    </div>
+
+  </div><!-- end tab-relocation-schengen -->
+
   </div><!-- end relocation section -->
 
   <!-- FINANCES -->
@@ -2205,6 +2265,162 @@ function dataImport(input) {
 }
 
 flLoad();
+
+// ── SCHENGEN COUNTER ──
+const SCH_DEFAULT_TRIPS = [
+  { id: 1,  entry: '2023-10-23', exit: '2023-11-02' },
+  { id: 2,  entry: '2023-12-10', exit: '2023-12-22' },
+  { id: 3,  entry: '2024-02-09', exit: '2024-02-13' },
+  { id: 4,  entry: '2024-03-21', exit: '2024-04-03' },
+  { id: 5,  entry: '2024-08-28', exit: '2024-09-20' },
+  { id: 6,  entry: '2025-06-25', exit: '2025-08-03' },
+  { id: 7,  entry: '2025-09-19', exit: '2025-10-15' },
+  { id: 8,  entry: '2025-12-03', exit: '2025-12-17' },
+  { id: 9,  entry: '2026-01-29', exit: '2026-02-26' },
+];
+let schTrips = [];
+
+function schDate(s) {
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function schToday() {
+  const d = new Date(); d.setHours(0,0,0,0); return d;
+}
+function schFmtDate(d) {
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function schTripDays(entry, exit) {
+  return Math.round((schDate(exit) - schDate(entry)) / 86400000) + 1;
+}
+function schDaysInWindow(entry, exit) {
+  const today = schToday();
+  const winStart = new Date(today); winStart.setDate(winStart.getDate() - 179);
+  const a = schDate(entry), b = schDate(exit);
+  const s = a > winStart ? a : winStart;
+  const e = b < today ? b : today;
+  if (e < s) return 0;
+  return Math.round((e - s) / 86400000) + 1;
+}
+function schDropOff(exit) {
+  const d = new Date(schDate(exit)); d.setDate(d.getDate() + 180); return d;
+}
+function schIsGone(exit) { return schDropOff(exit) <= schToday(); }
+
+function schCalc() {
+  const today = schToday();
+  const winStart = new Date(today); winStart.setDate(winStart.getDate() - 179);
+  let used = 0;
+  schTrips.forEach(t => { used += schDaysInWindow(t.entry, t.exit); });
+  let nextDrop = null, nextDropFrees = 0;
+  schTrips.forEach(t => {
+    const d = schDropOff(t.exit);
+    const inWin = schDaysInWindow(t.entry, t.exit);
+    if (d > today && inWin > 0 && (!nextDrop || d < nextDrop)) {
+      nextDrop = d; nextDropFrees = inWin;
+    }
+  });
+  return { used, remaining: Math.max(0, 90 - used), winStart, today, nextDrop, nextDropFrees };
+}
+
+function schRender() {
+  const s = schCalc();
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('sch-days-used', s.used);
+  set('sch-days-remaining', s.remaining);
+  if (s.nextDrop) {
+    const daysUntil = Math.round((s.nextDrop - s.today) / 86400000);
+    set('sch-next-dropoff', 'in ' + daysUntil + 'd');
+    set('sch-dropoff-sub', schFmtDate(s.nextDrop) + ' · ' + s.nextDropFrees + ' days free up');
+  } else {
+    set('sch-next-dropoff', '—'); set('sch-dropoff-sub', 'No active trips in window');
+  }
+  const pct = Math.min(100, Math.round(s.used / 90 * 100));
+  const fill = document.getElementById('sch-progress-fill');
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.style.background = s.used >= 80 ? 'var(--red)' : s.used >= 60 ? 'var(--yellow)' : 'var(--blue)';
+  }
+  set('sch-bar-label', s.used + ' / 90');
+  const qtag = document.getElementById('sch-quota-tag');
+  if (qtag) {
+    if (s.used >= 80) { qtag.textContent = '⚠️ High'; qtag.className = 'tag tag-red'; }
+    else if (s.used >= 60) { qtag.textContent = 'Watch'; qtag.className = 'tag tag-yellow'; }
+    else { qtag.textContent = 'OK'; qtag.className = 'tag tag-green'; }
+  }
+  const wr = document.getElementById('sch-window-range');
+  if (wr) wr.textContent = schFmtDate(s.winStart) + ' → Today';
+
+  const list = document.getElementById('sch-trip-list');
+  if (!list) return;
+  if (schTrips.length === 0) { list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:12px 0">No trips logged.</div>'; return; }
+
+  const sorted = [...schTrips].sort((a,b) => schDate(b.entry) - schDate(a.entry));
+  list.innerHTML = sorted.map(t => {
+    const total = schTripDays(t.entry, t.exit);
+    const counting = schDaysInWindow(t.entry, t.exit);
+    const gone = schIsGone(t.exit);
+    const dropDate = schDropOff(t.exit);
+    const partial = !gone && counting > 0 && counting < total;
+    const future = !gone && counting === 0 && schDate(t.entry) > s.today;
+
+    let badge, meta, opacity = '';
+    if (gone) {
+      badge = `<span class="tag tag-muted">Dropped off</span>`;
+      meta = `<span style="font-size:11.5px;color:var(--muted)">Expired ${schFmtDate(dropDate)}</span>`;
+      opacity = 'opacity:0.4;';
+    } else if (future) {
+      badge = `<span class="tag tag-yellow">Upcoming</span>`;
+      meta = `<span style="font-size:11.5px;color:var(--muted)">Drops off ${schFmtDate(dropDate)}</span>`;
+    } else if (partial) {
+      badge = `<span class="tag tag-yellow">Partial</span>`;
+      meta = `<span style="font-size:11.5px;color:var(--muted)">${counting}/${total}d counting · drops off ${schFmtDate(dropDate)}</span>`;
+    } else {
+      badge = `<span class="tag tag-blue">Counting</span>`;
+      meta = `<span style="font-size:11.5px;color:var(--muted)">Drops off ${schFmtDate(dropDate)}</span>`;
+    }
+
+    return `<div style="${opacity}display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;font-size:13px;background:var(--surface)">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:500;margin-bottom:3px">${schFmtDate(schDate(t.entry))} → ${schFmtDate(schDate(t.exit))}</div>
+        <div>${meta}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-right:4px">
+        <div style="font-family:'Lora',serif;font-size:20px;font-weight:400;letter-spacing:-0.03em">${total}d</div>
+        ${!gone && counting > 0 ? `<div style="font-size:11px;color:var(--muted)">${counting} active</div>` : ''}
+      </div>
+      <div style="flex-shrink:0">${badge}</div>
+      <button onclick="schDeleteTrip(${t.id})" class="fl-act-btn">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function schOpenAddTrip() {
+  const f = document.getElementById('sch-add-form');
+  if (f) f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+function schSaveTrip() {
+  const e = document.getElementById('sch-entry'), x = document.getElementById('sch-exit');
+  if (!e.value || !x.value || e.value > x.value) return;
+  schTrips.push({ id: Date.now(), entry: e.value, exit: x.value });
+  e.value = ''; x.value = '';
+  document.getElementById('sch-add-form').style.display = 'none';
+  schRender(); schSave();
+}
+function schDeleteTrip(id) {
+  schTrips = schTrips.filter(t => t.id !== id);
+  schRender(); schSave();
+}
+function schSave() {
+  try { localStorage.setItem('currently_sch', JSON.stringify(schTrips)); } catch(e) {}
+}
+function schLoad() {
+  const raw = localStorage.getItem('currently_sch');
+  if (raw) { try { schTrips = JSON.parse(raw); } catch(e) { schTrips = [...SCH_DEFAULT_TRIPS]; } }
+  else { schTrips = [...SCH_DEFAULT_TRIPS]; schSave(); }
+  schRender();
+}
+schLoad();
 </script>
 </body>
 </html>
