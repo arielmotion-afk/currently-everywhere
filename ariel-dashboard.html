@@ -9,13 +9,13 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #F9F6EF;
-    --surface: #ffffff;
-    --border: #e8e3d8;
-    --text: #282828;
-    --muted: #7a776e;
-    --accent: #1e1e1e;
-    --accent-light: #ece8e7;
+    --bg: #EEF1F8;
+    --surface: #FFFFFF;
+    --border: #E2E8F0;
+    --text: #1D2A45;
+    --muted: #8A97B0;
+    --accent: #1D2A45;
+    --accent-light: #E8EDF5;
     --heading: #193497;
     --green: #4d7c62;
     --green-light: #e8f2ec;
@@ -25,8 +25,10 @@
     --blue-light: #e8eff5;
     --yellow: #b09040;
     --yellow-light: #f8f2e0;
-    --radius: 12px;
-    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --radius: 14px;
+    --shadow: 0 2px 20px rgba(29,42,69,0.08);
+    --sb-bg: #1D2A45;
+    --sb-width: 66px;
   }
 
   body {
@@ -38,61 +40,86 @@
     line-height: 1.6;
   }
 
-  /* NAV */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(249,246,239,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
+  /* APP SHELL */
+  .app-shell {
     display: flex;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sb-width);
+    background: var(--sb-bg);
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0;
-    height: 56px;
+    padding: 16px 0 20px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
   }
-  .nav-logo {
-    font-family: 'Lora', serif;
-    font-size: 17px;
-    color: var(--text);
-    margin-right: auto;
-    letter-spacing: -0.02em;
+  .sb-brand {
+    margin-bottom: 28px;
   }
-  .nav-logo span { color: var(--accent); }
-  .nav-links {
-    display: flex; gap: 2px;
+  .sb-logo-mark {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #FFFFFF;
   }
-  .nav-links a {
-    text-decoration: none;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 400;
-    padding: 6px 14px;
-    border-radius: 20px;
+  .sb-nav {
+    display: flex; flex-direction: column; gap: 2px;
+    flex: 1; width: 100%; padding: 0 10px;
+  }
+  .sb-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
     transition: all 0.15s;
+    margin: 0 auto;
+    position: relative;
   }
-  .nav-links a:hover, .nav-links a.active {
-    color: var(--text);
-    background: var(--border);
+  .sb-btn:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.75); }
+  .sb-btn.active { background: rgba(255,255,255,0.14); color: #FFFFFF; }
+  .sb-btn[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 54px; top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.72);
+    color: #fff; font-size: 12px;
+    padding: 4px 10px; border-radius: 6px;
+    white-space: nowrap; pointer-events: none;
+    font-family: 'DM Sans', sans-serif;
+    z-index: 200;
   }
-  .nav-data {
-    display: flex; gap: 6px; margin-left: 16px; padding-left: 16px;
-    border-left: 1px solid var(--border);
+  .sb-divider {
+    width: 32px; height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 6px auto;
   }
-  .nav-data button {
-    font-size: 12px; font-family: 'DM Sans', sans-serif;
-    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
-    cursor: pointer; transition: all 0.15s; background: transparent;
-    color: var(--muted);
+  .sb-bottom {
+    display: flex; flex-direction: column; gap: 2px;
+    width: 100%; padding: 0 10px;
   }
-  .nav-data button:hover { background: var(--border); color: var(--text); }
-  .nav-data .btn-import { }
-  .nav-data .btn-export { }
+
+  /* CONTENT AREA */
+  .content-area {
+    margin-left: var(--sb-width);
+    flex: 1;
+    min-height: 100vh;
+  }
 
   /* LAYOUT */
   main {
-    max-width: 1100px;
+    max-width: 1060px;
     margin: 0 auto;
-    padding: 40px 32px 80px;
+    padding: 40px 36px 80px;
   }
 
   /* SECTIONS */
@@ -104,9 +131,9 @@
     margin-bottom: 28px;
   }
   .section-header h1 {
-    font-family: 'Lora', serif;
-    font-size: 26px;
-    font-weight: 400;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
     letter-spacing: -0.03em;
     color: var(--heading);
     margin-bottom: 4px;
@@ -126,8 +153,11 @@
     box-shadow: var(--shadow);
   }
   .card-title {
-    font-weight: 500;
-    font-size: 13.5px;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
     margin-bottom: 16px;
     display: flex;
     align-items: center;
@@ -175,7 +205,7 @@
   .checklist li.done { opacity: 0.5; }
   .checklist li.done .item-text { text-decoration: line-through; }
   .check-box {
-    width: 18px; height: 18px; border-radius: 4px;
+    width: 18px; height: 18px; border-radius: 50%;
     border: 1.5px solid var(--border);
     flex-shrink: 0; margin-top: 1px;
     display: flex; align-items: center; justify-content: center;
@@ -226,8 +256,8 @@
     padding: 20px;
     box-shadow: var(--shadow);
   }
-  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-  .stat-value { font-family: 'Lora', serif; font-size: 28px; letter-spacing: -0.04em; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .stat-value { font-family: 'DM Sans', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.04em; color: var(--text); }
   .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
   /* PROGRESS BAR */
@@ -283,9 +313,9 @@
   }
   .btn:hover { background: var(--bg); border-color: var(--text); }
   .btn-primary {
-    background: var(--text); color: var(--bg); border-color: var(--text);
+    background: var(--sb-bg); color: #fff; border-color: var(--sb-bg);
   }
-  .btn-primary:hover { background: #333; border-color: #333; }
+  .btn-primary:hover { background: #2d3f60; border-color: #2d3f60; }
 
   /* INPUT */
   .field { margin-bottom: 14px; }
@@ -326,14 +356,14 @@
 
   /* HOME */
   .home-greeting {
-    font-family: 'Lora', serif;
-    font-size: 32px;
-    font-weight: 400;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
     letter-spacing: -0.04em;
     margin-bottom: 6px;
     color: var(--heading);
   }
-  .home-greeting em { color: var(--heading); font-style: italic; }
+  .home-greeting em { color: var(--heading); font-style: italic; font-weight: 700; }
   .home-sub { color: var(--muted); margin-bottom: 36px; font-size: 14px; }
   .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
   .overview-card {
@@ -345,9 +375,9 @@
     cursor: pointer;
     transition: all 0.15s;
   }
-  .overview-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
-  .overview-card .icon { font-size: 22px; margin-bottom: 10px; }
-  .overview-card .oc-title { font-weight: 500; font-size: 13px; margin-bottom: 4px; }
+  .overview-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(29,42,69,0.12); }
+  .overview-card .icon { font-size: 24px; margin-bottom: 12px; }
+  .overview-card .oc-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
   .overview-card .oc-sub { color: var(--muted); font-size: 12px; }
   .urgent-list { display: flex; flex-direction: column; gap: 8px; }
   .urgent-item {
@@ -368,19 +398,18 @@
   .form-row .field { flex: 1; }
 
   /* TABS */
-  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--bg); border-radius: 12px; padding: 4px; width: fit-content; }
   .tab-btn {
     font-family: 'DM Sans', sans-serif;
     font-size: 13px; font-weight: 500;
-    padding: 8px 18px 10px;
+    padding: 7px 18px;
     border: none; background: none; cursor: pointer;
     color: var(--muted);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
+    border-radius: 9px;
     transition: all 0.15s;
   }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.7); }
+  .tab-btn.active { color: var(--text); background: var(--surface); box-shadow: 0 1px 6px rgba(29,42,69,0.1); font-weight: 600; }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
 
@@ -514,33 +543,57 @@
   }
 
   @media (max-width: 768px) {
-    nav { padding: 0 16px; }
+    .sidebar { display: none; }
+    .content-area { margin-left: 0; }
     main { padding: 24px 16px 60px; }
     .overview-grid { grid-template-columns: 1fr 1fr; }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    .nav-links a { padding: 6px 10px; font-size: 12px; }
   }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-logo">Currently<span>: Everywhere</span></div>
-  <div class="nav-links">
-    <a href="#" class="active" data-section="home">Home</a>
-    <a href="#" data-section="relocation">Relocation</a>
-    <a href="#" data-section="finances">Finances</a>
-    <a href="#" data-section="freelance">Freelance</a>
-    <a href="#" data-section="work">Work</a>
-    <a href="#" data-section="german">German</a>
+<div class="app-shell">
+
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo-mark">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </div>
   </div>
-  <div class="nav-data">
-    <button class="btn-export" onclick="dataExport()">↓ Export</button>
-    <button class="btn-import" onclick="document.getElementById('data-import-input').click()">↑ Import</button>
+  <nav class="sb-nav">
+    <button class="sb-btn active" data-section="home" data-tip="Home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </button>
+    <button class="sb-btn" data-section="relocation" data-tip="Relocation">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+    </button>
+    <button class="sb-btn" data-section="finances" data-tip="Finances">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </button>
+    <button class="sb-btn" data-section="freelance" data-tip="Freelance">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+    </button>
+    <button class="sb-btn" data-section="work" data-tip="Work">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+    </button>
+    <button class="sb-btn" data-section="german" data-tip="German">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+    </button>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-divider"></div>
+    <button class="sb-btn" data-tip="Export data" onclick="dataExport()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
+    <button class="sb-btn" data-tip="Import data" onclick="document.getElementById('data-import-input').click()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </button>
     <input type="file" id="data-import-input" accept=".json" style="display:none" onchange="dataImport(this)"/>
   </div>
-</nav>
+</aside>
 
+<div class="content-area">
 <main>
 
   <!-- HOME -->
@@ -1206,26 +1259,25 @@
   </div><!-- end german section -->
 
 </main>
+</div><!-- content-area -->
+</div><!-- app-shell -->
 
 <script>
 // ── NAVIGATION ──
 const sections = document.querySelectorAll('.section');
-const navLinks = document.querySelectorAll('.nav-links a');
+const sbBtns = document.querySelectorAll('.sb-btn[data-section]');
 
 function navigate(id) {
   sections.forEach(s => s.classList.remove('active'));
-  navLinks.forEach(a => a.classList.remove('active'));
+  sbBtns.forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const link = document.querySelector(`[data-section="${id}"]`);
-  if (link) link.classList.add('active');
+  const btn = document.querySelector(`.sb-btn[data-section="${id}"]`);
+  if (btn) btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-navLinks.forEach(a => {
-  a.addEventListener('click', e => {
-    e.preventDefault();
-    navigate(a.dataset.section);
-  });
+sbBtns.forEach(b => {
+  b.addEventListener('click', () => navigate(b.dataset.section));
 });
 
 // ── TABS ──
