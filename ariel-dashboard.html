@@ -9,13 +9,14 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f5e8e4;
-    --surface: #fdf7f6;
-    --border: #e8d0ca;
+    --bg: #F9F6EF;
+    --surface: #ffffff;
+    --border: #e8e3d8;
     --text: #282828;
     --muted: #7a776e;
     --accent: #1e1e1e;
     --accent-light: #ece8e7;
+    --heading: #193497;
     --green: #4d7c62;
     --green-light: #e8f2ec;
     --red: #a84d4d;
@@ -107,7 +108,7 @@
     font-size: 26px;
     font-weight: 400;
     letter-spacing: -0.03em;
-    color: var(--text);
+    color: var(--heading);
     margin-bottom: 4px;
   }
   .section-header p {
@@ -330,8 +331,9 @@
     font-weight: 400;
     letter-spacing: -0.04em;
     margin-bottom: 6px;
+    color: var(--heading);
   }
-  .home-greeting em { color: var(--accent); font-style: italic; }
+  .home-greeting em { color: var(--heading); font-style: italic; }
   .home-sub { color: var(--muted); margin-bottom: 36px; font-size: 14px; }
   .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
   .overview-card {
