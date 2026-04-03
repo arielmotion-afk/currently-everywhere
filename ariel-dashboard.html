@@ -1459,6 +1459,7 @@ function flMakeClient(data) {
     months,
     selectedMonth: `${year}-${String(now.getMonth()+1).padStart(2,'0')}`,
     activeTab: 'time',
+    collapsed: false,
     briefs: [],
     todos: []
   };
@@ -1852,6 +1853,7 @@ function flLoad() {
       c.briefs = c.briefs || [];
       c.todos = c.todos || [];
       c.months = c.months || {};
+      c.collapsed = c.collapsed || false;
       if (c.links) c.links.figma = c.links.figma || '';
       // ── Migrate flat entries → projects ──
       if (!c.projects || c.projects.length === 0) {
@@ -1995,48 +1997,59 @@ function flUpdateProjectStats(cid, pid) {
 function flRenderMonthly(id) {
   const c = flClients.find(x => x.id===id);
   if (!c) return;
-  const mk = c.selectedMonth;
-  if (!c.months[mk]) c.months[mk] = { logged:false, requested:false, emailed:false, invoiced:false };
-  const m = c.months[mk];
-  const mh = flMonthHours(c, mk);
-  const income = Math.round(mh * c.rate);
-  const monthLabel = FL_MONTHS[parseInt(mk.slice(5,7))-1]+' '+mk.slice(0,4);
   const el = document.getElementById(`fl-monthly-detail-${id}`);
   if (!el) return;
-  const checkSVG = `<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const li = (field, label, note='') => `
-    <li class="${m[field]?'done':''}" onclick="flToggleMonthCheck(${id},'${mk}','${field}')">
-      <div class="check-box">${checkSVG}</div>
-      <div class="item-meta"><span class="item-text">${label}</span>${note?`<span class="item-note">${note}</span>`:''}</div>
-    </li>`;
-  // Build per-project breakdown for this month
+
+  const curMk = flCurrentMonthKey();
+  const curLabel = FL_MONTHS[parseInt(curMk.slice(5,7))-1] + ' ' + curMk.slice(0,4);
+  const mh = flMonthHours(c, curMk);
+  const income = Math.round(mh * c.rate);
+
+  // Current month: per-project breakdown
   const projectRows = (c.projects||[]).map(p => {
-    const ph = (p.entries||[]).filter(e => e.date && e.date.startsWith(mk)).reduce((s,e)=>s+e.hours,0);
+    const ph = (p.entries||[]).filter(e => e.date && e.date.startsWith(curMk)).reduce((s,e)=>s+e.hours,0);
     if (!ph) return '';
-    return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)">
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
       <span style="font-size:13px">${p.name}</span>
-      <span style="font-size:13px;font-weight:500;white-space:nowrap;margin-left:16px">${ph.toFixed(1)}h &nbsp; ₪${Math.round(ph*c.rate).toLocaleString()}</span>
+      <span style="font-size:13px;font-weight:500;white-space:nowrap">${ph.toFixed(1)}h &nbsp;&nbsp; ₪${Math.round(ph*c.rate).toLocaleString()}</span>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  // Past months that have hours
+  const pastMks = new Set();
+  (c.projects||[]).forEach(p => (p.entries||[]).forEach(e => {
+    if (e.date) { const mk = e.date.slice(0,7); if (mk !== curMk) pastMks.add(mk); }
+  }));
+  const sortedPast = [...pastMks].sort().reverse();
+
+  const historyRows = sortedPast.map(mk => {
+    const h = flMonthHours(c, mk);
+    if (!h) return '';
+    if (!c.months[mk]) c.months[mk] = {};
+    const paid = c.months[mk].paid || false;
+    const label = FL_MONTHS[parseInt(mk.slice(5,7))-1] + ' ' + mk.slice(0,4);
+    const inc = Math.round(h * c.rate);
+    return `<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500">${label}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:1px">${h.toFixed(1)}h</div>
+      </div>
+      <div style="font-family:'Lora',serif;font-size:22px;font-weight:400;letter-spacing:-0.03em">₪${inc.toLocaleString()}</div>
+      <div onclick="flTogglePaid(${id},'${mk}')" style="cursor:pointer;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;flex-shrink:0;${paid?'background:var(--green-light);color:var(--green)':'background:var(--border);color:var(--muted)'}">${paid?'Paid':'Unpaid'}</div>
     </div>`;
   }).filter(Boolean).join('');
 
   el.innerHTML = `
-    <div style="margin-bottom:14px">
-      <div style="font-weight:500;font-size:14px">${monthLabel}</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px">${mh.toFixed(1)}h total · ₪${income.toLocaleString()}</div>
-    </div>
-    ${projectRows ? `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:16px">
-      <div class="fl-section-label" style="margin-bottom:8px">By project — for invoice</div>
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:10px">This month — ${curLabel}</div>
+    ${mh > 0 ? `<div style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:20px">
       ${projectRows}
-      <div style="display:flex;justify-content:space-between;padding:7px 0 2px;font-weight:500;font-size:13px">
-        <span>Total</span><span>${mh.toFixed(1)}h &nbsp; ₪${income.toLocaleString()}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px">
+        <span style="font-size:13px;font-weight:600">Total</span>
+        <span style="font-family:'Lora',serif;font-size:24px;font-weight:400;letter-spacing:-0.03em;color:var(--heading)">₪${income.toLocaleString()}</span>
       </div>
-    </div>` : ''}
-    <ul class="checklist" style="gap:8px">
-      ${li('logged','Hours finalized & logged')}
-      ${li('requested','Payment request printed')}
-      ${li('emailed','Sent via email')}
-      ${li('invoiced','Invoice sent','After payment received')}
-    </ul>`;
+    </div>` : `<div style="color:var(--muted);font-size:13px;padding:4px 0 20px">No hours logged this month yet.</div>`}
+    ${historyRows ? `<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:4px">Previous months</div>${historyRows}` : ''}
+  `;
 }
 
 function flRenderBriefs(id) {
@@ -2070,6 +2083,28 @@ function flRenderTasks(id) {
     </div>`).join('');
 }
 
+function flToggleCollapse(id) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  c.collapsed = !c.collapsed;
+  const body = document.getElementById(`fl-card-body-${id}`);
+  const chevron = document.getElementById(`fl-card-chevron-${id}`);
+  const header = body && body.previousElementSibling;
+  if (body) body.style.display = c.collapsed ? 'none' : 'block';
+  if (chevron) chevron.style.transform = c.collapsed ? 'rotate(-90deg)' : '';
+  if (header) header.style.marginBottom = c.collapsed ? '0' : '12px';
+  flSave();
+}
+
+function flTogglePaid(id, mk) {
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  if (!c.months[mk]) c.months[mk] = {};
+  c.months[mk].paid = !c.months[mk].paid;
+  flRenderMonthly(id);
+  flSave();
+}
+
 // ── CLIENT CARD HTML ──
 
 function flLinkChipsHTML(c) {
@@ -2084,19 +2119,13 @@ function flLinkChipsHTML(c) {
 }
 
 function flClientCardHTML(c) {
-  const year = new Date().getFullYear();
-  const monthPills = FL_MONTHS.map((m,i) => {
-    const mk = `${year}-${String(i+1).padStart(2,'0')}`;
-    const sel = mk===c.selectedMonth;
-    const hasH = (c.projects||[]).some(p => (p.entries||[]).some(e => e.date && e.date.startsWith(mk)));
-    return `<button class="fl-month-pill${sel?' active':''}${hasH&&!sel?' has-hours':''}" data-mpill="${c.id}" data-mk="${mk}" onclick="flSelectMonth(${c.id},'${mk}')">${m}</button>`;
-  }).join('');
   const statusClass = c.status==='active' ? 'tag-green' : 'tag-yellow';
   const logoStyle = c.logo ? `background-image:url(${c.logo});background-size:contain;background-repeat:no-repeat;background-position:center;background-color:#ffffff` : `background:${c.color}22;border-color:${c.color}`;
   const logoInner = c.logo ? '' : `<span style="font-size:18px;color:${c.color}">＋</span>`;
+  const chevronStyle = c.collapsed ? 'transform:rotate(-90deg)' : '';
 
   return `<div class="card fl-client-card" id="fl-card-${c.id}" style="margin-bottom:20px;border-left-color:${c.color};background:${c.color}26">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:${c.collapsed?'0':'12px'}">
     <div id="fl-logo-${c.id}" class="fl-logo" style="${logoStyle}" onclick="document.getElementById('fl-logo-input-${c.id}').click()" title="Click to upload logo">${logoInner}</div>
     <input type="file" id="fl-logo-input-${c.id}" accept="image/*" style="display:none" onchange="flUploadLogo(${c.id},this)"/>
     <div style="flex:1;min-width:0">
@@ -2108,8 +2137,10 @@ function flClientCardHTML(c) {
       <span id="fl-client-status-${c.id}" class="tag ${statusClass}">${c.status}</span>
       <button onclick="flToggleEditPanel(${c.id})" class="fl-act-btn" title="Edit client info" style="padding:3px 8px"> Edit</button>
       <button onclick="flRemoveClient(${c.id})" class="fl-act-btn" title="Remove client">&times;</button>
+      <button onclick="flToggleCollapse(${c.id})" class="fl-act-btn" title="${c.collapsed?'Expand':'Minimize'}" style="padding:4px 7px"><svg id="fl-card-chevron-${c.id}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;transition:transform 0.15s;${chevronStyle}"><polyline points="6 9 12 15 18 9"/></svg></button>
     </div>
   </div>
+  <div id="fl-card-body-${c.id}" style="display:${c.collapsed?'none':'block'}">
   <div id="fl-edit-panel-${c.id}" class="fl-edit-panel" style="display:none">
     <div class="form-row">
       <div class="field" style="margin-bottom:8px"><label>Client name</label><input type="text" id="fl-edit-name-${c.id}" value="${c.name}"/></div>
@@ -2179,7 +2210,6 @@ function flClientCardHTML(c) {
   </div>
 
   <div id="fl-ctab-${c.id}-monthly" style="display:none">
-    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px">${monthPills}</div>
     <div id="fl-monthly-detail-${c.id}"></div>
   </div>
 
@@ -2204,6 +2234,7 @@ function flClientCardHTML(c) {
         <button class="btn" onclick="document.getElementById('fl-add-task-form-${c.id}').style.display='none'" style="font-size:12px;padding:6px 12px">Cancel</button>
       </div>
     </div>
+  </div>
   </div>
 </div>`;
 }
