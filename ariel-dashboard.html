@@ -1330,18 +1330,29 @@
 const sections = document.querySelectorAll('.section');
 const sbBtns = document.querySelectorAll('.sb-btn[data-section]');
 
-function navigate(id) {
+function navigate(id, pushState = true) {
+  if (!document.getElementById(id)) return;
   sections.forEach(s => s.classList.remove('active'));
   sbBtns.forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   const btn = document.querySelector(`.sb-btn[data-section="${id}"]`);
   if (btn) btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (pushState) history.pushState({ section: id }, '', '#' + id);
 }
 
 sbBtns.forEach(b => {
   b.addEventListener('click', () => navigate(b.dataset.section));
 });
+
+window.addEventListener('popstate', e => {
+  const id = e.state?.section || 'home';
+  navigate(id, false);
+});
+
+// restore section from URL hash on load
+const initSection = location.hash.replace('#', '');
+navigate(initSection && document.getElementById(initSection) ? initSection : 'home', false);
 
 // ── TABS ──
 function switchTab(section, tab, btn) {
