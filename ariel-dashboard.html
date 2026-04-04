@@ -544,6 +544,39 @@
     padding: 14px; margin-bottom: 14px;
     border: 1.5px solid var(--border);
   }
+  /* MODALS */
+  .fl-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(29,42,69,0.38); z-index: 500;
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .fl-modal-overlay.open { display: flex; }
+  .fl-modal {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 24px; width: 360px;
+    max-width: 100%; box-shadow: 0 8px 40px rgba(29,42,69,0.18);
+  }
+  .fl-modal h3 { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .fl-modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+  .fl-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+  .btn-red { background: var(--red-light); color: var(--red); border-color: transparent; }
+  .btn-red:hover { background: #f5dede; border-color: var(--red); }
+  /* QUICK TIMER */
+  .fl-quick-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .fl-quick-display {
+    font-family: 'Lora', serif; font-size: 24px;
+    letter-spacing: -0.03em; min-width: 90px;
+    color: var(--text);
+  }
+  .fl-quick-sel {
+    flex: 1; min-width: 120px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; background: var(--surface); color: var(--text); cursor: pointer;
+  }
 
   @media (max-width: 768px) {
     .sidebar { display: none; }
@@ -1499,11 +1532,20 @@ function flStartInterval() {
   if (flTimerInterval) return;
   flTimerInterval = setInterval(() => {
     flClients.forEach(c => {
+      let anyRunning = false;
       (c.projects||[]).forEach(p => {
         if (!p.timerStart) return;
+        anyRunning = true;
         const el = document.getElementById(`fl-timer-${c.id}-${p.id}`);
         if (el) el.textContent = flFormatSeconds(flElapsedProject(p));
       });
+      if (anyRunning) {
+        const qd = document.getElementById(`fl-quick-display-${c.id}`);
+        const sel = document.getElementById(`fl-quick-sel-${c.id}`);
+        const pid = sel ? parseInt(sel.value) : 0;
+        const p = pid && (c.projects||[]).find(x => x.id===pid);
+        if (qd && p && p.timerStart) qd.textContent = flFormatSeconds(flElapsedProject(p));
+      }
     });
   }, 1000);
 }
@@ -1534,15 +1576,12 @@ function flStopTimer(cid, pid) {
   if (secs < 60) return;
   const hours = Math.round(secs/3600*4)/4;
   p.timerAccum = 0;
-  const today = new Date().toISOString().slice(0,10);
-  p.entries.unshift({ id: Date.now(), date: today, hours, desc: 'Timer session' });
   const timerEl = document.getElementById(`fl-timer-${cid}-${pid}`);
   if (timerEl) timerEl.textContent = '00:00:00';
   const btn = document.getElementById(`fl-tbtn-${cid}-${pid}`);
   if (btn) btn.innerHTML = '▶ Start';
-  flRenderProjectEntries(cid, pid);
-  flUpdateProjectStats(cid, pid);
-  flRenderTimeTab(cid); flUpdateStats(); flSave();
+  flSave();
+  flShowLogModal(cid, pid, hours);
 }
 
 function flManualLog(cid, pid) {
@@ -1564,20 +1603,7 @@ function flManualLog(cid, pid) {
   flRenderTimeTab(cid); flUpdateStats(); flSave();
 }
 
-function flEditEntry(cid, pid, eid) {
-  const c = flClients.find(x => x.id===cid);
-  const p = c && (c.projects||[]).find(x => x.id===pid);
-  if (!p) return;
-  const e = p.entries.find(x => x.id===eid);
-  if (!e) return;
-  const h = parseFloat(prompt('Hours:', e.hours));
-  if (!isNaN(h) && h > 0) e.hours = h;
-  const d = prompt('Description:', e.desc);
-  if (d !== null) e.desc = d;
-  flRenderProjectEntries(cid, pid);
-  flUpdateProjectStats(cid, pid);
-  flRenderTimeTab(cid); flUpdateStats(); flSave();
-}
+// flEditEntry — replaced by modal version below
 
 function flDeleteEntry(cid, pid, eid) {
   const c = flClients.find(x => x.id===cid);
@@ -1709,11 +1735,14 @@ function flSaveLinks(id) {
 }
 
 function flRemoveClient(id) {
-  if (!confirm('Remove this client and all their data?')) return;
-  flClients = flClients.filter(x => x.id!==id);
-  const card = document.getElementById(`fl-card-${id}`);
-  if (card) card.remove();
-  flUpdateStats(); flSave();
+  const c = flClients.find(x => x.id===id);
+  if (!c) return;
+  flConfirm(`Remove "${c.name}" and all their data? This cannot be undone.`, () => {
+    flClients = flClients.filter(x => x.id!==id);
+    const card = document.getElementById(`fl-card-${id}`);
+    if (card) card.remove();
+    flUpdateStats(); flSave();
+  }, 'Remove client');
 }
 
 // ── PROJECT MANAGEMENT ──
@@ -1751,11 +1780,14 @@ function flDeleteProject(cid, pid) {
   const c = flClients.find(x => x.id===cid);
   if (!c) return;
   const p = c.projects.find(x => x.id===pid);
-  const entryCount = (p && p.entries) ? p.entries.length : 0;
-  if (entryCount > 0 && !confirm(`Remove "${p.name}" and its ${entryCount} logged entries?`)) return;
-  c.projects = c.projects.filter(x => x.id!==pid);
-  flRenderProjects(cid);
-  flUpdateStats(); flSave();
+  if (!p) return;
+  const entryCount = (p.entries||[]).length;
+  const doDelete = () => { c.projects = c.projects.filter(x => x.id!==pid); flRenderProjects(cid); flUpdateStats(); flSave(); };
+  if (entryCount > 0) {
+    flConfirm(`Remove "${p.name}" and its ${entryCount} logged entries?`, doDelete, 'Remove project');
+  } else {
+    doDelete();
+  }
 }
 
 function flToggleProject(cid, pid) {
@@ -1963,6 +1995,19 @@ function flRenderProjects(cid) {
     }
     flRenderProjectEntries(cid, p.id);
   });
+  flRebuildQuickSel(cid);
+}
+
+function flRebuildQuickSel(cid) {
+  const c = flClients.find(x => x.id===cid);
+  const sel = document.getElementById(`fl-quick-sel-${cid}`);
+  const btn = document.getElementById(`fl-quick-btn-${cid}`);
+  if (!c || !sel) return;
+  const prev = parseInt(sel.value) || 0;
+  sel.innerHTML = '<option value="">— choose project —</option>' +
+    (c.projects||[]).map(p => `<option value="${p.id}"${p.id===prev?' selected':''}>${p.name}</option>`).join('');
+  if (btn) btn.disabled = (c.projects||[]).length === 0;
+  flQuickTimerSync(cid);
 }
 
 function flRenderProjectEntries(cid, pid) {
@@ -2096,6 +2141,153 @@ function flToggleCollapse(id) {
   flSave();
 }
 
+// ── MODAL SYSTEM ──
+function flShowModal(id) {
+  const el = document.getElementById(id);
+  if (el) { el.style.display = 'flex'; el.classList.add('open'); }
+}
+function flHideModal(id) {
+  const el = document.getElementById(id);
+  if (el) { el.style.display = 'none'; el.classList.remove('open'); }
+}
+
+let _flConfirmCb = null;
+function flConfirm(msg, onYes, title) {
+  if (title) document.getElementById('fl-confirm-title').textContent = title;
+  document.getElementById('fl-confirm-msg').textContent = msg;
+  _flConfirmCb = onYes;
+  flShowModal('fl-confirm-modal');
+  setTimeout(() => document.getElementById('fl-confirm-ok').focus(), 50);
+}
+function flConfirmOk() { flHideModal('fl-confirm-modal'); if (_flConfirmCb) _flConfirmCb(); _flConfirmCb = null; }
+function flConfirmCancel() { flHideModal('fl-confirm-modal'); _flConfirmCb = null; }
+
+let _flEditCtx = null;
+function flEditEntry(cid, pid, eid) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  const e = p.entries.find(x => x.id===eid);
+  if (!e) return;
+  _flEditCtx = { cid, pid, eid };
+  document.getElementById('fl-edit-hours').value = e.hours;
+  document.getElementById('fl-edit-desc').value = e.desc || '';
+  flShowModal('fl-edit-modal');
+  setTimeout(() => document.getElementById('fl-edit-hours').select(), 50);
+}
+function flEditSave() {
+  if (!_flEditCtx) return;
+  const { cid, pid, eid } = _flEditCtx;
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  const e = p.entries.find(x => x.id===eid);
+  if (!e) return;
+  const h = parseFloat(document.getElementById('fl-edit-hours').value);
+  if (!isNaN(h) && h > 0) e.hours = h;
+  e.desc = document.getElementById('fl-edit-desc').value.trim();
+  flHideModal('fl-edit-modal');
+  _flEditCtx = null;
+  flRenderProjectEntries(cid, pid);
+  flUpdateProjectStats(cid, pid);
+  flRenderTimeTab(cid); flUpdateStats(); flSave();
+}
+
+let _flLogCtx = null;
+function flShowLogModal(cid, pid, hours) {
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  _flLogCtx = { cid, pid, hours };
+  document.getElementById('fl-log-project-name').textContent = p.name;
+  document.getElementById('fl-log-hours-val').textContent = hours + 'h';
+  document.getElementById('fl-log-desc').value = '';
+  flShowModal('fl-log-modal');
+  setTimeout(() => document.getElementById('fl-log-desc').focus(), 50);
+}
+function flLogSave() {
+  if (!_flLogCtx) return;
+  const { cid, pid, hours } = _flLogCtx;
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) { flHideModal('fl-log-modal'); return; }
+  const desc = document.getElementById('fl-log-desc').value.trim() || 'Timer session';
+  const today = new Date().toISOString().slice(0,10);
+  p.entries.unshift({ id: Date.now(), date: today, hours, desc });
+  flHideModal('fl-log-modal'); _flLogCtx = null;
+  flRenderProjectEntries(cid, pid); flUpdateProjectStats(cid, pid);
+  flRenderTimeTab(cid); flUpdateStats(); flSave();
+  flQuickTimerSync(cid);
+}
+function flLogDiscard() {
+  if (_flLogCtx) {
+    const { cid, pid } = _flLogCtx;
+    const c = flClients.find(x => x.id===cid);
+    const p = c && (c.projects||[]).find(x => x.id===pid);
+    if (p) { p.timerAccum = 0; p.timerStart = null; }
+    flSave();
+    flQuickTimerSync(cid);
+  }
+  flHideModal('fl-log-modal'); _flLogCtx = null;
+}
+
+// ── QUICK TIMER ──
+function flQuickTimerSync(cid) {
+  const sel = document.getElementById(`fl-quick-sel-${cid}`);
+  const pid = sel ? parseInt(sel.value) : 0;
+  const c = flClients.find(x => x.id===cid);
+  const p = pid && c && (c.projects||[]).find(x => x.id===pid);
+  const dispEl = document.getElementById(`fl-quick-display-${cid}`);
+  const btnEl = document.getElementById(`fl-quick-btn-${cid}`);
+  if (!p) {
+    if (dispEl) dispEl.textContent = '00:00:00';
+    if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Start'; btnEl.className = 'btn btn-primary'; }
+    return;
+  }
+  if (dispEl) dispEl.textContent = flFormatSeconds(flElapsedProject(p));
+  if (btnEl) {
+    btnEl.disabled = false;
+    if (p.timerStart) {
+      btnEl.textContent = 'Stop & Log';
+      btnEl.className = 'btn btn-red';
+    } else if (p.timerAccum > 0) {
+      btnEl.textContent = 'Log session';
+      btnEl.className = 'btn btn-primary';
+    } else {
+      btnEl.textContent = 'Start';
+      btnEl.className = 'btn btn-primary';
+    }
+  }
+}
+function flQuickStart(cid) {
+  const sel = document.getElementById(`fl-quick-sel-${cid}`);
+  const pid = sel ? parseInt(sel.value) : 0;
+  if (!pid) return;
+  const c = flClients.find(x => x.id===cid);
+  const p = c && (c.projects||[]).find(x => x.id===pid);
+  if (!p) return;
+  if (p.timerStart || p.timerAccum > 0) {
+    // stop running timer first
+    if (p.timerStart) { p.timerAccum += Math.floor((Date.now()-p.timerStart)/1000); p.timerStart = null; }
+    const secs = p.timerAccum||0;
+    if (secs < 60) { p.timerAccum = 0; flSave(); flQuickTimerSync(cid); return; }
+    const hours = Math.round(secs/3600*4)/4;
+    p.timerAccum = 0;
+    // sync per-project UI if open
+    const timerEl = document.getElementById(`fl-timer-${cid}-${pid}`);
+    if (timerEl) timerEl.textContent = '00:00:00';
+    const btn = document.getElementById(`fl-tbtn-${cid}-${pid}`);
+    if (btn) btn.innerHTML = '▶ Start';
+    flSave();
+    flShowLogModal(cid, pid, hours);
+  } else {
+    p.timerStart = Date.now();
+    flStartInterval();
+    flSave();
+    flQuickTimerSync(cid);
+  }
+}
+
 function flTogglePaid(id, mk) {
   const c = flClients.find(x => x.id===id);
   if (!c) return;
@@ -2182,6 +2374,14 @@ function flClientCardHTML(c) {
   </div>
 
   <div id="fl-ctab-${c.id}-time">
+    <div class="fl-quick-row">
+      <div id="fl-quick-display-${c.id}" class="fl-quick-display">00:00:00</div>
+      <select id="fl-quick-sel-${c.id}" class="fl-quick-sel" onchange="flQuickTimerSync(${c.id})">
+        <option value="">— choose project —</option>
+        ${(c.projects||[]).map(p=>`<option value="${p.id}"${p.timerStart||p.timerAccum>0?' selected':''} >${p.name}</option>`).join('')}
+      </select>
+      <button id="fl-quick-btn-${c.id}" class="btn btn-primary" onclick="flQuickStart(${c.id})" ${(c.projects||[]).length===0?'disabled':''}>Start</button>
+    </div>
     <div class="fl-timer-box" style="gap:20px;margin-bottom:14px">
       <div>
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Month</div>
@@ -2295,12 +2495,12 @@ function dataImport(input) {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!confirm('This will replace all current data with the backup. Continue?')) {
-        input.value = ''; return;
-      }
-      localStorage.clear();
-      Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v));
-      location.reload();
+      flConfirm('This will replace all current data with the backup. This cannot be undone.', () => {
+        localStorage.clear();
+        Object.entries(data).forEach(([k, v]) => localStorage.setItem(k, v));
+        location.reload();
+      }, 'Restore backup');
+      input.value = ''; return;
     } catch(err) {
       alert('Could not read backup file — make sure it\'s a valid Currently: Everywhere export.');
       input.value = '';
@@ -2467,5 +2667,52 @@ function schLoad() {
 }
 schLoad();
 </script>
+
+<!-- CONFIRM MODAL -->
+<div class="fl-modal-overlay" id="fl-confirm-modal" onclick="if(event.target===this)flConfirmCancel()">
+  <div class="fl-modal">
+    <h3 id="fl-confirm-title">Are you sure?</h3>
+    <div class="fl-modal-sub" id="fl-confirm-msg"></div>
+    <div class="fl-modal-actions">
+      <button class="btn" onclick="flConfirmCancel()">Cancel</button>
+      <button class="btn btn-red" id="fl-confirm-ok" onclick="flConfirmOk()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ENTRY MODAL -->
+<div class="fl-modal-overlay" id="fl-edit-modal" onclick="if(event.target===this)flHideModal('fl-edit-modal')">
+  <div class="fl-modal">
+    <h3>Edit entry</h3>
+    <div class="field" style="margin-bottom:14px">
+      <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">Hours</label>
+      <input type="number" id="fl-edit-hours" min="0.25" step="0.25" style="width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)" onkeydown="if(event.key==='Enter')flEditSave()"/>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">Description</label>
+      <input type="text" id="fl-edit-desc" placeholder="What did you work on?" style="width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)" onkeydown="if(event.key==='Enter')flEditSave()"/>
+    </div>
+    <div class="fl-modal-actions">
+      <button class="btn" onclick="flHideModal('fl-edit-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="flEditSave()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOG SESSION MODAL -->
+<div class="fl-modal-overlay" id="fl-log-modal">
+  <div class="fl-modal">
+    <h3>Session logged</h3>
+    <div class="fl-modal-sub"><span id="fl-log-hours-val" style="font-weight:500;color:var(--heading)"></span> &middot; <span id="fl-log-project-name" style="color:var(--text)"></span></div>
+    <div class="field" style="margin-bottom:0">
+      <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">What did you work on?</label>
+      <input type="text" id="fl-log-desc" placeholder="Optional description…" style="width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)" onkeydown="if(event.key==='Enter')flLogSave()"/>
+    </div>
+    <div class="fl-modal-actions">
+      <button class="btn" onclick="flLogDiscard()">Discard</button>
+      <button class="btn btn-primary" onclick="flLogSave()">Save</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
