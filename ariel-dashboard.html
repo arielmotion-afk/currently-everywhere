@@ -432,7 +432,7 @@
     background-color: #ffffff;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: contain;
+    background-size: 72%;
   }
   .fl-logo:hover { opacity: 0.8; }
   .fl-link-chip {
@@ -538,6 +538,38 @@
     padding: 14px 16px; background: var(--bg);
     border-top: 1.5px solid var(--border);
   }
+  /* MONTH HERO */
+  .fl-month-hero { background: var(--bg); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+  .fl-month-hero-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+  .fl-month-hero-row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .fl-hero-h { font-family: 'Lora', serif; font-size: 36px; letter-spacing: -.03em; }
+  .fl-hero-inc { font-family: 'Lora', serif; font-size: 22px; color: var(--heading); }
+  /* MONTH ARCHIVE BLOCKS */
+  .fl-month-block { border: 1.5px solid var(--border); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+  .fl-month-block-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; background: var(--surface); user-select: none; transition: background .12s; }
+  .fl-month-block-header:hover { background: var(--bg); }
+  .fl-mb-name { font-weight: 500; font-size: 14px; flex: 1; }
+  .fl-mb-hours { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .fl-mb-income { font-family: 'Lora', serif; font-size: 20px; color: var(--heading); white-space: nowrap; }
+  .fl-paid-pill { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+  .fl-paid-pill.paid { background: var(--green-light); color: var(--green); }
+  .fl-paid-pill.unpaid { background: var(--border); color: var(--muted); }
+  .fl-month-block-body { border-top: 1.5px solid var(--border); background: var(--bg); padding: 10px 16px; }
+  .fl-month-proj-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .fl-month-proj-name { font-weight: 500; font-size: 13px; flex: 1; }
+  .fl-month-proj-hours { font-size: 12px; color: var(--muted); }
+  .fl-month-proj-income { font-size: 13px; font-weight: 500; }
+  .fl-sub-entries { padding-left: 10px; margin-bottom: 6px; }
+  .fl-sub-entry { display: flex; gap: 10px; padding: 3px 0; font-size: 12px; color: var(--muted); border-bottom: 1px dashed var(--border); }
+  .fl-sub-entry:last-child { border: none; }
+  .fl-sub-entry-date { flex-shrink: 0; width: 38px; }
+  .fl-sub-entry-desc { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fl-sub-entry-h { white-space: nowrap; }
+  /* MANUAL LOG ROW */
+  .fl-manual-new { display: flex; gap: 8px; align-items: flex-end; margin-top: 14px; flex-wrap: wrap; border-top: 1.5px solid var(--border); padding-top: 12px; }
+  .fl-mini-field { display: flex; flex-direction: column; gap: 4px; }
+  .fl-mini-field label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+  .fl-mini-field input { font-family: 'DM Sans',sans-serif; font-size: 13px; border: 1.5px solid var(--border); border-radius: 8px; padding: 6px 10px; background: var(--bg); color: var(--text); }
   /* CLIENT EDIT PANEL */
   .fl-edit-panel {
     background: var(--bg); border-radius: 8px;
@@ -1618,9 +1650,9 @@ function flDeleteEntry(cid, pid, eid) {
   const p = c && (c.projects||[]).find(x => x.id===pid);
   if (!p) return;
   p.entries = p.entries.filter(e => e.id!==eid);
-  flRenderProjectEntries(cid, pid);
-  flUpdateProjectStats(cid, pid);
-  flRenderTimeTab(cid); flUpdateStats(); flSave();
+  flRenderTimeTab(cid);
+  flRenderMonthly(cid);
+  flUpdateStats(); flSave();
 }
 
 function flSelectMonth(id, mk) {
@@ -1705,7 +1737,7 @@ function flUploadLogo(id, input) {
   reader.onload = e => {
     c.logo = e.target.result;
     const el = document.getElementById(`fl-logo-${id}`);
-    if (el) { el.style.backgroundImage=`url(${c.logo})`; el.style.backgroundSize='contain'; el.style.backgroundRepeat='no-repeat'; el.style.backgroundPosition='center'; el.style.backgroundColor='#ffffff'; el.innerHTML=''; }
+    if (el) { el.style.backgroundImage=`url(${c.logo})`; el.style.backgroundSize='72%'; el.style.backgroundRepeat='no-repeat'; el.style.backgroundPosition='center'; el.style.backgroundColor='#ffffff'; el.innerHTML=''; }
     flSave();
   };
   reader.readAsDataURL(input.files[0]);
@@ -1930,6 +1962,9 @@ function flLoad() {
       flRenderMonthly(c.id);
       flRenderBriefs(c.id);
       flRenderTasks(c.id);
+      // Set date input default to today
+      const di = document.getElementById(`fl-new-date-${c.id}`);
+      if (di && !di.value) di.valueAsDate = new Date();
     } catch(e) { console.warn('Error loading client', c.name, e); }
   });
   flUpdateStats(); // safe — never calls flSave() now
@@ -1940,69 +1975,113 @@ window.addEventListener('beforeunload', flSave);
 // ── RENDER FUNCTIONS ──
 
 function flRenderTimeTab(id) {
-  // Updates the stats summary at the top of the time tab only
+  flRenderMonthHero(id);
+  flRenderMonthEntries(id);
+}
+
+function flRenderMonthHero(id) {
   const c = flClients.find(x => x.id===id);
   if (!c) return;
   const mk = flCurrentMonthKey();
   const mh = flMonthHours(c, mk);
-  const th = flTotalHours(c);
-  const mhEl = document.getElementById(`fl-month-hours-${id}`);
-  const thEl = document.getElementById(`fl-total-hours-${id}`);
-  const incEl = document.getElementById(`fl-month-income-${id}`);
-  if (mhEl) mhEl.textContent = mh.toFixed(1)+'h';
-  if (thEl) thEl.textContent = th.toFixed(1)+'h';
-  if (incEl) incEl.innerHTML = '<span style="font-family:\'DM Sans\',sans-serif;font-size:0.88em;opacity:0.8">₪</span>'+Math.round(mh*c.rate).toLocaleString();
+  const income = Math.round(mh * c.rate);
+  const hEl = document.getElementById(`fl-hero-h-${id}`);
+  const iEl = document.getElementById(`fl-hero-inc-${id}`);
+  if (hEl) hEl.textContent = mh > 0 ? mh.toFixed(1)+'h' : '0h';
+  if (iEl) iEl.innerHTML = income > 0
+    ? `<span style="font-family:'DM Sans',sans-serif;font-size:0.72em;opacity:0.7">₪</span>${income.toLocaleString()}`
+    : `<span style="opacity:0.25">₪0</span>`;
+}
+
+function flRenderMonthEntries(id) {
+  const c = flClients.find(x => x.id===id);
+  const el = document.getElementById(`fl-month-entries-${id}`);
+  if (!c || !el) return;
+  const curMk = flCurrentMonthKey();
+  const entries = [];
+  (c.projects||[]).forEach(p => {
+    (p.entries||[]).filter(e => e.date && e.date.startsWith(curMk)).forEach(e => {
+      entries.push({ ...e, pid: p.id });
+    });
+  });
+  entries.sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
+  if (entries.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:14px 0;text-align:center">No hours logged this month yet</div>';
+    return;
+  }
+  el.innerHTML = entries.map(e => `
+    <div class="fl-entry">
+      <span class="fl-entry-date">${e.date.slice(5).replace('-','/')}</span>
+      <div class="fl-entry-desc">${e.desc||'—'}</div>
+      <span class="fl-entry-hours">${e.hours}h</span>
+      <div class="fl-entry-actions">
+        <button onclick="flEditEntry(${id},${e.pid},${e.id})" class="fl-act-btn">Edit</button>
+        <button onclick="flDeleteEntry(${id},${e.pid},${e.id})" class="fl-act-btn">&times;</button>
+      </div>
+    </div>`).join('');
+}
+
+function flManualLogNew(cid) {
+  const c = flClients.find(x => x.id===cid);
+  if (!c) return;
+  const sel = document.getElementById(`fl-quick-sel-${cid}`);
+  const pid = sel ? parseInt(sel.value) : 0;
+  const p = pid && (c.projects||[]).find(x => x.id===pid);
+  if (!p) {
+    const sel2 = document.getElementById(`fl-quick-sel-${cid}`);
+    if (sel2) sel2.focus();
+    return;
+  }
+  const dateEl  = document.getElementById(`fl-new-date-${cid}`);
+  const hoursEl = document.getElementById(`fl-new-hours-${cid}`);
+  const descEl  = document.getElementById(`fl-new-desc-${cid}`);
+  const date  = dateEl  ? dateEl.value : '';
+  const hours = parseFloat(hoursEl ? hoursEl.value : '');
+  const desc  = descEl  ? descEl.value.trim() : '';
+  if (!date || !hours || hours <= 0) return;
+  p.entries.unshift({ id: Date.now(), date, hours, desc });
+  if (hoursEl) hoursEl.value = '';
+  if (descEl)  descEl.value  = '';
+  flRenderMonthEntries(cid);
+  flRenderMonthHero(cid);
+  flRenderMonthly(cid);
+  flUpdateStats(); flSave();
+}
+
+function flToggleManageProjects(cid) {
+  const panel = document.getElementById(`fl-manage-proj-${cid}`);
+  if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function flToggleMonthBlock(cid, mk) {
+  const body    = document.getElementById(`fl-mb-body-${cid}-${mk}`);
+  const chevron = document.getElementById(`fl-mb-chev-${cid}-${mk}`);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 function flRenderProjects(cid) {
   const c = flClients.find(x => x.id===cid);
-  const el = document.getElementById(`fl-projects-${cid}`);
-  if (!c || !el) return;
+  if (!c) return;
   flRenderTimeTab(cid);
-  const mk = flCurrentMonthKey();
-  if ((c.projects||[]).length === 0) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">No projects yet — add one below</div>';
-    return;
-  }
-  el.innerHTML = c.projects.map(p => {
-    const pmh = (p.entries||[]).filter(e => e.date && e.date.startsWith(mk)).reduce((s,e)=>s+e.hours,0);
-    const pth = (p.entries||[]).reduce((s,e)=>s+e.hours,0);
-    const statsStr = [pmh>0?pmh.toFixed(1)+'h this month':'', pth>0?pth.toFixed(1)+'h total':''].filter(Boolean).join(' · ');
-    return `<div class="fl-project-row" id="fl-proj-${cid}-${p.id}">
-  <div class="fl-project-header" onclick="flToggleProject(${cid},${p.id})" style="border-left-color:${c.color}">
-    <span id="fl-proj-arrow-${cid}-${p.id}" class="fl-proj-arrow">${p.open?'▾':'▸'}</span>
-    <span class="fl-proj-name">${p.name}</span>
-    <span class="fl-proj-stats" id="fl-proj-stats-${cid}-${p.id}">${statsStr}</span>
-    <button onclick="flDeleteProject(${cid},${p.id});event.stopPropagation()" class="fl-act-btn" title="Remove project" style="margin-left:8px">&times;</button>
-  </div>
-  <div class="fl-project-body" id="fl-proj-body-${cid}-${p.id}" style="display:${p.open?'block':'none'}">
-    <div class="fl-timer-box" style="margin-bottom:10px">
-      <div id="fl-timer-${cid}-${p.id}" class="fl-timer-display">${flFormatSeconds(flElapsedProject(p))}</div>
-      <button id="fl-tbtn-${cid}-${p.id}" onclick="flToggleTimer(${cid},${p.id})" class="btn btn-primary">${p.timerStart?'⏸ Pause':(p.timerAccum>0?'▶ Resume':'▶ Start')}</button>
-      <button onclick="flStopTimer(${cid},${p.id})" class="btn" title="Stop and log entry">⏹ Stop & Log</button>
-    </div>
-    <div class="fl-manual-box">
-      <div class="fl-section-label">Log hours manually</div>
-      <div class="form-row">
-        <div class="field" style="margin-bottom:8px"><label>Date</label><input type="date" id="fl-mdate-${cid}-${p.id}"/></div>
-        <div class="field" style="margin-bottom:8px"><label>Hours</label><input type="number" id="fl-mhours-${cid}-${p.id}" min="0.25" step="0.25" placeholder="2.5"/></div>
-      </div>
-      <div class="field" style="margin-bottom:10px"><label>Description</label><input type="text" id="fl-mdesc-${cid}-${p.id}" placeholder="What specifically did you work on?"/></div>
-      <button class="btn btn-primary" onclick="flManualLog(${cid},${p.id})" style="font-size:12px;padding:6px 14px">Save entry</button>
-    </div>
-    <div class="fl-section-label" style="margin-top:4px">Entries</div>
-    <div id="fl-entries-${cid}-${p.id}"></div>
-  </div>
-</div>`;
-  }).join('');
-  // Init dates and render entries for open projects
-  c.projects.forEach(p => {
-    if (p.open) {
-      const di = document.getElementById(`fl-mdate-${cid}-${p.id}`);
-      if (di && !di.value) di.valueAsDate = new Date();
+  // Simple project list inside the "Manage projects" panel
+  const el = document.getElementById(`fl-projects-${cid}`);
+  if (el) {
+    if ((c.projects||[]).length === 0) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">No projects yet</div>';
+    } else {
+      el.innerHTML = c.projects.map(p => {
+        const total = (p.entries||[]).reduce((s,e)=>s+e.hours,0);
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="flex:1;font-size:13px;font-weight:500">${p.name}</span>
+          <span style="font-size:12px;color:var(--muted)">${total>0?total.toFixed(1)+'h total':''}</span>
+          <button onclick="flDeleteProject(${cid},${p.id})" class="fl-act-btn">&times;</button>
+        </div>`;
+      }).join('');
     }
-    flRenderProjectEntries(cid, p.id);
-  });
+  }
   flRebuildQuickSel(cid);
 }
 
@@ -2052,57 +2131,66 @@ function flRenderMonthly(id) {
   if (!c) return;
   const el = document.getElementById(`fl-monthly-detail-${id}`);
   if (!el) return;
-
   const curMk = flCurrentMonthKey();
-  const curLabel = FL_MONTHS[parseInt(curMk.slice(5,7))-1] + ' ' + curMk.slice(0,4);
-  const mh = flMonthHours(c, curMk);
-  const income = Math.round(mh * c.rate);
 
-  // Current month: per-project breakdown
-  const projectRows = (c.projects||[]).map(p => {
-    const ph = (p.entries||[]).filter(e => e.date && e.date.startsWith(curMk)).reduce((s,e)=>s+e.hours,0);
-    if (!ph) return '';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
-      <span style="font-size:13px">${p.name}</span>
-      <span style="font-size:13px;font-weight:500;white-space:nowrap">${ph.toFixed(1)}h &nbsp;&nbsp; ₪${Math.round(ph*c.rate).toLocaleString()}</span>
-    </div>`;
-  }).filter(Boolean).join('');
+  // Build map: mk → { hours, projects: { pid → { name, hours, entries[] } } }
+  const monthMap = {};
+  (c.projects||[]).forEach(p => {
+    (p.entries||[]).forEach(e => {
+      if (!e.date) return;
+      const mk = e.date.slice(0,7);
+      if (mk === curMk) return; // current month lives in Time tab
+      if (!monthMap[mk]) monthMap[mk] = { hours: 0, projects: {} };
+      if (!monthMap[mk].projects[p.id]) monthMap[mk].projects[p.id] = { name: p.name, hours: 0, entries: [] };
+      monthMap[mk].projects[p.id].hours += e.hours;
+      monthMap[mk].projects[p.id].entries.push(e);
+      monthMap[mk].hours += e.hours;
+    });
+  });
 
-  // Past months that have hours
-  const pastMks = new Set();
-  (c.projects||[]).forEach(p => (p.entries||[]).forEach(e => {
-    if (e.date) { const mk = e.date.slice(0,7); if (mk !== curMk) pastMks.add(mk); }
-  }));
-  const sortedPast = [...pastMks].sort().reverse();
+  const sortedMks = Object.keys(monthMap).sort().reverse();
+  if (sortedMks.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px 0;text-align:center">No previous months yet</div>';
+    return;
+  }
 
-  const historyRows = sortedPast.map(mk => {
-    const h = flMonthHours(c, mk);
-    if (!h) return '';
+  el.innerHTML = sortedMks.map(mk => {
+    const m = monthMap[mk];
+    const label = FL_MONTHS[parseInt(mk.slice(5,7))-1] + ' ' + mk.slice(0,4);
+    const income = Math.round(m.hours * c.rate);
     if (!c.months[mk]) c.months[mk] = {};
     const paid = c.months[mk].paid || false;
-    const label = FL_MONTHS[parseInt(mk.slice(5,7))-1] + ' ' + mk.slice(0,4);
-    const inc = Math.round(h * c.rate);
-    return `<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:500">${label}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:1px">${h.toFixed(1)}h</div>
-      </div>
-      <div style="font-family:'Lora',serif;font-size:22px;font-weight:400;letter-spacing:-0.03em">₪${inc.toLocaleString()}</div>
-      <div onclick="flTogglePaid(${id},'${mk}')" style="cursor:pointer;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;flex-shrink:0;${paid?'background:var(--green-light);color:var(--green)':'background:var(--border);color:var(--muted)'}">${paid?'Paid':'Unpaid'}</div>
-    </div>`;
-  }).filter(Boolean).join('');
 
-  el.innerHTML = `
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:10px">This month — ${curLabel}</div>
-    ${mh > 0 ? `<div style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:20px">
-      ${projectRows}
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px">
-        <span style="font-size:13px;font-weight:600">Total</span>
-        <span style="font-family:'Lora',serif;font-size:24px;font-weight:400;letter-spacing:-0.03em;color:var(--heading)">₪${income.toLocaleString()}</span>
+    const projRows = Object.values(m.projects).map(p => {
+      const pInc = Math.round(p.hours * c.rate);
+      const entryRows = [...p.entries]
+        .sort((a,b) => b.date.localeCompare(a.date))
+        .map(e => `<div class="fl-sub-entry">
+          <div class="fl-sub-entry-date">${e.date.slice(5).replace('-','/')}</div>
+          <div class="fl-sub-entry-desc">${e.desc||'—'}</div>
+          <div class="fl-sub-entry-h">${e.hours}h</div>
+        </div>`).join('');
+      return `<div class="fl-month-proj-row">
+        <div class="fl-month-proj-name">${p.name}</div>
+        <div class="fl-month-proj-hours">${p.hours.toFixed(1)}h</div>
+        <div class="fl-month-proj-income">₪${pInc.toLocaleString()}</div>
       </div>
-    </div>` : `<div style="color:var(--muted);font-size:13px;padding:4px 0 20px">No hours logged this month yet.</div>`}
-    ${historyRows ? `<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:4px">Previous months</div>${historyRows}` : ''}
-  `;
+      <div class="fl-sub-entries">${entryRows}</div>`;
+    }).join('');
+
+    return `<div class="fl-month-block">
+      <div class="fl-month-block-header" onclick="flToggleMonthBlock(${id},'${mk}')">
+        <div class="fl-mb-name">${label}</div>
+        <div class="fl-mb-hours">${m.hours.toFixed(1)}h</div>
+        <div class="fl-mb-income">₪${income.toLocaleString()}</div>
+        <div id="fl-paid-${id}-${mk}" class="fl-paid-pill ${paid?'paid':'unpaid'}" onclick="flTogglePaid(${id},'${mk}');event.stopPropagation()">${paid?'Paid':'Unpaid'}</div>
+        <svg id="fl-mb-chev-${id}-${mk}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--muted);transition:transform .15s"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="fl-month-block-body" id="fl-mb-body-${id}-${mk}" style="display:none">
+        ${projRows}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function flRenderBriefs(id) {
@@ -2196,9 +2284,9 @@ function flEditSave() {
   e.desc = document.getElementById('fl-edit-desc').value.trim();
   flHideModal('fl-edit-modal');
   _flEditCtx = null;
-  flRenderProjectEntries(cid, pid);
-  flUpdateProjectStats(cid, pid);
-  flRenderTimeTab(cid); flUpdateStats(); flSave();
+  flRenderTimeTab(cid);
+  flRenderMonthly(cid);
+  flUpdateStats(); flSave();
 }
 
 let _flLogCtx = null;
@@ -2223,8 +2311,9 @@ function flLogSave() {
   const today = new Date().toISOString().slice(0,10);
   p.entries.unshift({ id: Date.now(), date: today, hours, desc });
   flHideModal('fl-log-modal'); _flLogCtx = null;
-  flRenderProjectEntries(cid, pid); flUpdateProjectStats(cid, pid);
-  flRenderTimeTab(cid); flUpdateStats(); flSave();
+  flRenderTimeTab(cid);
+  flRenderMonthly(cid);
+  flUpdateStats(); flSave();
   flQuickTimerSync(cid);
 }
 function flLogDiscard() {
@@ -2301,7 +2390,12 @@ function flTogglePaid(id, mk) {
   if (!c) return;
   if (!c.months[mk]) c.months[mk] = {};
   c.months[mk].paid = !c.months[mk].paid;
-  flRenderMonthly(id);
+  const paid = c.months[mk].paid;
+  const pill = document.getElementById(`fl-paid-${id}-${mk}`);
+  if (pill) {
+    pill.textContent = paid ? 'Paid' : 'Unpaid';
+    pill.className = `fl-paid-pill ${paid ? 'paid' : 'unpaid'}`;
+  }
   flSave();
 }
 
@@ -2320,7 +2414,7 @@ function flLinkChipsHTML(c) {
 
 function flClientCardHTML(c) {
   const statusClass = c.status==='active' ? 'tag-green' : 'tag-yellow';
-  const logoStyle = c.logo ? `background-image:url(${c.logo});background-size:contain;background-repeat:no-repeat;background-position:center;background-color:#ffffff` : `background:${c.color}22;border-color:${c.color}`;
+  const logoStyle = c.logo ? `background-image:url(${c.logo});background-size:72%;background-repeat:no-repeat;background-position:center;background-color:#ffffff` : `background:${c.color}22;border-color:${c.color}`;
   const logoInner = c.logo ? '' : `<span style="font-size:18px;color:${c.color}">＋</span>`;
   const chevronStyle = c.collapsed ? 'transform:rotate(-90deg)' : '';
 
@@ -2382,6 +2476,15 @@ function flClientCardHTML(c) {
   </div>
 
   <div id="fl-ctab-${c.id}-time">
+    <!-- Month hero -->
+    <div class="fl-month-hero">
+      <div class="fl-month-hero-label" id="fl-hero-label-${c.id}">${FL_MONTHS[new Date().getMonth()]} ${new Date().getFullYear()}</div>
+      <div class="fl-month-hero-row">
+        <div class="fl-hero-h" id="fl-hero-h-${c.id}">0h</div>
+        <div class="fl-hero-inc" id="fl-hero-inc-${c.id}"><span style="opacity:0.25">₪0</span></div>
+      </div>
+    </div>
+    <!-- Quick timer -->
     <div class="fl-quick-row">
       <div id="fl-quick-display-${c.id}" class="fl-quick-display">00:00:00</div>
       <select id="fl-quick-sel-${c.id}" class="fl-quick-sel" onchange="flQuickTimerSync(${c.id})">
@@ -2390,28 +2493,28 @@ function flClientCardHTML(c) {
       </select>
       <button id="fl-quick-btn-${c.id}" class="btn btn-primary" onclick="flQuickStart(${c.id})" ${(c.projects||[]).length===0?'disabled':''}>Start</button>
     </div>
-    <div class="fl-timer-box" style="gap:20px;margin-bottom:14px">
-      <div>
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Month</div>
-        <div style="font-weight:500;font-size:15px"><span id="fl-month-hours-${c.id}">0h</span></div>
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Total</div>
-        <div style="font-weight:500;font-size:15px"><span id="fl-total-hours-${c.id}">0h</span></div>
-      </div>
-      <div style="margin-left:auto;text-align:right">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Income this month</div>
-        <div style="font-weight:500;font-size:15px"><span id="fl-month-income-${c.id}"><span style="font-family:'DM Sans',sans-serif;font-size:0.88em;opacity:0.8">₪</span>0</span></div>
-      </div>
+    <!-- This month flat entries -->
+    <div class="fl-section-label">This month</div>
+    <div id="fl-month-entries-${c.id}"></div>
+    <!-- Manual log -->
+    <div class="fl-manual-new">
+      <div class="fl-mini-field"><label>Date</label><input type="date" id="fl-new-date-${c.id}" style="width:130px"/></div>
+      <div class="fl-mini-field"><label>Hours</label><input type="number" id="fl-new-hours-${c.id}" min="0.25" step="0.25" placeholder="1.5" style="width:72px"/></div>
+      <div class="fl-mini-field" style="flex:1;min-width:120px"><label>Description</label><input type="text" id="fl-new-desc-${c.id}" placeholder="What did you work on?" onkeydown="if(event.key==='Enter')flManualLogNew(${c.id})"/></div>
+      <button class="btn btn-sm" onclick="flManualLogNew(${c.id})" style="align-self:flex-end">+ Log</button>
     </div>
-    <div id="fl-projects-${c.id}"></div>
-    <div style="margin-top:6px">
-      <button id="fl-np-btn-${c.id}" class="btn" onclick="flOpenNewProject(${c.id})" style="font-size:12px;padding:6px 14px">+ Add project</button>
-      <div id="fl-new-proj-form-${c.id}" style="display:none;margin-top:10px;border:1.5px solid var(--border);border-radius:8px;padding:14px">
-        <div class="field" style="margin-bottom:10px"><label>Project name</label><input type="text" id="fl-np-name-${c.id}" placeholder="e.g. Brand identity, Social templates…" onkeydown="if(event.key==='Enter')flAddProject(${c.id})"/></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" onclick="flAddProject(${c.id})" style="font-size:12px;padding:6px 12px">Save project</button>
-          <button class="btn" onclick="flCloseNewProject(${c.id})" style="font-size:12px;padding:6px 12px">Cancel</button>
+    <!-- Manage projects (collapsed by default) -->
+    <div style="margin-top:14px">
+      <span onclick="flToggleManageProjects(${c.id})" style="font-size:12px;color:var(--muted);cursor:pointer;user-select:none">&#9881; Manage projects</span>
+      <div id="fl-manage-proj-${c.id}" style="display:none;margin-top:10px;border:1.5px solid var(--border);border-radius:8px;padding:14px">
+        <div id="fl-projects-${c.id}" style="margin-bottom:10px"></div>
+        <button id="fl-np-btn-${c.id}" class="btn" onclick="flOpenNewProject(${c.id})" style="font-size:12px;padding:5px 12px">+ Add project</button>
+        <div id="fl-new-proj-form-${c.id}" style="display:none;margin-top:10px">
+          <div class="field" style="margin-bottom:8px"><label>Project name</label><input type="text" id="fl-np-name-${c.id}" placeholder="e.g. Brand identity, Social templates…" onkeydown="if(event.key==='Enter')flAddProject(${c.id})"/></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="flAddProject(${c.id})" style="font-size:12px;padding:6px 12px">Save</button>
+            <button class="btn" onclick="flCloseNewProject(${c.id})" style="font-size:12px;padding:6px 12px">Cancel</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2477,6 +2580,8 @@ function flSaveNewClient() {
   flRenderMonthly(c.id);
   flRenderBriefs(c.id);
   flRenderTasks(c.id);
+  const di2 = document.getElementById(`fl-new-date-${c.id}`);
+  if (di2 && !di2.value) di2.valueAsDate = new Date();
   flUpdateStats(); flSave();
 }
 
