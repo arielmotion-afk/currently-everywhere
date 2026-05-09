@@ -3020,7 +3020,8 @@ async function spConnect() {
     redirect_uri: spRedirectUri(),
     code_challenge_method: 'S256',
     code_challenge: challenge,
-    state: 'sp_auth'
+    state: 'sp_auth',
+    show_dialog: 'true'
   });
   window.location.href = 'https://accounts.spotify.com/authorize?' + params;
 }
@@ -3211,7 +3212,11 @@ async function spCreate() {
     headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: playlistName, public: isPublic, description: 'Created with Currently: Everywhere' })
   });
-  if (!createRes.ok) { alert('Failed to create playlist — try reconnecting.'); return; }
+  if (!createRes.ok) {
+    const err = await createRes.json().catch(() => ({}));
+    alert(`Failed to create playlist (${createRes.status}): ${err?.error?.message || 'unknown error'}.\n\nTry: Disconnect → Connect again to refresh permissions.`);
+    return;
+  }
   const playlist = await createRes.json();
   await spSearchAndAdd(lines, token, playlist.id, playlist.external_urls?.spotify);
 }
