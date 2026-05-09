@@ -3215,7 +3215,19 @@ async function spCreate() {
   const playlistName = document.getElementById('sp-playlist-name').value.trim() || 'My Playlist';
   const isPublic     = document.getElementById('sp-playlist-public').checked;
 
-  const userId = localStorage.getItem(SP_KEY_USER_ID);
+  // Get fresh userId directly from API
+  const meRes = await fetch('https://api.spotify.com/v1/me', {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  if (!meRes.ok) {
+    alert(`Token check failed (${meRes.status}) — please Disconnect and Connect again.`);
+    return;
+  }
+  const meData = await meRes.json();
+  const userId = meData.id;
+  const grantedScopes = localStorage.getItem('sp_granted_scopes') || '(not recorded)';
+  console.log('[Spotify] userId:', userId, '| scopes:', grantedScopes, '| token starts:', token.slice(0,12));
+
   const createRes = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
@@ -3223,7 +3235,8 @@ async function spCreate() {
   });
   if (!createRes.ok) {
     const err = await createRes.json().catch(() => ({}));
-    alert(`Failed to create playlist (${createRes.status}): ${err?.error?.message || 'unknown error'}.\n\nTry: Disconnect → Connect again to refresh permissions.`);
+    console.error('[Spotify] create failed:', createRes.status, err);
+    alert(`Failed (${createRes.status}): ${err?.error?.message || 'unknown'}\nScopes granted: ${grantedScopes}\nUser ID: ${userId}`);
     return;
   }
   const playlist = await createRes.json();
