@@ -3231,7 +3231,7 @@ async function spCreate() {
   const createRes = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: playlistName, public: isPublic, description: 'Created with Currently: Everywhere' })
+    body: JSON.stringify({ name: playlistName, public: isPublic })
   });
   if (!createRes.ok) {
     const err = await createRes.json().catch(() => ({}));
@@ -3271,7 +3271,7 @@ async function spLoadPlaylists() {
   }
   sel.innerHTML = '<option value="">Choose a playlist…</option>' +
     items.map(p =>
-      `<option value="${p.id}" data-url="${p.external_urls?.spotify || ''}">${p.name} (${p.tracks?.total ?? '?'} tracks)</option>`
+      `<option value="${p.id}" data-url="${p.external_urls?.spotify || ''}">${p.name}</option>`
     ).join('');
 }
 
