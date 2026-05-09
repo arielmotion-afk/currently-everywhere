@@ -3088,15 +3088,6 @@ function spUpdateUI() {
     userInfo.style.display = 'block';
     document.getElementById('sp-user-name').textContent = userName;
     creator.style.display = 'block';
-    const scopes = localStorage.getItem('sp_granted_scopes') || '';
-    const scopeEl = document.getElementById('sp-scope-debug');
-    if (scopeEl) {
-      const hasPlaylist = scopes.includes('playlist-modify');
-      scopeEl.textContent = hasPlaylist
-        ? '✓ Playlist permissions granted'
-        : `⚠ Missing playlist permissions. Granted: ${scopes || 'none'}`;
-      scopeEl.style.color = hasPlaylist ? 'var(--green)' : 'var(--red)';
-    }
   } else {
     pill.textContent = 'Not connected';
     pill.className   = 'sp-status-pill disconnected';
@@ -3218,7 +3209,8 @@ async function spCreate() {
   const playlistName = document.getElementById('sp-playlist-name').value.trim() || 'My Playlist';
   const isPublic     = document.getElementById('sp-playlist-public').checked;
 
-  const createRes = await fetch(`https://api.spotify.com/v1/me/playlists`, {
+  const userId = localStorage.getItem(SP_KEY_USER_ID);
+  const createRes = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: playlistName, public: isPublic, description: 'Created with Currently: Everywhere' })
