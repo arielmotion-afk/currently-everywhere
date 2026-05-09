@@ -1505,7 +1505,7 @@
       <div id="sp-user-info" style="display:none;font-size:13px;color:var(--text);padding-top:10px;border-top:1.5px solid var(--border)">
         Logged in as <strong id="sp-user-name"></strong>
         <button class="btn" style="font-size:12px;padding:3px 10px;margin-left:10px" onclick="spDisconnect()">Disconnect</button>
-        <div id="sp-scope-debug" style="margin-top:6px;font-size:11px;color:var(--muted)"></div>
+        <div id="sp-scope-debug" style="margin-top:6px;font-size:11px;color:var(--muted);word-break:break-all"></div>
       </div>
     </div>
 
@@ -3046,6 +3046,7 @@ async function spExchangeCode(code) {
   const data = await res.json();
   localStorage.setItem(SP_KEY_TOKEN,   data.access_token);
   localStorage.setItem(SP_KEY_EXPIRES, Date.now() + data.expires_in * 1000);
+  localStorage.setItem('sp_granted_scopes', data.scope || '');
   localStorage.removeItem(SP_KEY_VERIFIER);
   history.replaceState({}, '', window.location.pathname + '#music');
   await spFetchUser();
@@ -3088,6 +3089,11 @@ function spUpdateUI() {
     userInfo.style.display = 'block';
     document.getElementById('sp-user-name').textContent = userName;
     creator.style.display = 'block';
+    const scopes = localStorage.getItem('sp_granted_scopes') || '';
+    const scopeEl = document.getElementById('sp-scope-debug');
+    if (scopeEl) {
+      scopeEl.textContent = 'Scopes: ' + (scopes || 'none recorded yet — reconnect to refresh');
+    }
   } else {
     pill.textContent = 'Not connected';
     pill.className   = 'sp-status-pill disconnected';
