@@ -1505,6 +1505,7 @@
       <div id="sp-user-info" style="display:none;font-size:13px;color:var(--text);padding-top:10px;border-top:1.5px solid var(--border)">
         Logged in as <strong id="sp-user-name"></strong>
         <button class="btn" style="font-size:12px;padding:3px 10px;margin-left:10px" onclick="spDisconnect()">Disconnect</button>
+        <div id="sp-scope-debug" style="margin-top:6px;font-size:11px;color:var(--muted)"></div>
       </div>
     </div>
 
@@ -3059,8 +3060,10 @@ async function spFetchUser() {
   });
   if (!res.ok) return;
   const data = await res.json();
+  const grantedScopes = res.headers.get('x-oauth-scopes') || '';
   localStorage.setItem(SP_KEY_USER_ID,   data.id);
   localStorage.setItem(SP_KEY_USER_NAME, data.display_name || data.id);
+  localStorage.setItem('sp_granted_scopes', grantedScopes);
   spUpdateUI();
 }
 
@@ -3085,6 +3088,15 @@ function spUpdateUI() {
     userInfo.style.display = 'block';
     document.getElementById('sp-user-name').textContent = userName;
     creator.style.display = 'block';
+    const scopes = localStorage.getItem('sp_granted_scopes') || '';
+    const scopeEl = document.getElementById('sp-scope-debug');
+    if (scopeEl) {
+      const hasPlaylist = scopes.includes('playlist-modify');
+      scopeEl.textContent = hasPlaylist
+        ? '✓ Playlist permissions granted'
+        : `⚠ Missing playlist permissions. Granted: ${scopes || 'none'}`;
+      scopeEl.style.color = hasPlaylist ? 'var(--green)' : 'var(--red)';
+    }
   } else {
     pill.textContent = 'Not connected';
     pill.className   = 'sp-status-pill disconnected';
@@ -3205,9 +3217,8 @@ async function spCreate() {
 
   const playlistName = document.getElementById('sp-playlist-name').value.trim() || 'My Playlist';
   const isPublic     = document.getElementById('sp-playlist-public').checked;
-  const userId       = localStorage.getItem(SP_KEY_USER_ID);
 
-  const createRes = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+  const createRes = await fetch(`https://api.spotify.com/v1/me/playlists`, {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: playlistName, public: isPublic, description: 'Created with Currently: Everywhere' })
