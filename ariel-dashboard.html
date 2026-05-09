@@ -2986,7 +2986,7 @@ const SP_KEY_EXPIRES = 'sp_token_expires';
 const SP_KEY_VERIFIER = 'sp_code_verifier';
 const SP_KEY_USER_ID  = 'sp_user_id';
 const SP_KEY_USER_NAME = 'sp_user_name';
-const SP_SCOPES = 'playlist-modify-public playlist-modify-private';
+const SP_SCOPES = 'playlist-modify-public playlist-modify-private playlist-read-private';
 
 function spRedirectUri() {
   return window.location.origin + window.location.pathname;
@@ -3044,7 +3044,6 @@ async function spExchangeCode(code) {
   });
   if (!res.ok) { console.error('Spotify token exchange failed', await res.text()); return false; }
   const data = await res.json();
-  alert('DEBUG — Spotify granted scopes: ' + (data.scope || '(none)'));
   localStorage.setItem(SP_KEY_TOKEN,   data.access_token);
   localStorage.setItem(SP_KEY_EXPIRES, Date.now() + data.expires_in * 1000);
   localStorage.setItem('sp_granted_scopes', data.scope || '');
