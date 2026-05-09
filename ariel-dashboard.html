@@ -3044,6 +3044,7 @@ async function spExchangeCode(code) {
   });
   if (!res.ok) { console.error('Spotify token exchange failed', await res.text()); return false; }
   const data = await res.json();
+  alert('DEBUG — Spotify granted scopes: ' + (data.scope || '(none)'));
   localStorage.setItem(SP_KEY_TOKEN,   data.access_token);
   localStorage.setItem(SP_KEY_EXPIRES, Date.now() + data.expires_in * 1000);
   localStorage.setItem('sp_granted_scopes', data.scope || '');
