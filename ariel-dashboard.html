@@ -3170,17 +3170,31 @@ async function spSearchAndAdd(lines, token, playlistId, playlistUrl) {
 
   // Add tracks in batches of 100
   progressLabel.textContent = `Adding ${uris.length} tracks to playlist…`;
+  let addError = null;
   for (let i = 0; i < uris.length; i += 100) {
     const batch = uris.slice(i, i + 100);
-    await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    const addRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ uris: batch })
     });
+    if (!addRes.ok) {
+      const errBody = await addRes.json().catch(() => ({}));
+      addError = `${addRes.status}: ${errBody?.error?.message || 'unknown'}`;
+      break;
+    }
     progressFill.style.width = (70 + Math.min((i + 100) / Math.max(uris.length, 1), 1) * 30) + '%';
   }
 
   progressFill.style.width  = '100%';
+
+  if (addError) {
+    progressLabel.textContent = `Failed to add tracks: ${addError}`;
+    progressLabel.style.color = 'var(--red)';
+    if (createBtn) { createBtn.disabled = false; createBtn.innerHTML = '+ Create playlist'; }
+    return;
+  }
+
   progressLabel.textContent = 'Done!';
   setTimeout(() => { progressArea.style.display = 'none'; }, 1400);
 
