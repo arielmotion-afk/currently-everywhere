@@ -593,6 +593,21 @@
   .fl-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
   .btn-red { background: var(--red-light); color: var(--red); border-color: transparent; }
   .btn-red:hover { background: #f5dede; border-color: var(--red); }
+  /* GITHUB SYNC */
+  .gh-sync-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #8A97B0; position: absolute; bottom: 8px; right: 8px;
+    transition: background 0.3s;
+  }
+  #gh-sync-btn { position: relative; }
+  .gh-sync-modal-token {
+    width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+    background: var(--bg); color: var(--text); margin-top: 4px;
+  }
+  .gh-sync-modal-token:focus { outline: none; border-color: var(--heading); }
+  .gh-sync-status-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .gh-sync-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #8A97B0; flex-shrink: 0; }
   /* QUICK TIMER */
   .fl-quick-row {
     display: flex; align-items: center; gap: 10px;
@@ -732,6 +747,10 @@
   </nav>
   <div class="sb-bottom">
     <div class="sb-divider"></div>
+    <button class="sb-btn" id="gh-sync-btn" data-tip="Set up cloud sync" onclick="ghOpenSettings()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.36-3.36L23 10M1 14l5.13 4.36A9 9 0 0020.49 15"/></svg>
+      <span class="gh-sync-dot" id="gh-sync-dot"></span>
+    </button>
     <button class="sb-btn" data-tip="Export data" onclick="dataExport()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     </button>
@@ -2111,6 +2130,7 @@ function flSave() {
       return saved;
     });
     localStorage.setItem('currently_fl', JSON.stringify(data));
+    ghSync();
   } catch(e) { console.warn('flSave error', e); }
 }
 
@@ -2821,8 +2841,6 @@ function dataImport(input) {
   reader.readAsText(file);
 }
 
-flLoad();
-
 // ── SCHENGEN COUNTER ──
 const SCH_DEFAULT_TRIPS = [
   { id: 1,  entry: '2023-10-23', exit: '2023-11-02' },
@@ -2969,7 +2987,7 @@ function schDeleteTrip(id) {
   schRender(); schSave();
 }
 function schSave() {
-  try { localStorage.setItem('currently_sch', JSON.stringify(schTrips)); } catch(e) {}
+  try { localStorage.setItem('currently_sch', JSON.stringify(schTrips)); ghSync(); } catch(e) {}
 }
 function schLoad() {
   const raw = localStorage.getItem('currently_sch');
@@ -2977,8 +2995,6 @@ function schLoad() {
   else { schTrips = [...SCH_DEFAULT_TRIPS]; schSave(); }
   schRender();
 }
-schLoad();
-
 // ── SPOTIFY ──
 const SP_KEY_CLIENT  = 'sp_client_id';
 const SP_KEY_TOKEN   = 'sp_access_token';
@@ -3307,6 +3323,118 @@ function spCopyNotFound() {
   navigator.clipboard.writeText(text).catch(() => {});
 }
 
+// ── GITHUB SYNC ──
+const GH_REPO = 'arielmotion-afk/currently-everywhere';
+const GH_FILE = 'data.json';
+const GH_DATA_KEYS = ['currently_fl', 'currently_sch'];
+let _ghSyncTimeout = null;
+let _ghSyncStatus = 'unconfigured';
+
+function ghGetPAT() { return localStorage.getItem('gh_pat') || ''; }
+
+function _ghSetStatus(status) {
+  _ghSyncStatus = status;
+  const dot = document.getElementById('gh-sync-dot');
+  if (!dot) return;
+  const colors = { ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)', unconfigured: '#8A97B0' };
+  const tips   = { ok: 'Synced to GitHub', syncing: 'Syncing…', error: 'Sync failed — click to retry', unconfigured: 'Set up cloud sync' };
+  dot.style.background = colors[status] || '#8A97B0';
+  document.getElementById('gh-sync-btn')?.setAttribute('data-tip', tips[status] || 'Cloud sync');
+}
+
+async function ghPush() {
+  const pat = ghGetPAT();
+  if (!pat) return;
+  _ghSetStatus('syncing');
+  try {
+    const payload = {};
+    GH_DATA_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v) payload[k] = v; });
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    const url = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+    const headers = { Authorization: `token ${pat}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+    let sha;
+    const getRes = await fetch(url, { headers });
+    if (getRes.ok) { sha = (await getRes.json()).sha; }
+    const putRes = await fetch(url, {
+      method: 'PUT', headers,
+      body: JSON.stringify({ message: `sync: ${new Date().toISOString().slice(0,16).replace('T',' ')} UTC`, content, ...(sha ? { sha } : {}) })
+    });
+    if (!putRes.ok) throw new Error(`${putRes.status}`);
+    _ghSetStatus('ok');
+  } catch(e) {
+    console.warn('GitHub sync failed:', e);
+    _ghSetStatus('error');
+  }
+}
+
+function ghSync() {
+  if (!ghGetPAT()) return;
+  _ghSetStatus('syncing');
+  clearTimeout(_ghSyncTimeout);
+  _ghSyncTimeout = setTimeout(ghPush, 1500);
+}
+
+async function ghPull() {
+  const pat = ghGetPAT();
+  if (!pat) return false;
+  try {
+    const url = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+    const res = await fetch(url, { headers: { Authorization: `token ${pat}`, Accept: 'application/vnd.github.v3+json' } });
+    if (!res.ok) return false;
+    const file = await res.json();
+    const text = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+    const data = JSON.parse(text);
+    GH_DATA_KEYS.forEach(k => { if (data[k] !== undefined) localStorage.setItem(k, data[k]); });
+    return true;
+  } catch(e) {
+    console.warn('GitHub pull failed:', e);
+    return false;
+  }
+}
+
+function ghOpenSettings() {
+  const pat = ghGetPAT();
+  const input = document.getElementById('gh-pat-input');
+  const clearBtn = document.getElementById('gh-clear-btn');
+  const statusDot = document.getElementById('gh-modal-status-dot');
+  const statusText = document.getElementById('gh-modal-status-text');
+  if (input) input.value = pat;
+  if (clearBtn) clearBtn.style.display = pat ? '' : 'none';
+  if (statusDot && statusText) {
+    const colors = { ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)', unconfigured: '#8A97B0' };
+    const labels = { ok: 'Synced', syncing: 'Syncing…', error: 'Last sync failed', unconfigured: 'Not configured' };
+    statusDot.style.background = colors[_ghSyncStatus] || '#8A97B0';
+    statusText.textContent = labels[_ghSyncStatus] || 'Not configured';
+  }
+  document.getElementById('gh-sync-modal').classList.add('open');
+}
+
+function ghCloseSettings() {
+  document.getElementById('gh-sync-modal').classList.remove('open');
+}
+
+function ghSaveSettings() {
+  const token = document.getElementById('gh-pat-input').value.trim();
+  if (token) localStorage.setItem('gh_pat', token);
+  ghCloseSettings();
+  if (token) ghPush();
+  else _ghSetStatus('unconfigured');
+}
+
+function ghClearPAT() {
+  localStorage.removeItem('gh_pat');
+  ghCloseSettings();
+  _ghSetStatus('unconfigured');
+}
+
+// Pull from GitHub first, then load — runs after all GH constants/functions are defined
+(async function ghInit() {
+  const pulled = await ghPull();
+  flLoad();
+  schLoad();
+  _ghSetStatus(ghGetPAT() ? (pulled ? 'ok' : 'error') : 'unconfigured');
+})();
+
 // Init: handle OAuth callback + restore UI
 (async function spInit() {
   const url   = new URL(window.location.href);
@@ -3371,6 +3499,25 @@ function spCopyNotFound() {
     <div class="fl-modal-actions">
       <button class="btn" onclick="flLogDiscard()">Discard</button>
       <button class="btn btn-primary" onclick="flLogSave()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- GITHUB SYNC MODAL -->
+<div class="fl-modal-overlay" id="gh-sync-modal" onclick="if(event.target===this)ghCloseSettings()">
+  <div class="fl-modal">
+    <h3>Cloud sync</h3>
+    <div class="fl-modal-sub">Your data syncs to <strong>data.json</strong> in your GitHub repo after every save — no more losing hours when a computer dies.<br><br>Create a <a href="https://github.com/settings/tokens/new?scopes=repo&description=Currently+Everywhere+Sync" target="_blank" style="color:var(--heading)">GitHub personal access token</a> with <strong>repo</strong> scope and paste it below. It stays in your browser only.</div>
+    <label style="display:block;font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em">GitHub PAT</label>
+    <input type="password" id="gh-pat-input" class="gh-sync-modal-token" placeholder="ghp_…" autocomplete="off"/>
+    <div class="gh-sync-status-row">
+      <span class="gh-sync-status-dot" id="gh-modal-status-dot"></span>
+      <span id="gh-modal-status-text">Not configured</span>
+    </div>
+    <div class="fl-modal-actions">
+      <button class="btn btn-red" onclick="ghClearPAT()" id="gh-clear-btn" style="display:none;margin-right:auto">Disconnect</button>
+      <button class="btn" onclick="ghCloseSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="ghSaveSettings()">Save & sync</button>
     </div>
   </div>
 </div>
