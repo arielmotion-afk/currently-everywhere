@@ -439,7 +439,8 @@
     position: relative;
     overflow: hidden;
   }
-  .fl-stat-card.income { background: linear-gradient(140deg, #FFF8F2 0%, #FFE4D2 100%); }
+  .fl-stat-card.income { background: linear-gradient(140deg, #F2F8F0 0%, #D7E9CD 100%); }
+  .fl-stat-card.income .fl-stat-card-label { color: #6B8A65; }
   .fl-stat-card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; position: relative; z-index: 1; }
   .fl-stat-card-label {
     font-size: 11px; color: #A88876;
@@ -471,14 +472,17 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .fl-breakdown-track {
-    flex: 1; height: 8px;
-    background: rgba(255,255,255,0.55);
+    flex: 1; height: 9px;
+    background: rgba(255,255,255,0.65);
     border-radius: 999px; overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(45,31,26,0.04);
+    box-shadow: inset 0 1px 2px rgba(45,31,26,0.05);
+    display: block;
   }
   .fl-breakdown-fill {
+    display: block;
     height: 100%; border-radius: 999px;
     transition: width 0.4s ease;
+    box-shadow: 0 1px 3px rgba(45,31,26,0.08);
   }
   .fl-breakdown-value {
     flex: 0 0 auto; color: var(--text); font-weight: 500;
@@ -492,7 +496,11 @@
   }
 
   /* FREELANCE CLIENT CARDS */
-  .fl-client-card { border-left: 4px solid var(--accent); }
+  .fl-client-card {
+    border-left: 4px solid var(--accent);
+    border-radius: 18px;
+    box-shadow: 0 1px 3px rgba(45,31,26,0.03), 0 8px 28px rgba(45,31,26,0.04);
+  }
   .fl-logo {
     width: 44px; height: 44px; border-radius: 10px;
     border: 1.5px solid var(--border);
@@ -2203,7 +2211,8 @@ function flClientCardHTML(c) {
   const logoInner = c.logo ? '' : `<span style="font-size:18px;color:${c.color}">＋</span>`;
   const chevronStyle = c.collapsed ? 'transform:rotate(-90deg)' : '';
 
-  return `<div class="card fl-client-card" id="fl-card-${c.id}" style="margin-bottom:20px;border-left-color:${c.color};background:${c.color}26">
+  const cardBg = `linear-gradient(135deg, ${c.color}0A 0%, ${c.color}24 100%), #FFFFFF`;
+  return `<div class="card fl-client-card" id="fl-card-${c.id}" style="margin-bottom:20px;border-left-color:${c.color};background:${cardBg}">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:${c.collapsed?'0':'12px'}">
     <div id="fl-logo-${c.id}" class="fl-logo" style="${logoStyle}" onclick="document.getElementById('fl-logo-input-${c.id}').click()" title="Click to upload logo">${logoInner}</div>
     <input type="file" id="fl-logo-input-${c.id}" accept="image/*" style="display:none" onchange="flUploadLogo(${c.id},this)"/>
