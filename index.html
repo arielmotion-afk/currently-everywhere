@@ -356,44 +356,6 @@
     color: #6b5b1a;
   }
 
-  /* HOME */
-  .home-greeting {
-    font-family: 'Lora', serif;
-    font-size: 36px;
-    font-weight: 400;
-    letter-spacing: -0.04em;
-    margin-bottom: 6px;
-    color: var(--heading);
-  }
-  .home-greeting em { color: var(--heading); font-style: italic; }
-  .home-sub { color: var(--muted); margin-bottom: 36px; font-size: 14px; }
-  .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
-  .overview-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .overview-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(29,42,69,0.12); }
-  .overview-card .icon { font-size: 24px; margin-bottom: 12px; }
-  .overview-card .oc-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
-  .overview-card .oc-sub { color: var(--muted); font-size: 12px; }
-  .urgent-list { display: flex; flex-direction: column; gap: 8px; }
-  .urgent-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.1s;
-  }
-  .urgent-item:hover { background: var(--bg); }
-  .urgent-area { color: var(--muted); font-size: 12px; margin-left: auto; }
 
   /* MODAL/FORM overlays */
   .form-row { display: flex; gap: 12px; }
@@ -418,7 +380,6 @@
   /* SVG ICONS */
   .svg-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
   .section-header h1 { display: flex; align-items: center; gap: 10px; }
-  .overview-card .icon { line-height: 1; display: flex; align-items: center; justify-content: flex-start; color: var(--heading); }
   .note-icon { display: inline-block; vertical-align: -3px; margin-right: 5px; flex-shrink: 0; opacity: 0.7; }
 
   /* FREELANCE CLIENT CARDS */
@@ -643,7 +604,6 @@
     .sidebar { display: none; }
     .content-area { margin-left: 0; }
     main { padding: 24px 16px 60px; }
-    .overview-grid { grid-template-columns: 1fr 1fr; }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
   }
 
@@ -664,9 +624,6 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
     </button>
     <div class="sb-divider"></div>
-    <button class="sb-btn" data-section="home" data-tip="Home">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    </button>
     <button class="sb-btn" data-section="relocation" data-tip="Relocation">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
     </button>
@@ -700,89 +657,6 @@
 <main>
 
   <!-- HOME -->
-  <div class="section" id="home">
-    <p class="home-greeting">Currently: <em>Everywhere.</em></p>
-    <p class="home-sub">But at least it's organized.</p>
-
-    <div class="overview-grid">
-      <div class="overview-card" onclick="navigate('relocation')">
-        <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg></div>
-        <div class="oc-title">Relocation</div>
-        <div class="oc-sub"><span class="tag tag-yellow">In progress</span></div>
-      </div>
-      <div class="overview-card" onclick="navigate('finances')">
-        <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-        <div class="oc-title">Finances</div>
-        <div class="oc-sub"><span class="tag tag-blue">Tracking</span></div>
-      </div>
-      <div class="overview-card" onclick="navigate('freelance')">
-        <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg></div>
-        <div class="oc-title">Freelance</div>
-        <div class="oc-sub"><span class="tag tag-green">Active</span></div>
-      </div>
-      <div class="overview-card" onclick="navigate('german')">
-        <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
-        <div class="oc-title">German</div>
-        <div class="oc-sub"><span class="tag tag-muted">Learning</span></div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">
-          <div class="card-title-left"><div class="dot" style="background:var(--red)"></div>Needs attention</div>
-        </div>
-        <div class="urgent-list" id="urgent-list">
-          <div class="urgent-item" onclick="navigate('relocation')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--muted)"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            <div>
-              <div style="font-weight:500">Acte de naissance — digital apostille accepted by Brunstatt mairie</div>
-              <div style="font-size:12px;color:var(--muted)">Verify before sending dossier</div>
-            </div>
-            <span class="urgent-area">Relocation</span>
-          </div>
-          <div class="urgent-item" onclick="navigate('relocation')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--muted)"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-            <div>
-              <div style="font-weight:500">Book appointment at Migrationsamt St. Gallen</div>
-              <div style="font-size:12px;color:var(--muted)">Book once arrival date is confirmed</div>
-            </div>
-            <span class="urgent-area">Relocation</span>
-          </div>
-          <div class="urgent-item" onclick="navigate('finances')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--muted)"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            <div>
-              <div style="font-weight:500">Clarify tax residency start date with Israeli accountant</div>
-              <div style="font-size:12px;color:var(--muted)">Impacts both IL and CH obligations</div>
-            </div>
-            <span class="urgent-area">Finances</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Overall progress</div>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-label"><span>Relocation</span><span>35%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-label"><span>Finances</span><span>15%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:15%;background:var(--blue)"></div></div>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-label"><span>Freelance</span><span id="fl-home-pct">0%</span></div>
-          <div class="progress-bar"><div class="progress-fill" id="fl-home-bar" style="width:0%;background:var(--green)"></div></div>
-        </div>
-        <div class="progress-wrap">
-          <div class="progress-label"><span>German</span><span>0%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:0%;background:var(--yellow)"></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- RELOCATION -->
   <div class="section" id="relocation">
@@ -1506,27 +1380,6 @@ function updateProgress() {
     }
   });
 
-  // Home progress bars (bar 0=Relocation, 1=Finances, 2=Work, 3=German)
-  const homeBars = [
-    { bar: 0, lists: ['residency-checklist', 'ariel-checklist', 'partner-checklist'] },
-    { bar: 1, lists: ['il-checklist', 'ch-checklist', 'ch-insurance-checklist', 'il-insurance-checklist'] },
-    // bar 2 (Freelance) is driven by client data, not a checklist — stays at 0% for now
-    // bar 3 (German) has no checklist — stays at 0%
-  ];
-  const fills = document.querySelectorAll('.progress-fill');
-  const labels = document.querySelectorAll('.progress-label span:last-child');
-  homeBars.forEach(({ bar, lists }) => {
-    let total = 0, done = 0;
-    lists.forEach(id => {
-      const ul = document.getElementById(id);
-      if (!ul) return;
-      total += ul.querySelectorAll('li').length;
-      done += ul.querySelectorAll('li.done').length;
-    });
-    const pct = total ? Math.round((done / total) * 100) : 0;
-    if (fills[bar]) fills[bar].style.width = pct + '%';
-    if (labels[bar]) labels[bar].textContent = pct + '%';
-  });
 }
 
 updateProgress();
