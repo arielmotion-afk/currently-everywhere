@@ -627,15 +627,6 @@
     <button class="sb-btn" data-section="relocation" data-tip="Relocation">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
     </button>
-    <button class="sb-btn" data-section="finances" data-tip="Finances">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    </button>
-    <button class="sb-btn" data-section="work" data-tip="Work">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
-    </button>
-    <button class="sb-btn" data-section="german" data-tip="German">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-    </button>
   </nav>
   <div class="sb-bottom">
     <div class="sb-divider"></div>
@@ -666,13 +657,13 @@
     </div>
 
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('relocation', 'residency', this)">Swiss Residency</button>
+      <button class="tab-btn active" onclick="switchTab('relocation', 'schengen', this)">Schengen</button>
+      <button class="tab-btn" onclick="switchTab('relocation', 'residency', this)">Swiss Residency</button>
       <button class="tab-btn" onclick="switchTab('relocation', 'marriage', this)">French Marriage</button>
-      <button class="tab-btn" onclick="switchTab('relocation', 'schengen', this)">Schengen</button>
     </div>
 
     <!-- TAB: RESIDENCY -->
-    <div class="tab-panel active" id="tab-relocation-residency">
+    <div class="tab-panel" id="tab-relocation-residency">
 
     <div class="grid-2">
       <div>
@@ -867,7 +858,7 @@
     </div><!-- end tab-relocation-marriage -->
 
   <!-- TAB: SCHENGEN -->
-  <div class="tab-panel" id="tab-relocation-schengen">
+  <div class="tab-panel active" id="tab-relocation-schengen">
 
     <div class="grid-3" style="margin-bottom:20px">
       <div class="stat-card">
@@ -925,208 +916,6 @@
   </div><!-- end tab-relocation-schengen -->
 
   </div><!-- end relocation section -->
-
-  <!-- FINANCES -->
-  <div class="section" id="finances">
-    <div class="section-header">
-      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finances</h1>
-      <p>Tax obligations, insurance setup, and managing mom's affairs remotely</p>
-    </div>
-
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('finances', 'tax', this)">Tax</button>
-      <button class="tab-btn" onclick="switchTab('finances', 'insurance', this)">Insurance</button>
-      <button class="tab-btn" onclick="switchTab('finances', 'mom', this)">Mom</button>
-    </div>
-
-    <!-- TAB: TAX -->
-    <div class="tab-panel active" id="tab-finances-tax">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">
-            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Israel</div>
-            <span class="tag tag-blue">Active</span>
-          </div>
-          <ul class="checklist" id="il-checklist">
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Clarify tax residency end date with accountant</span><span class="item-note">Israel taxes residents on worldwide income</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">File final Israeli tax return (departure year)</span><span class="item-note">Required when ceasing Israeli tax residency</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Notify employer of status change</span><span class="item-note">Affects payroll tax / bituach leumi deductions</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Confirm bituach leumi implications</span><span class="item-note">NII contributions may continue or end depending on arrangement</span></div>
-            </li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">
-            <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Switzerland</div>
-            <span class="tag tag-yellow">Upcoming</span>
-          </div>
-          <ul class="checklist" id="ch-checklist">
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Understand Quellensteuer (withholding tax) rules</span><span class="item-note">As a foreign employee earning remotely, may apply</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Register with St. Gallen canton tax authority</span><span class="item-note">Done via Migrationsamt registration process</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Check IL–CH double tax treaty implications</span><span class="item-note">Israel and Switzerland have a DTA — avoid double taxation</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">File first Swiss tax declaration</span><span class="item-note">Due by March 31 of year following residence start</span></div>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:0">
-        <div class="card-title">
-          <div class="card-title-left"><div class="dot" style="background:var(--muted)"></div>Notes & reminders</div>
-        </div>
-        <textarea class="field" style="width:100%;font-size:13px;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);resize:vertical;min-height:80px;outline:none" placeholder="Add notes, accountant contact, key dates..."></textarea>
-      </div>
-
-      <div class="note-block" style="margin-top:4px">
-        <svg class="note-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5l3 3"/></svg>Key risk area: Israel taxes residents on worldwide income. Your Swiss tax residency start date directly affects when Israeli obligations end. Consult both an Israeli and Swiss accountant before moving — ideally at the same time.
-      </div>
-    </div><!-- end tab-finances-tax -->
-
-    <!-- TAB: INSURANCE -->
-    <div class="tab-panel" id="tab-finances-insurance">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">
-            <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Switzerland</div>
-            <span id="ch-insurance-progress" class="tag tag-yellow">0 / 4 done</span>
-          </div>
-          <ul class="checklist" id="ch-insurance-checklist">
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Enroll in Krankenkasse (basic health insurance)</span><span class="item-note">Mandatory — must register within 3 months of arrival. Compare via priminfo.admin.ch</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Check supplemental coverage (Zusatzversicherung)</span><span class="item-note">Optional add-ons: dental, private room, alternative medicine</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Get Privathaftpflicht (personal liability insurance)</span><span class="item-note">~CHF 100–150/yr — highly recommended, covers accidental damage to others</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Open 3rd pillar account (Säule 3a)</span><span class="item-note">Tax-deductible pension savings — worth starting once you have Swiss income. Max CHF 7,056/yr (2024)</span></div>
-            </li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">
-            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Israel — exit</div>
-            <span id="il-insurance-progress" class="tag tag-blue">0 / 3 done</span>
-          </div>
-          <ul class="checklist" id="il-insurance-checklist">
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Notify kupat holim of emigration</span><span class="item-note">Formally exit your Israeli health fund to stop monthly charges</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Understand bituach leumi export / continuation rights</span><span class="item-note">Check if voluntary contributions abroad make sense for future Israeli pension entitlements</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Handle existing Israeli insurance policies</span><span class="item-note">Life insurance, pension (קרן פנסיה) — check transfer or pause options</span></div>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="note-block" style="margin-top:4px">
-        <svg class="note-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Swiss Krankenkasse is mandatory and expensive (~CHF 350–500/month). You can choose your own deductible (franchise): higher deductible = lower premium. Haftpflicht is cheap and essential — landlords often require it.
-      </div>
-    </div><!-- end tab-finances-insurance -->
-
-    <!-- TAB: MOM -->
-    <div class="tab-panel" id="tab-finances-mom">
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title">
-            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Health insurance (Israel)</div>
-            <span id="mom-insurance-progress" class="tag tag-blue">0 / 4 done</span>
-          </div>
-          <ul class="checklist" id="mom-insurance-checklist">
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Confirm active kupat holim membership + fund name</span><span class="item-note">Know which fund and membership tier she's on</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Check supplemental (mushlam / zahav) tier status</span><span class="item-note">Upgrade if needed — especially relevant for specialists, medication</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Set up digital access to her kupat holim account</span><span class="item-note">Needed to manage remotely — referrals, prescriptions, appointments</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Confirm bituach leumi pension payments</span><span class="item-note">Verify she's receiving her full entitlement and bank details are current</span></div>
-            </li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">
-            <div class="card-title-left"><div class="dot" style="background:var(--green)"></div>Documents & remote access</div>
-            <span id="mom-docs-progress" class="tag tag-green">0 / 4 done</span>
-          </div>
-          <ul class="checklist" id="mom-docs-checklist">
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Scan and store all key documents digitally</span><span class="item-note">ID, passport, bank cards, insurance cards, medical history</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Set up power of attorney (ייפוי כוח) if needed</span><span class="item-note">Allows you to act on her behalf remotely for financial/medical matters</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Identify trusted contact in Israel for in-person help</span><span class="item-note">Someone who can assist with appointments, forms, post</span></div>
-            </li>
-            <li onclick="toggle(this)">
-              <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-              <div class="item-meta"><span class="item-text">Set up bank account access / monitoring</span><span class="item-note">Online banking access to track and help manage her finances remotely</span></div>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:0">
-        <div class="card-title">
-          <div class="card-title-left"><div class="dot" style="background:var(--muted)"></div>Notes</div>
-        </div>
-        <textarea class="field" style="width:100%;font-size:13px;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);resize:vertical;min-height:80px;outline:none" placeholder="Doctors, contacts, medications, account numbers, key dates..."></textarea>
-      </div>
-
-      <div class="note-block" style="margin-top:4px">
-        <svg class="note-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Managing remotely is doable with the right setup: Zoom/WhatsApp for coordination, digital access to health fund and banking, and one reliable person on the ground. Power of attorney makes the bureaucratic parts much easier.
-      </div>
-    </div><!-- end tab-finances-mom -->
-
-  </div><!-- end finances section -->
 
   <!-- FREELANCE -->
   <div class="section active" id="freelance">
@@ -1189,121 +978,6 @@
     <div id="fl-client-cards"></div>
   </div><!-- end freelance section -->
 
-  <!-- WORK -->
-  <div class="section" id="work">
-    <div class="section-header">
-      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>Work</h1>
-      <p>Remote setup (Israeli employer) + freelance time tracking</p>
-    </div>
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-title">
-        <div class="card-title-left"><div class="dot" style="background:var(--green)"></div>Remote work setup checklist</div>
-        <span id="work-progress" class="tag tag-green">0 / 5 done</span>
-      </div>
-      <div class="grid-2" style="margin-top:4px">
-        <ul class="checklist" id="work-checklist">
-          <li onclick="toggle(this)">
-            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="item-meta"><span class="item-text">Inform employer of relocation to Switzerland</span><span class="item-note">Get written agreement for remote work arrangement</span></div>
-          </li>
-          <li onclick="toggle(this)">
-            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="item-meta"><span class="item-text">Update employment contract (remote clause)</span><span class="item-note">Document that work location is Switzerland</span></div>
-          </li>
-          <li onclick="toggle(this)">
-            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="item-meta"><span class="item-text">Clarify salary payment method from IL to CH</span><span class="item-note">Wire to Israeli account or Swiss? Currency and fees</span></div>
-          </li>
-          <li onclick="toggle(this)">
-            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="item-meta"><span class="item-text">Open Swiss bank account</span><span class="item-note">Needed for local expenses; required by many Swiss landlords</span></div>
-          </li>
-          <li onclick="toggle(this)">
-            <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="item-meta"><span class="item-text">Check if employer is exposed to Swiss PE risk</span><span class="item-note">Permanent establishment risk if you're in CH long-term</span></div>
-          </li>
-        </ul>
-        <div>
-          <div class="note-block">
-            <svg class="note-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><path d="M12 6a6 6 0 010 12"/><path d="M12 6a6 6 0 000 12"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/><line x1="9" y1="18" x2="15" y2="18"/></svg>Working from Switzerland for an Israeli employer is legally straightforward as long as you hold a valid permit. The main risks are tax and the employer's potential PE exposure. Most tech companies handle this fine — just get written confirmation.
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- end work section -->
-
-  <!-- GERMAN -->
-  <div class="section" id="german">
-    <div class="section-header">
-      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>German</h1>
-      <p>Learning tracker — target B2 for local job market in Switzerland</p>
-    </div>
-
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">
-          <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Current level</div>
-        </div>
-        <div style="margin-bottom:20px">
-          <div class="progress-label" style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px"><span>Where you are</span><span>Target: B2</span></div>
-          <div style="display:flex;gap:6px;margin-bottom:4px">
-            <div id="lev-a1" onclick="setLevel('a1')" style="flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s">A1</div>
-            <div id="lev-a2" onclick="setLevel('a2')" style="flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s">A2</div>
-            <div id="lev-b1" onclick="setLevel('b1')" style="flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s">B1</div>
-            <div id="lev-b2" onclick="setLevel('b2')" style="flex:1;text-align:center;padding:8px 0;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s">B2</div>
-          </div>
-          <div style="font-size:12px;color:var(--muted);margin-top:6px">Click to set your current level</div>
-        </div>
-
-        <div class="field">
-          <label>Current course / resource</label>
-          <input type="text" placeholder="e.g. Volkshochschule St. Gallen, Duolingo, Pimsleur..." />
-        </div>
-        <div class="field">
-          <label>Next milestone</label>
-          <input type="text" placeholder="e.g. Finish A2 by September" />
-        </div>
-        <div class="field">
-          <label>Notes</label>
-          <textarea rows="3" placeholder="Vocabulary to practice, grammar notes, resources..."></textarea>
-        </div>
-      </div>
-
-      <div>
-        <div class="card">
-          <div class="card-title">
-            <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Milestones & goals</div>
-          </div>
-          <div class="timeline">
-            <div class="timeline-item active">
-              <div class="timeline-label">Start learning (A0 → A1)</div>
-              <div class="timeline-sub">Basic greetings, numbers, orientation</div>
-            </div>
-            <div class="timeline-item pending">
-              <div class="timeline-label">A2 — Daily life</div>
-              <div class="timeline-sub">Groceries, transport, simple conversations with neighbours</div>
-            </div>
-            <div class="timeline-item pending">
-              <div class="timeline-label">B1 — Functional</div>
-              <div class="timeline-sub">Handle appointments, understand forms, basic work meetings</div>
-            </div>
-            <div class="timeline-item pending">
-              <div class="timeline-label">B2 — Job-ready</div>
-              <div class="timeline-sub">Apply to local design studios in St. Gallen / Basel</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="note-block" style="margin-top:16px">
-          <svg class="note-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Swiss German (Schweizerdeutsch) is spoken locally but Standard German (Hochdeutsch) is used in writing, school, and work. Focus on Hochdeutsch for your B2 exam — locals will switch for you.
-        </div>
-      </div>
-    </div>
-  </div><!-- end german section -->
-
-  <!-- MUSIC / SPOTIFY -->
 
 </main>
 </div><!-- content-area -->
