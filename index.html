@@ -11,14 +11,14 @@
   html, body { overflow-x: hidden; }
 
   :root {
-    --bg: #EEF1F8;
-    --surface: #F5F8FD;
-    --border: #E2E8F0;
-    --text: #1D2A45;
-    --muted: #8A97B0;
-    --accent: #1D2A45;
-    --accent-light: #E8EDF5;
-    --heading: #193497;
+    --bg: #FAF6F1;
+    --surface: #FFFFFF;
+    --border: #ECE3D6;
+    --text: #2A201A;
+    --muted: #9C8A7A;
+    --accent: #E66A4A;
+    --accent-light: #FFE8DD;
+    --heading: #C44E2D;
     --green: #4d7c62;
     --green-light: #e8f2ec;
     --red: #a84d4d;
@@ -28,9 +28,10 @@
     --yellow: #b09040;
     --yellow-light: #f8f2e0;
     --radius: 14px;
-    --shadow: 0 2px 20px rgba(29,42,69,0.08);
-    --sb-bg: #1D2A45;
+    --shadow: 0 2px 20px rgba(45,31,26,0.06);
+    --sb-bg: #2D1F1A;
     --sb-width: 66px;
+    --hero-gradient: linear-gradient(135deg, #FFE8DD 0%, #FFEEDF 50%, #FFDCC8 100%);
   }
 
   body {
@@ -381,6 +382,80 @@
   .svg-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
   .section-header h1 { display: flex; align-items: center; gap: 10px; }
   .note-icon { display: inline-block; vertical-align: -3px; margin-right: 5px; flex-shrink: 0; opacity: 0.7; }
+
+  /* FREELANCE PAGE HERO */
+  .fl-page-hero {
+    background: var(--hero-gradient);
+    border-radius: 20px;
+    padding: 34px 36px;
+    margin-bottom: 18px;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+    position: relative; overflow: hidden;
+  }
+  .fl-page-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 85% -10%, rgba(255,255,255,0.4) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .fl-page-hero-left { position: relative; z-index: 1; }
+  .fl-page-hero-left h1 {
+    font-family: 'Lora', serif;
+    font-size: 34px; font-weight: 400; letter-spacing: -0.03em;
+    color: #2A201A; margin-bottom: 4px; line-height: 1.15;
+  }
+  .fl-page-hero-left h1 .wave { font-size: 28px; display: inline-block; margin-left: 4px; }
+  .fl-page-hero-left p { color: #8C6F58; font-size: 14px; }
+  .fl-sync-pill {
+    position: relative; z-index: 1;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.95);
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .fl-sync-pill:hover { background: rgba(255,255,255,0.95); transform: translateY(-1px); }
+  .fl-sync-pill-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .fl-sync-pill.syncing .fl-sync-pill-dot { background: var(--yellow); animation: gh-pulse 1s infinite; }
+  .fl-sync-pill.error .fl-sync-pill-dot { background: var(--red); }
+  .fl-sync-pill.unconfigured .fl-sync-pill-dot { background: #9C8A7A; }
+
+  /* FREELANCE STAT CARDS */
+  .fl-stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; margin-bottom: 24px;
+  }
+  .fl-stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 22px 14px;
+    display: flex; flex-direction: column;
+  }
+  .fl-stat-card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .fl-stat-card-label {
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    font-weight: 600; margin-bottom: 8px;
+  }
+  .fl-stat-card-value {
+    font-family: 'Lora', serif;
+    font-size: 32px; font-weight: 400; letter-spacing: -0.03em;
+    color: var(--text); line-height: 1.1;
+  }
+  .fl-stat-card-delta { font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .fl-stat-card-delta.up { color: var(--green); }
+  .fl-stat-card-delta.down { color: var(--red); }
+  .fl-stat-card-delta .muted { color: var(--muted); font-weight: 400; }
+  .fl-stat-spark { margin-top: 14px; height: 36px; }
+  @media (max-width: 640px) {
+    .fl-stat-grid { grid-template-columns: 1fr; }
+    .fl-page-hero { padding: 24px; flex-direction: column; align-items: stretch; }
+    .fl-page-hero-left h1 { font-size: 28px; }
+  }
 
   /* FREELANCE CLIENT CARDS */
   .fl-client-card { border-left: 4px solid var(--accent); }
@@ -921,26 +996,37 @@
 
   <!-- FREELANCE -->
   <div class="section active" id="freelance">
-    <div class="section-header">
-      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>Freelance</h1>
-      <p>Client tracker — time, billing, briefs, and tasks</p>
+    <div class="fl-page-hero">
+      <div class="fl-page-hero-left">
+        <h1 id="fl-greeting">Mornin' Ariel<span class="wave"> 👋</span></h1>
+        <p id="fl-hero-sub">Here's where things stand for <span id="fl-hero-month">May</span>.</p>
+      </div>
+      <button class="fl-sync-pill" id="fl-sync-pill" onclick="ghOpenSettings()" type="button">
+        <span class="fl-sync-pill-dot" id="fl-sync-pill-dot"></span>
+        <span id="fl-sync-pill-text">Synced</span>
+      </button>
     </div>
 
-    <div class="grid-3" style="margin-bottom:20px">
-      <div class="stat-card">
-        <div class="stat-label">This month</div>
-        <div class="stat-value" id="fl-stat-hours">0h</div>
-        <div class="stat-sub">logged hours</div>
+    <div class="fl-stat-grid">
+      <div class="fl-stat-card">
+        <div class="fl-stat-card-row">
+          <div>
+            <div class="fl-stat-card-label">Hours this month</div>
+            <div class="fl-stat-card-value" id="fl-stat-hours">0h</div>
+          </div>
+          <div id="fl-stat-hours-delta"></div>
+        </div>
+        <div class="fl-stat-spark" id="fl-stat-hours-spark"></div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Active clients</div>
-        <div class="stat-value" id="fl-stat-clients">0</div>
-        <div class="stat-sub">current projects</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Month income</div>
-        <div class="stat-value" id="fl-stat-income"><span style="font-family:'DM Sans',sans-serif;font-size:0.72em;vertical-align:0.08em;opacity:0.8">₪</span>0</div>
-        <div class="stat-sub">estimated</div>
+      <div class="fl-stat-card">
+        <div class="fl-stat-card-row">
+          <div>
+            <div class="fl-stat-card-label">Income this month</div>
+            <div class="fl-stat-card-value" id="fl-stat-income"><span style="font-family:'DM Sans',sans-serif;font-size:0.6em;vertical-align:0.18em;opacity:0.7">₪</span>0</div>
+          </div>
+          <div id="fl-stat-income-delta"></div>
+        </div>
+        <div class="fl-stat-spark" id="fl-stat-income-spark"></div>
       </div>
     </div>
 
@@ -1451,19 +1537,95 @@ function flSaveClientInfo(id) {
   flUpdateStats(); flSave();
 }
 
+function flGreeting() {
+  const h = new Date().getHours();
+  const n = 'Ariel';
+  if (h >= 5 && h < 12) return "Mornin' " + n;
+  if (h >= 12 && h < 17) return 'Afternoon ' + n;
+  if (h >= 17 && h < 22) return "Evenin' " + n;
+  return 'Late night ' + n;
+}
+function flPrevMonthKey(mk) {
+  const [yy, mm] = mk.split('-').map(Number);
+  if (mm === 1) return (yy-1) + '-12';
+  return yy + '-' + String(mm-1).padStart(2,'0');
+}
+function flMonthTotals(mk) {
+  let hours = 0, income = 0;
+  flClients.forEach(c => {
+    let ch = 0;
+    (c.projects||[]).forEach(p => {
+      (p.entries||[]).forEach(e => { if (e.date && e.date.slice(0,7) === mk) ch += e.hours; });
+    });
+    hours += ch; income += ch * (c.rate || 0);
+  });
+  return { hours, income };
+}
+function flDailyHours(mk) {
+  const [yy, mm] = mk.split('-').map(Number);
+  const today = new Date();
+  const isCurrent = (yy === today.getFullYear() && mm === today.getMonth()+1);
+  const lastDay = isCurrent ? today.getDate() : new Date(yy, mm, 0).getDate();
+  const daily = new Array(lastDay).fill(0);
+  flClients.forEach(c => {
+    (c.projects||[]).forEach(p => {
+      (p.entries||[]).forEach(e => {
+        if (!e.date) return;
+        const [eyy, emm, edd] = e.date.split('-').map(Number);
+        if (eyy === yy && emm === mm && edd >= 1 && edd <= lastDay) daily[edd-1] += e.hours;
+      });
+    });
+  });
+  return daily;
+}
+function flSparklineSVG(values) {
+  const w = 100, h = 36;
+  if (!values.length || values.every(v => v === 0)) {
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none"><line x1="0" y1="' + (h-2) + '" x2="' + w + '" y2="' + (h-2) + '" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="3,3"/></svg>';
+  }
+  const max = Math.max(...values), min = Math.min(...values);
+  const range = (max - min) || 1;
+  const step = values.length > 1 ? w / (values.length - 1) : 0;
+  const pts = values.map((v, i) => (i*step).toFixed(2) + ',' + (h - 3 - ((v - min)/range) * (h - 6)).toFixed(2)).join(' ');
+  const area = '0,' + h + ' ' + pts + ' ' + w + ',' + h;
+  return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none">'
+    + '<polygon points="' + area + '" fill="var(--accent-light)" opacity="0.7"/>'
+    + '<polyline points="' + pts + '" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>'
+    + '</svg>';
+}
+function flRenderDelta(elId, cur, prev) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!prev || cur === prev) { el.innerHTML = ''; return; }
+  const pct = Math.round(((cur - prev) / prev) * 100);
+  if (pct === 0) { el.innerHTML = ''; return; }
+  const up = pct > 0;
+  el.innerHTML = '<span class="fl-stat-card-delta ' + (up ? 'up' : 'down') + '">'
+    + (up ? '↑' : '↓') + ' ' + Math.abs(pct) + '% <span class="muted">vs last mo</span></span>';
+}
 function flUpdateStats() {
   const mk = flCurrentMonthKey();
-  let mh=0, mi=0, ac=0;
-  flClients.forEach(c => {
-    if (c.status==='active') ac++;
-    const h = flMonthHours(c, mk); mh+=h; mi+=h*c.rate;
-  });
+  const prevMk = flPrevMonthKey(mk);
+  const cur = flMonthTotals(mk);
+  const prev = flMonthTotals(prevMk);
   const hEl = document.getElementById('fl-stat-hours');
-  const cEl = document.getElementById('fl-stat-clients');
   const iEl = document.getElementById('fl-stat-income');
-  if (hEl) hEl.textContent = mh%1===0 ? mh+'h' : mh.toFixed(1)+'h';
-  if (cEl) cEl.textContent = ac;
-  if (iEl) iEl.innerHTML = '<span style="font-family:\'DM Sans\',sans-serif;font-size:0.72em;vertical-align:0.08em;opacity:0.8">₪</span>'+Math.round(mi).toLocaleString();
+  if (hEl) hEl.textContent = cur.hours%1===0 ? cur.hours+'h' : cur.hours.toFixed(1)+'h';
+  if (iEl) iEl.innerHTML = '<span style="font-family:\'DM Sans\',sans-serif;font-size:0.6em;vertical-align:0.18em;opacity:0.7">₪</span>' + Math.round(cur.income).toLocaleString();
+  flRenderDelta('fl-stat-hours-delta', cur.hours, prev.hours);
+  flRenderDelta('fl-stat-income-delta', cur.income, prev.income);
+  const daily = flDailyHours(mk);
+  const cumIncome = [];
+  let runHours = 0;
+  daily.forEach((d) => { runHours += d; cumIncome.push(runHours); }); // shape only; both sparks use same shape
+  const hSpark = document.getElementById('fl-stat-hours-spark');
+  const iSpark = document.getElementById('fl-stat-income-spark');
+  if (hSpark) hSpark.innerHTML = flSparklineSVG(daily);
+  if (iSpark) iSpark.innerHTML = flSparklineSVG(cumIncome);
+  const gEl = document.getElementById('fl-greeting');
+  if (gEl) gEl.innerHTML = flGreeting() + '<span class="wave"> 👋</span>';
+  const mEl = document.getElementById('fl-hero-month');
+  if (mEl) mEl.textContent = FL_MONTHS[new Date().getMonth()];
   const hint = document.getElementById('fl-empty-hint');
   if (hint) hint.style.display = flClients.length>0 ? 'none' : '';
 }
@@ -2384,10 +2546,20 @@ function ghGetPAT() { return localStorage.getItem('gh_pat') || ''; }
 function _ghSetStatus(status) {
   _ghSyncStatus = status;
   const dot = document.getElementById('gh-sync-dot');
-  const colors = { ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)', unconfigured: '#8A97B0' };
+  const colors = { ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)', unconfigured: '#9C8A7A' };
   const tips   = { ok: 'Synced to GitHub', syncing: 'Syncing…', error: 'Sync failed — click to retry', unconfigured: 'Set up cloud sync' };
-  if (dot) dot.style.background = colors[status] || '#8A97B0';
+  if (dot) dot.style.background = colors[status] || '#9C8A7A';
   document.getElementById('gh-sync-btn')?.setAttribute('data-tip', tips[status] || 'Cloud sync');
+  // Hero sync pill
+  const pill = document.getElementById('fl-sync-pill');
+  const pillText = document.getElementById('fl-sync-pill-text');
+  if (pill && pillText) {
+    pill.classList.remove('syncing', 'error', 'unconfigured');
+    if (status === 'syncing') { pill.classList.add('syncing'); pillText.textContent = 'Saving…'; }
+    else if (status === 'error') { pill.classList.add('error'); pillText.textContent = 'Sync failed'; }
+    else if (status === 'unconfigured') { pill.classList.add('unconfigured'); pillText.textContent = 'Set up sync'; }
+    else { pillText.textContent = 'Synced ✓'; }
+  }
   // Toast
   const toast = document.getElementById('gh-toast');
   const toastText = document.getElementById('gh-toast-text');
