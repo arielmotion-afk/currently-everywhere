@@ -594,6 +594,20 @@
   .btn-red { background: var(--red-light); color: var(--red); border-color: transparent; }
   .btn-red:hover { background: #f5dede; border-color: var(--red); }
   /* GITHUB SYNC */
+  .gh-toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 600;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 999px; padding: 8px 16px; font-size: 13px;
+    color: var(--text); box-shadow: 0 4px 16px rgba(29,42,69,0.12);
+    display: flex; align-items: center; gap: 8px;
+    opacity: 0; transform: translateY(8px); pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .gh-toast.show { opacity: 1; transform: translateY(0); }
+  .gh-toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .gh-toast.syncing .gh-toast-dot { background: var(--yellow); animation: gh-pulse 1s infinite; }
+  .gh-toast.error .gh-toast-dot { background: var(--red); }
+  @keyframes gh-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
   .gh-sync-dot {
     width: 7px; height: 7px; border-radius: 50%;
     background: #8A97B0; position: absolute; bottom: 8px; right: 8px;
@@ -2243,24 +2257,38 @@ function flRenderMonthEntries(id) {
 function flManualLogNew(cid) {
   const c = flClients.find(x => x.id===cid);
   if (!c) return;
-  const sel = document.getElementById(`fl-quick-sel-${cid}`);
-  const pid = sel ? parseInt(sel.value) : 0;
-  const p = pid && (c.projects||[]).find(x => x.id===pid);
-  if (!p) {
-    const sel2 = document.getElementById(`fl-quick-sel-${cid}`);
-    if (sel2) sel2.focus();
-    return;
-  }
   const dateEl  = document.getElementById(`fl-new-date-${cid}`);
   const hoursEl = document.getElementById(`fl-new-hours-${cid}`);
+  const projEl  = document.getElementById(`fl-new-proj-${cid}`);
   const descEl  = document.getElementById(`fl-new-desc-${cid}`);
   const date  = dateEl  ? dateEl.value : '';
   const hours = parseFloat(hoursEl ? hoursEl.value : '');
+  const projName = (projEl ? projEl.value.trim() : '') || 'Quick log';
   const desc  = descEl  ? descEl.value.trim() : '';
-  if (!date || !hours || hours <= 0) return;
+  if (!date || !hours || hours <= 0) {
+    if (!date && dateEl) dateEl.focus();
+    else if ((!hours || hours <= 0) && hoursEl) hoursEl.focus();
+    return;
+  }
+  // Find existing project by name (case-insensitive) or auto-create
+  c.projects = c.projects || [];
+  let p = c.projects.find(x => x.name.toLowerCase() === projName.toLowerCase());
+  if (!p) {
+    p = flMakeProject(projName);
+    c.projects.push(p);
+    // Refresh datalist so the new project shows in autocomplete immediately
+    const dl = document.getElementById(`fl-proj-list-${cid}`);
+    if (dl) {
+      const opt = document.createElement('option');
+      opt.value = projName;
+      dl.appendChild(opt);
+    }
+  }
   p.entries.unshift({ id: Date.now(), date, hours, desc });
   if (hoursEl) hoursEl.value = '';
   if (descEl)  descEl.value  = '';
+  if (projEl)  projEl.value  = '';
+  flRenderProjects(cid);
   flRenderMonthEntries(cid);
   flRenderMonthHero(cid);
   flRenderMonthly(cid);
@@ -2719,6 +2747,7 @@ function flClientCardHTML(c) {
     <div class="fl-manual-new">
       <div class="fl-mini-field"><label>Date</label><input type="date" id="fl-new-date-${c.id}" style="width:130px"/></div>
       <div class="fl-mini-field"><label>Hours</label><input type="number" id="fl-new-hours-${c.id}" min="0.25" step="0.25" placeholder="1.5" style="width:72px"/></div>
+      <div class="fl-mini-field" style="width:140px"><label>Project</label><input type="text" id="fl-new-proj-${c.id}" placeholder="Quick log" list="fl-proj-list-${c.id}" autocomplete="off"/><datalist id="fl-proj-list-${c.id}">${(c.projects||[]).map(p=>`<option value="${p.name.replace(/"/g,'&quot;')}"></option>`).join('')}</datalist></div>
       <div class="fl-mini-field" style="flex:1;min-width:120px"><label>Description</label><input type="text" id="fl-new-desc-${c.id}" placeholder="What did you work on?" onkeydown="if(event.key==='Enter')flManualLogNew(${c.id})"/></div>
       <button class="btn btn-sm" onclick="flManualLogNew(${c.id})" style="align-self:flex-end">+ Log</button>
     </div>
@@ -3335,12 +3364,33 @@ function ghGetPAT() { return localStorage.getItem('gh_pat') || ''; }
 function _ghSetStatus(status) {
   _ghSyncStatus = status;
   const dot = document.getElementById('gh-sync-dot');
-  if (!dot) return;
   const colors = { ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)', unconfigured: '#8A97B0' };
   const tips   = { ok: 'Synced to GitHub', syncing: 'Syncing…', error: 'Sync failed — click to retry', unconfigured: 'Set up cloud sync' };
-  dot.style.background = colors[status] || '#8A97B0';
+  if (dot) dot.style.background = colors[status] || '#8A97B0';
   document.getElementById('gh-sync-btn')?.setAttribute('data-tip', tips[status] || 'Cloud sync');
+  // Toast
+  const toast = document.getElementById('gh-toast');
+  const toastText = document.getElementById('gh-toast-text');
+  if (!toast || !toastText) return;
+  toast.classList.remove('syncing', 'error');
+  if (status === 'syncing') {
+    toast.classList.add('show', 'syncing');
+    toastText.textContent = 'Saving…';
+  } else if (status === 'ok') {
+    toast.classList.add('show');
+    toastText.textContent = 'Saved ✓';
+    clearTimeout(_ghToastTimeout);
+    _ghToastTimeout = setTimeout(() => toast.classList.remove('show'), 1800);
+  } else if (status === 'error') {
+    toast.classList.add('show', 'error');
+    toastText.textContent = 'Sync failed';
+    clearTimeout(_ghToastTimeout);
+    _ghToastTimeout = setTimeout(() => toast.classList.remove('show'), 3500);
+  } else {
+    toast.classList.remove('show');
+  }
 }
+let _ghToastTimeout = null;
 
 async function ghPush() {
   const pat = ghGetPAT();
@@ -3502,6 +3552,9 @@ function ghClearPAT() {
     </div>
   </div>
 </div>
+
+<!-- GITHUB SYNC TOAST -->
+<div class="gh-toast" id="gh-toast"><span class="gh-toast-dot"></span><span id="gh-toast-text">Saved</span></div>
 
 <!-- GITHUB SYNC MODAL -->
 <div class="fl-modal-overlay" id="gh-sync-modal" onclick="if(event.target===this)ghCloseSettings()">
