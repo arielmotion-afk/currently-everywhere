@@ -389,14 +389,18 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 13px; font-weight: 500;
     padding: 7px 18px;
-    border: none; background: none; cursor: pointer;
+    border: none; background: transparent; cursor: pointer;
     color: var(--muted);
     border-radius: 9px;
-    transition: all 0.15s;
+    transition: color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
     white-space: nowrap; flex-shrink: 0;
   }
   .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.85); }
-  .tab-btn.active { color: var(--text); background: #FFFFFF; box-shadow: 0 1px 6px rgba(45,31,26,0.08); font-weight: 600; }
+  .tab-btn.active {
+    color: var(--text);
+    background: #FFFFFF;
+    box-shadow: 0 1px 6px rgba(45,31,26,0.08);
+  }
   @media (max-width: 640px) {
     .tabs { width: 100%; }
     .tab-btn { padding: 7px 14px; font-size: 12.5px; }
