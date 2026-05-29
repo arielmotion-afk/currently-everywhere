@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Currently: Everywhere</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23193497'/%3E%3Csvg x='6' y='6' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 2L11 13'/%3E%3Cpath d='M22 2L15 22 11 13 2 9l20-7z'/%3E%3C/svg%3E%3C/svg%3E"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF8B6B'/%3E%3Cstop offset='100%25' stop-color='%23E66A4A'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='url(%23g)'/%3E%3Ctext x='6' y='25' fill='white' font-family='Georgia, serif' font-style='italic' font-size='22' font-weight='500'%3Ec.%3C/text%3E%3C/svg%3E"/>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,7 +31,7 @@
     --shadow: 0 2px 20px rgba(45,31,26,0.06);
     --sb-bg: rgba(255,251,246,0.85);
     --sb-height: 60px;
-    --hero-gradient: linear-gradient(135deg, #FFE8DD 0%, #FFEEDF 50%, #FFDCC8 100%);
+    --hero-gradient: linear-gradient(135deg, #FFFFFF 0%, #FFFCF6 55%, #FFF4E6 100%);
   }
 
   body {
@@ -419,8 +419,8 @@
   .fl-sync-pill {
     position: relative; z-index: 1;
     display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid rgba(255,255,255,0.95);
+    background: rgba(255, 232, 221, 0.7);
+    border: 1px solid rgba(255, 200, 170, 0.55);
     padding: 8px 14px; border-radius: 999px;
     font-size: 12px; font-weight: 500;
     color: var(--text);
@@ -429,7 +429,7 @@
     transition: background 0.15s, transform 0.15s;
     flex-shrink: 0;
   }
-  .fl-sync-pill:hover { background: rgba(255,255,255,0.95); transform: translateY(-1px); }
+  .fl-sync-pill:hover { background: rgba(255, 217, 200, 0.85); transform: translateY(-1px); }
   .fl-sync-pill-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
   .fl-sync-pill.syncing .fl-sync-pill-dot { background: var(--yellow); animation: gh-pulse 1s infinite; }
   .fl-sync-pill.error .fl-sync-pill-dot { background: var(--red); }
