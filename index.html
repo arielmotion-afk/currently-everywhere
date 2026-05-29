@@ -460,7 +460,31 @@
   .fl-stat-card-delta.up { color: #4d7c62; }
   .fl-stat-card-delta.down { color: #a84d4d; }
   .fl-stat-card-delta .muted { color: var(--muted); font-weight: 400; margin-left: 2px; }
-  .fl-stat-spark { margin: 18px -26px -8px; height: 56px; position: relative; }
+  .fl-stat-spark { margin: 18px 0 12px; position: relative; }
+  .fl-breakdown-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; margin-bottom: 7px;
+  }
+  .fl-breakdown-row:last-child { margin-bottom: 0; }
+  .fl-breakdown-name {
+    flex: 0 0 78px; color: var(--text); font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .fl-breakdown-track {
+    flex: 1; height: 8px;
+    background: rgba(255,255,255,0.55);
+    border-radius: 999px; overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(45,31,26,0.04);
+  }
+  .fl-breakdown-fill {
+    height: 100%; border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .fl-breakdown-value {
+    flex: 0 0 auto; color: var(--text); font-weight: 500;
+    min-width: 44px; text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .fl-breakdown-empty { font-size: 12px; color: var(--muted); padding: 8px 0 4px; font-style: italic; }
   @media (max-width: 640px) {
     .fl-stat-grid { grid-template-columns: 1fr; }
     .fl-page-hero { padding: 24px; flex-direction: column; align-items: stretch; }
@@ -1588,48 +1612,28 @@ function flDailyHours(mk) {
   });
   return daily;
 }
-function flSmoothPath(points) {
-  if (points.length < 2) return points.length ? 'M' + points[0][0] + ',' + points[0][1] : '';
-  let d = 'M' + points[0][0].toFixed(2) + ',' + points[0][1].toFixed(2);
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[Math.max(0, i-1)];
-    const p1 = points[i];
-    const p2 = points[i+1];
-    const p3 = points[Math.min(points.length-1, i+2)];
-    const t = 0.22; // tension — smaller = smoother
-    const c1x = p1[0] + (p2[0] - p0[0]) * t;
-    const c1y = p1[1] + (p2[1] - p0[1]) * t;
-    const c2x = p2[0] - (p3[0] - p1[0]) * t;
-    const c2y = p2[1] - (p3[1] - p1[1]) * t;
-    d += ' C' + c1x.toFixed(2) + ',' + c1y.toFixed(2)
-       + ' ' + c2x.toFixed(2) + ',' + c2y.toFixed(2)
-       + ' ' + p2[0].toFixed(2) + ',' + p2[1].toFixed(2);
-  }
-  return d;
+function flClientBreakdown(mk) {
+  return flClients.map(c => {
+    let h = 0;
+    (c.projects||[]).forEach(p => {
+      (p.entries||[]).forEach(e => { if (e.date && e.date.slice(0,7) === mk) h += e.hours; });
+    });
+    return { name: c.name, color: c.color || '#E66A4A', hours: h, income: h * (c.rate || 0) };
+  }).filter(x => x.hours > 0);
 }
-let _flSparkSeq = 0;
-function flSparklineSVG(values) {
-  const w = 100, h = 48;
-  if (!values.length || values.every(v => v === 0)) {
-    return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none">'
-      + '<line x1="4" y1="' + (h-6) + '" x2="' + (w-4) + '" y2="' + (h-6) + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="2,3"/></svg>';
-  }
-  const max = Math.max(...values), min = Math.min(...values);
-  const range = (max - min) || 1;
-  const step = values.length > 1 ? w / (values.length - 1) : 0;
-  const padTop = 4, padBot = 4;
-  const points = values.map((v, i) => [i*step, h - padBot - ((v - min)/range) * (h - padTop - padBot)]);
-  const linePath = flSmoothPath(points);
-  const areaPath = linePath + ' L' + w + ',' + h + ' L0,' + h + ' Z';
-  const gid = 'fl-spark-' + (++_flSparkSeq);
-  return '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '" preserveAspectRatio="none">'
-    + '<defs><linearGradient id="' + gid + '" x1="0" x2="0" y1="0" y2="1">'
-    + '<stop offset="0%" stop-color="#E66A4A" stop-opacity="0.32"/>'
-    + '<stop offset="100%" stop-color="#E66A4A" stop-opacity="0"/>'
-    + '</linearGradient></defs>'
-    + '<path d="' + areaPath + '" fill="url(#' + gid + ')"/>'
-    + '<path d="' + linePath + '" fill="none" stroke="#E66A4A" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
-    + '</svg>';
+function flBreakdownHTML(items, valueKey, fmt) {
+  if (!items.length) return '<div class="fl-breakdown-empty">No activity yet this month</div>';
+  const sorted = items.slice().sort((a,b) => b[valueKey] - a[valueKey]);
+  const max = sorted[0][valueKey] || 1;
+  return sorted.slice(0, 4).map(it => {
+    const pct = Math.max(6, Math.round(it[valueKey] / max * 100));
+    const name = it.name.replace(/</g, '&lt;');
+    return '<div class="fl-breakdown-row">'
+      + '<span class="fl-breakdown-name">' + name + '</span>'
+      + '<span class="fl-breakdown-track"><span class="fl-breakdown-fill" style="width:' + pct + '%;background:' + it.color + '"></span></span>'
+      + '<span class="fl-breakdown-value">' + fmt(it[valueKey]) + '</span>'
+      + '</div>';
+  }).join('');
 }
 function flRenderDelta(elId, cur, prev) {
   const el = document.getElementById(elId);
@@ -1652,23 +1656,14 @@ function flUpdateStats() {
   if (iEl) iEl.innerHTML = '<span style="font-family:\'DM Sans\',sans-serif;font-size:0.6em;vertical-align:0.18em;opacity:0.7">₪</span>' + Math.round(cur.income).toLocaleString();
   flRenderDelta('fl-stat-hours-delta', cur.hours, prev.hours);
   flRenderDelta('fl-stat-income-delta', cur.income, prev.income);
-  // Both sparklines show cumulative growth through the month — smooth curves read better
-  // than per-day spikes when there are lots of zero days.
-  const daily = flDailyHours(mk);
-  const cumHours = [];
-  const cumIncomeArr = [];
-  let runH = 0, runI = 0;
-  const ratePerHour = (cur.hours > 0) ? (cur.income / cur.hours) : 0;
-  daily.forEach((d) => {
-    runH += d;
-    runI += d * ratePerHour;
-    cumHours.push(runH);
-    cumIncomeArr.push(runI);
-  });
+  // Per-client breakdown bars — far more useful than a sparkline when entries are sparse.
+  const breakdown = flClientBreakdown(mk);
+  const fmtH = (h) => (h % 1 === 0 ? h : h.toFixed(1)) + 'h';
+  const fmtI = (i) => '₪' + Math.round(i).toLocaleString();
   const hSpark = document.getElementById('fl-stat-hours-spark');
   const iSpark = document.getElementById('fl-stat-income-spark');
-  if (hSpark) hSpark.innerHTML = flSparklineSVG(cumHours);
-  if (iSpark) iSpark.innerHTML = flSparklineSVG(cumIncomeArr);
+  if (hSpark) hSpark.innerHTML = flBreakdownHTML(breakdown, 'hours', fmtH);
+  if (iSpark) iSpark.innerHTML = flBreakdownHTML(breakdown.filter(x => x.income > 0), 'income', fmtI);
   const gEl = document.getElementById('fl-greeting');
   if (gEl) gEl.innerHTML = flGreeting() + '<span class="wave"> 👋</span>';
   const mEl = document.getElementById('fl-hero-month');
