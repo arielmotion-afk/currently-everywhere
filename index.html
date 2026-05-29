@@ -29,8 +29,8 @@
     --yellow-light: #f8f2e0;
     --radius: 14px;
     --shadow: 0 2px 20px rgba(45,31,26,0.06);
-    --sb-bg: #2D1F1A;
-    --sb-width: 66px;
+    --sb-bg: rgba(255,251,246,0.85);
+    --sb-height: 60px;
     --hero-gradient: linear-gradient(135deg, #FFE8DD 0%, #FFEEDF 50%, #FFDCC8 100%);
   }
 
@@ -45,77 +45,79 @@
 
   /* APP SHELL */
   .app-shell {
-    display: flex;
     min-height: 100vh;
   }
 
-  /* SIDEBAR */
+  /* TOPBAR (was sidebar) */
   .sidebar {
-    width: var(--sb-width);
+    height: var(--sb-height);
     background: var(--sb-bg);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid var(--border);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    padding: 16px 0 20px;
+    padding: 0 20px;
+    gap: 10px;
     position: fixed;
-    top: 0; left: 0; bottom: 0;
+    top: 0; left: 0; right: 0;
     z-index: 100;
   }
-  .sb-brand {
-    margin-bottom: 28px;
-  }
+  .sb-brand { margin: 0 8px 0 0; }
   .sb-logo-mark {
-    width: 40px; height: 40px;
-    background: rgba(255,255,255,0.12);
-    border-radius: 12px;
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent) 0%, #FF8B6B 100%);
+    border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(230,106,74,0.25);
   }
   .sb-nav {
-    display: flex; flex-direction: column; gap: 2px;
-    flex: 1; width: 100%; padding: 0 10px;
+    display: flex; flex-direction: row; align-items: center; gap: 4px;
+    flex: 1; width: auto; padding: 0;
   }
   .sb-btn {
     display: flex; align-items: center; justify-content: center;
-    width: 46px; height: 46px;
-    border-radius: 12px;
+    width: 40px; height: 40px;
+    border-radius: 10px;
     border: none;
     background: transparent;
-    color: #FFFFFF;
+    color: #9C8A7A;
     cursor: pointer;
     transition: all 0.15s;
-    margin: 0 auto;
+    margin: 0;
     position: relative;
   }
-  .sb-btn:hover { background: rgba(255,255,255,0.08); color: #FFFFFF; }
-  .sb-btn.active { background: rgba(255,255,255,0.18); color: #FFFFFF; }
+  .sb-btn:hover { background: var(--accent-light); color: var(--text); }
+  .sb-btn.active { background: var(--accent-light); color: var(--accent); }
   .sb-btn[data-tip]:hover::after {
     content: attr(data-tip);
     position: absolute;
-    left: 54px; top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.72);
+    top: calc(100% + 6px); left: 50%;
+    transform: translateX(-50%);
+    background: rgba(45,31,26,0.92);
     color: #fff; font-size: 12px;
-    padding: 4px 10px; border-radius: 6px;
+    padding: 5px 10px; border-radius: 6px;
     white-space: nowrap; pointer-events: none;
     font-family: 'DM Sans', sans-serif;
     z-index: 200;
   }
   .sb-divider {
-    width: 32px; height: 1px;
-    background: rgba(255,255,255,0.08);
-    margin: 6px auto;
+    width: 1px; height: 24px;
+    background: var(--border);
+    margin: 0 4px;
   }
   .sb-bottom {
-    display: flex; flex-direction: column; gap: 2px;
-    width: 100%; padding: 0 10px;
+    display: flex; flex-direction: row; align-items: center; gap: 4px;
+    width: auto; padding: 0;
+    margin-left: auto;
   }
 
   /* CONTENT AREA */
   .content-area {
-    margin-left: var(--sb-width);
-    flex: 1;
-    min-height: 100vh;
+    margin-top: var(--sb-height);
+    min-height: calc(100vh - var(--sb-height));
   }
 
   /* LAYOUT */
@@ -316,9 +318,9 @@
   }
   .btn:hover { background: var(--bg); border-color: var(--text); }
   .btn-primary {
-    background: var(--sb-bg); color: #fff; border-color: var(--sb-bg);
+    background: var(--accent); color: #fff; border-color: var(--accent);
   }
-  .btn-primary:hover { background: #2d3f60; border-color: #2d3f60; }
+  .btn-primary:hover { background: #D45A3F; border-color: #D45A3F; }
 
   /* INPUT */
   .field { margin-bottom: 14px; }
@@ -468,9 +470,11 @@
   }
   .fl-breakdown-row:last-child { margin-bottom: 0; }
   .fl-breakdown-name {
-    flex: 0 0 78px; color: var(--text); font-weight: 500;
+    flex: 0 0 92px; color: var(--text); font-weight: 500;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: inline-flex; align-items: center; gap: 6px;
   }
+  .fl-breakdown-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .fl-breakdown-track {
     flex: 1; height: 9px;
     background: rgba(255,255,255,0.65);
@@ -1629,16 +1633,17 @@ function flClientBreakdown(mk) {
     return { name: c.name, color: c.color || '#E66A4A', hours: h, income: h * (c.rate || 0) };
   }).filter(x => x.hours > 0);
 }
-function flBreakdownHTML(items, valueKey, fmt) {
+function flBreakdownHTML(items, valueKey, fmt, accentColor) {
   if (!items.length) return '<div class="fl-breakdown-empty">No activity yet this month</div>';
   const sorted = items.slice().sort((a,b) => b[valueKey] - a[valueKey]);
   const max = sorted[0][valueKey] || 1;
+  const fill = accentColor || 'var(--accent)';
   return sorted.slice(0, 4).map(it => {
     const pct = Math.max(6, Math.round(it[valueKey] / max * 100));
     const name = it.name.replace(/</g, '&lt;');
     return '<div class="fl-breakdown-row">'
-      + '<span class="fl-breakdown-name">' + name + '</span>'
-      + '<span class="fl-breakdown-track"><span class="fl-breakdown-fill" style="width:' + pct + '%;background:' + it.color + '"></span></span>'
+      + '<span class="fl-breakdown-name"><span class="fl-breakdown-dot" style="background:' + it.color + '"></span>' + name + '</span>'
+      + '<span class="fl-breakdown-track"><span class="fl-breakdown-fill" style="width:' + pct + '%;background:' + fill + '"></span></span>'
       + '<span class="fl-breakdown-value">' + fmt(it[valueKey]) + '</span>'
       + '</div>';
   }).join('');
@@ -1670,8 +1675,8 @@ function flUpdateStats() {
   const fmtI = (i) => '₪' + Math.round(i).toLocaleString();
   const hSpark = document.getElementById('fl-stat-hours-spark');
   const iSpark = document.getElementById('fl-stat-income-spark');
-  if (hSpark) hSpark.innerHTML = flBreakdownHTML(breakdown, 'hours', fmtH);
-  if (iSpark) iSpark.innerHTML = flBreakdownHTML(breakdown.filter(x => x.income > 0), 'income', fmtI);
+  if (hSpark) hSpark.innerHTML = flBreakdownHTML(breakdown, 'hours', fmtH, 'var(--accent)');
+  if (iSpark) iSpark.innerHTML = flBreakdownHTML(breakdown.filter(x => x.income > 0), 'income', fmtI, '#6FA468');
   const gEl = document.getElementById('fl-greeting');
   if (gEl) gEl.innerHTML = flGreeting() + '<span class="wave"> 👋</span>';
   const mEl = document.getElementById('fl-hero-month');
