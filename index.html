@@ -1191,9 +1191,44 @@ function switchTab(section, tab, btn) {
 }
 
 // ── CHECKLIST ──
+const CHECK_KEY = 'currently_checks';
+function checkLoadState() {
+  try { return JSON.parse(localStorage.getItem(CHECK_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function checkSaveState(state) {
+  localStorage.setItem(CHECK_KEY, JSON.stringify(state));
+  if (typeof ghSync === 'function') ghSync();
+}
+function checkItemKey(li) {
+  const ul = li.closest('ul.checklist');
+  if (!ul || !ul.id) return null;
+  const items = Array.from(ul.children);
+  const idx = items.indexOf(li);
+  return ul.id + ':' + idx;
+}
 function toggle(el) {
   el.classList.toggle('done');
+  const key = checkItemKey(el);
+  if (key) {
+    const state = checkLoadState();
+    if (el.classList.contains('done')) state[key] = 1;
+    else delete state[key];
+    checkSaveState(state);
+  }
   updateProgress();
+}
+function checkRestoreAll() {
+  const state = checkLoadState();
+  document.querySelectorAll('ul.checklist').forEach(ul => {
+    if (!ul.id) return;
+    Array.from(ul.children).forEach((li, idx) => {
+      const key = ul.id + ':' + idx;
+      if (state[key]) li.classList.add('done');
+      // Note: don't unset; default class in HTML (`class="done"`) remains intact
+      // if nothing has explicitly been saved for that key.
+    });
+  });
 }
 
 function updateProgress() {
@@ -2625,7 +2660,7 @@ function schLoad() {
 // ── GITHUB SYNC ──
 const GH_REPO = 'arielmotion-afk/currently-everywhere';
 const GH_FILE = 'data.json';
-const GH_DATA_KEYS = ['currently_fl', 'currently_sch'];
+const GH_DATA_KEYS = ['currently_fl', 'currently_sch', 'currently_checks'];
 let _ghSyncTimeout = null;
 let _ghSyncStatus = 'unconfigured';
 
@@ -2762,6 +2797,8 @@ function ghClearPAT() {
   const pulled = await ghPull();
   flLoad();
   schLoad();
+  checkRestoreAll();
+  updateProgress();
   _ghSetStatus(ghGetPAT() ? (pulled ? 'ok' : 'error') : 'unconfigured');
 })();
 
