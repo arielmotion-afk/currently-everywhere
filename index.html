@@ -1961,8 +1961,30 @@ function flRebuildQuickSel(cid) {
   if (!c || !sel) return;
   const prev = parseInt(sel.value) || 0;
   sel.innerHTML = '<option value="">— choose project —</option>' +
-    (c.projects||[]).map(p => `<option value="${p.id}"${p.id===prev?' selected':''}>${p.name}</option>`).join('');
+    (c.projects||[]).map(p => `<option value="${p.id}"${p.id===prev?' selected':''}>${p.name}</option>`).join('') +
+    '<option value="__new__" style="font-style:italic;color:#C44E2D">+ New project…</option>';
   if (btn) btn.disabled = (c.projects||[]).length === 0;
+  flQuickTimerSync(cid);
+}
+
+function flQuickSelChange(cid) {
+  const sel = document.getElementById(`fl-quick-sel-${cid}`);
+  if (!sel) return;
+  if (sel.value === '__new__') {
+    const c = flClients.find(x => x.id===cid);
+    if (!c) { sel.value = ''; flQuickTimerSync(cid); return; }
+    const name = (prompt('New project name:') || '').trim();
+    if (!name) { sel.value = ''; flQuickTimerSync(cid); return; }
+    const p = flMakeProject(name);
+    c.projects = c.projects || [];
+    c.projects.push(p);
+    flRenderProjects(cid); // rebuilds dropdown and project list
+    const sel2 = document.getElementById(`fl-quick-sel-${cid}`);
+    if (sel2) sel2.value = String(p.id);
+    flUpdateStats(); flSave();
+    flQuickTimerSync(cid);
+    return;
+  }
   flQuickTimerSync(cid);
 }
 
@@ -2357,9 +2379,10 @@ function flClientCardHTML(c) {
     <!-- Quick timer -->
     <div class="fl-quick-row">
       <div id="fl-quick-display-${c.id}" class="fl-quick-display">00:00:00</div>
-      <select id="fl-quick-sel-${c.id}" class="fl-quick-sel" onchange="flQuickTimerSync(${c.id})">
+      <select id="fl-quick-sel-${c.id}" class="fl-quick-sel" onchange="flQuickSelChange(${c.id})">
         <option value="">— choose project —</option>
         ${(c.projects||[]).map(p=>`<option value="${p.id}"${p.timerStart||p.timerAccum>0?' selected':''} >${p.name}</option>`).join('')}
+        <option value="__new__" style="font-style:italic;color:#C44E2D">+ New project…</option>
       </select>
       <button id="fl-quick-btn-${c.id}" class="btn btn-primary" onclick="flQuickStart(${c.id})" ${(c.projects||[]).length===0?'disabled':''}>Start</button>
     </div>
