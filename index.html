@@ -756,6 +756,68 @@
     font-size: 13px; border: 1.5px solid var(--border); border-radius: 8px;
     padding: 6px 10px; background: var(--surface); color: var(--text); cursor: pointer;
   }
+  /* CUSTOM DROPDOWN (quick timer project picker) */
+  .fl-dropdown { position: relative; flex: 1; min-width: 120px; }
+  .fl-dropdown-trigger {
+    width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 8px 36px 8px 12px;
+    background: #FFFFFF; color: var(--text); cursor: pointer;
+    text-align: left;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    transition: border-color 0.12s ease;
+  }
+  .fl-dropdown-trigger:hover { border-color: var(--accent); }
+  .fl-dropdown.open .fl-dropdown-trigger { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(230,106,74,0.12); }
+  .fl-dropdown-value { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fl-dropdown-value.placeholder { color: var(--muted); }
+  .fl-dropdown-chev { width: 14px; height: 14px; color: var(--muted); flex-shrink: 0; transition: transform 0.15s; }
+  .fl-dropdown.open .fl-dropdown-chev { transform: rotate(180deg); }
+  .fl-dropdown-menu {
+    display: none;
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #FFFFFF;
+    border: 1px solid var(--border); border-radius: 12px;
+    box-shadow: 0 10px 32px rgba(45,31,26,0.12), 0 2px 6px rgba(45,31,26,0.04);
+    z-index: 80; overflow: hidden; padding: 4px;
+    max-height: 320px; overflow-y: auto;
+  }
+  .fl-dropdown.open .fl-dropdown-menu { display: block; }
+  .fl-dropdown-option {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 7px;
+    font-size: 13px; cursor: pointer; color: var(--text);
+    transition: background 0.1s;
+  }
+  .fl-dropdown-option:hover { background: var(--accent-light); }
+  .fl-dropdown-option.selected { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+  .fl-dropdown-option-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fl-dropdown-option-x {
+    visibility: hidden;
+    background: transparent; border: none;
+    color: var(--muted); cursor: pointer;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 5px;
+    font-size: 16px; line-height: 1; padding: 0;
+    flex-shrink: 0;
+  }
+  .fl-dropdown-option:hover .fl-dropdown-option-x { visibility: visible; }
+  .fl-dropdown-option-x:hover { background: var(--red-light); color: var(--red); }
+  .fl-dropdown-divider { height: 1px; background: var(--border); margin: 4px 6px; }
+  .fl-dropdown-newinput {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 8px;
+  }
+  .fl-dropdown-newinput input {
+    flex: 1; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    border: 1.5px solid transparent;
+    border-radius: 6px; padding: 6px 8px;
+    background: var(--bg); color: var(--text);
+    outline: none;
+  }
+  .fl-dropdown-newinput input::placeholder { color: var(--accent); font-style: italic; }
+  .fl-dropdown-newinput input:focus { border-color: var(--accent); background: #FFFFFF; }
 
   @media (max-width: 768px) {
     .sidebar { padding: 0 14px; gap: 6px; }
@@ -1350,8 +1412,7 @@ function flStartInterval() {
       });
       if (anyRunning) {
         const qd = document.getElementById(`fl-quick-display-${c.id}`);
-        const sel = document.getElementById(`fl-quick-sel-${c.id}`);
-        const pid = sel ? parseInt(sel.value) : 0;
+        const pid = flQuickGetSelected(c.id);
         const p = pid && (c.projects||[]).find(x => x.id===pid);
         if (qd && p && p.timerStart) qd.textContent = flFormatSeconds(flElapsedProject(p));
       }
@@ -1572,17 +1633,25 @@ function flCloseNewProject(cid) {
   if (btn) btn.style.display = '';
 }
 
-function flAddProject(cid) {
+// Shared add-project core. Returns the created project or null.
+// Callers handle their own UI cleanup (closing forms, selecting, etc.).
+function flCreateProject(cid, name) {
+  name = (name || '').trim();
+  if (!name) return null;
   const c = flClients.find(x => x.id===cid);
-  if (!c) return;
-  const nameEl = document.getElementById(`fl-np-name-${cid}`);
-  const name = nameEl ? nameEl.value.trim() : '';
-  if (!name) return;
+  if (!c) return null;
   const p = flMakeProject(name);
+  c.projects = c.projects || [];
   c.projects.push(p);
-  flCloseNewProject(cid);
   flRenderProjects(cid);
-  flSave();
+  flUpdateStats(); flSave();
+  return p;
+}
+
+function flAddProject(cid) {
+  const nameEl = document.getElementById(`fl-np-name-${cid}`);
+  if (!flCreateProject(cid, nameEl ? nameEl.value : '')) return;
+  flCloseNewProject(cid);
 }
 
 function flDeleteProject(cid, pid) {
@@ -1954,39 +2023,78 @@ function flRenderProjects(cid) {
   flRebuildQuickSel(cid);
 }
 
+// Helper: read which project the quick-timer dropdown has selected.
+function flQuickGetSelected(cid) {
+  const t = document.getElementById(`fl-quick-sel-${cid}`);
+  return t ? (parseInt(t.dataset.value) || 0) : 0;
+}
+
 function flRebuildQuickSel(cid) {
   const c = flClients.find(x => x.id===cid);
-  const sel = document.getElementById(`fl-quick-sel-${cid}`);
+  const trigger = document.getElementById(`fl-quick-sel-${cid}`);
+  const menu = document.getElementById(`fl-dd-menu-${cid}`);
   const btn = document.getElementById(`fl-quick-btn-${cid}`);
-  if (!c || !sel) return;
-  const prev = parseInt(sel.value) || 0;
-  sel.innerHTML = '<option value="">— choose project —</option>' +
-    (c.projects||[]).map(p => `<option value="${p.id}"${p.id===prev?' selected':''}>${p.name}</option>`).join('') +
-    '<option value="__new__" style="font-style:italic;color:#C44E2D">+ New project…</option>';
-  if (btn) btn.disabled = (c.projects||[]).length === 0;
+  if (!c || !trigger || !menu) return;
+  const projects = c.projects || [];
+  // Preserve selection if the project still exists; otherwise clear.
+  const prevId = parseInt(trigger.dataset.value) || 0;
+  const selProj = prevId ? projects.find(p => p.id === prevId) : null;
+  const selId = selProj ? prevId : 0;
+  trigger.dataset.value = selId ? String(selId) : '';
+  const valueEl = trigger.querySelector('.fl-dropdown-value');
+  if (valueEl) {
+    valueEl.textContent = selProj ? selProj.name : '— choose project —';
+    valueEl.classList.toggle('placeholder', !selProj);
+  }
+  menu.innerHTML = projects.map(p => {
+    const cls = p.id === selId ? ' selected' : '';
+    const name = p.name.replace(/</g, '&lt;');
+    return `<div class="fl-dropdown-option${cls}" onclick="flDropdownSelect(${cid},${p.id})">`
+      + `<span class="fl-dropdown-option-label">${name}</span>`
+      + `<button type="button" class="fl-dropdown-option-x" title="Remove project" onclick="event.stopPropagation();flDeleteProject(${cid},${p.id})">×</button>`
+      + `</div>`;
+  }).join('')
+    + (projects.length ? '<div class="fl-dropdown-divider"></div>' : '')
+    + `<div class="fl-dropdown-newinput"><input type="text" placeholder="+ New project…" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){flDropdownAddProject(${cid},this)}else if(event.key==='Escape'){flDropdownClose(${cid})}"/></div>`;
+  if (btn) btn.disabled = projects.length === 0 || !selId;
   flQuickTimerSync(cid);
 }
 
-function flQuickSelChange(cid) {
-  const sel = document.getElementById(`fl-quick-sel-${cid}`);
-  if (!sel) return;
-  if (sel.value === '__new__') {
-    const c = flClients.find(x => x.id===cid);
-    if (!c) { sel.value = ''; flQuickTimerSync(cid); return; }
-    const name = (prompt('New project name:') || '').trim();
-    if (!name) { sel.value = ''; flQuickTimerSync(cid); return; }
-    const p = flMakeProject(name);
-    c.projects = c.projects || [];
-    c.projects.push(p);
-    flRenderProjects(cid); // rebuilds dropdown and project list
-    const sel2 = document.getElementById(`fl-quick-sel-${cid}`);
-    if (sel2) sel2.value = String(p.id);
-    flUpdateStats(); flSave();
-    flQuickTimerSync(cid);
-    return;
+function flDropdownToggle(cid) {
+  const dd = document.getElementById(`fl-dd-${cid}`);
+  if (!dd) return;
+  // Close any other open dropdowns first.
+  document.querySelectorAll('.fl-dropdown.open').forEach(el => { if (el !== dd) el.classList.remove('open'); });
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) {
+    const input = dd.querySelector('.fl-dropdown-newinput input');
+    if (input) input.focus();
   }
-  flQuickTimerSync(cid);
 }
+function flDropdownClose(cid) {
+  const dd = document.getElementById(`fl-dd-${cid}`);
+  if (dd) dd.classList.remove('open');
+}
+function flDropdownSelect(cid, pid) {
+  const trigger = document.getElementById(`fl-quick-sel-${cid}`);
+  if (!trigger) return;
+  trigger.dataset.value = pid ? String(pid) : '';
+  flRebuildQuickSel(cid); // single source-of-truth render: updates trigger + menu + selected + Start button
+  flDropdownClose(cid);
+}
+function flDropdownAddProject(cid, inputEl) {
+  const p = flCreateProject(cid, inputEl.value);
+  if (!p) return;
+  inputEl.value = '';
+  flDropdownSelect(cid, p.id);
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.fl-dropdown')) {
+    document.querySelectorAll('.fl-dropdown.open').forEach(el => el.classList.remove('open'));
+  }
+});
 
 function flRenderProjectEntries(cid, pid) {
   const c = flClients.find(x => x.id===cid);
@@ -2221,8 +2329,7 @@ function flLogDiscard() {
 
 // ── QUICK TIMER ──
 function flQuickTimerSync(cid) {
-  const sel = document.getElementById(`fl-quick-sel-${cid}`);
-  const pid = sel ? parseInt(sel.value) : 0;
+  const pid = flQuickGetSelected(cid);
   const c = flClients.find(x => x.id===cid);
   const p = pid && c && (c.projects||[]).find(x => x.id===pid);
   const dispEl = document.getElementById(`fl-quick-display-${cid}`);
@@ -2248,8 +2355,7 @@ function flQuickTimerSync(cid) {
   }
 }
 function flQuickStart(cid) {
-  const sel = document.getElementById(`fl-quick-sel-${cid}`);
-  const pid = sel ? parseInt(sel.value) : 0;
+  const pid = flQuickGetSelected(cid);
   if (!pid) return;
   const c = flClients.find(x => x.id===cid);
   const p = c && (c.projects||[]).find(x => x.id===pid);
@@ -2379,11 +2485,13 @@ function flClientCardHTML(c) {
     <!-- Quick timer -->
     <div class="fl-quick-row">
       <div id="fl-quick-display-${c.id}" class="fl-quick-display">00:00:00</div>
-      <select id="fl-quick-sel-${c.id}" class="fl-quick-sel" onchange="flQuickSelChange(${c.id})">
-        <option value="">— choose project —</option>
-        ${(c.projects||[]).map(p=>`<option value="${p.id}"${p.timerStart||p.timerAccum>0?' selected':''} >${p.name}</option>`).join('')}
-        <option value="__new__" style="font-style:italic;color:#C44E2D">+ New project…</option>
-      </select>
+      <div class="fl-dropdown" id="fl-dd-${c.id}">
+        <button type="button" class="fl-dropdown-trigger" id="fl-quick-sel-${c.id}" data-value="" onclick="flDropdownToggle(${c.id})">
+          <span class="fl-dropdown-value placeholder">— choose project —</span>
+          <svg class="fl-dropdown-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="fl-dropdown-menu" id="fl-dd-menu-${c.id}"></div>
+      </div>
       <button id="fl-quick-btn-${c.id}" class="btn btn-primary" onclick="flQuickStart(${c.id})" ${(c.projects||[]).length===0?'disabled':''}>Start</button>
     </div>
     <!-- This month flat entries -->
