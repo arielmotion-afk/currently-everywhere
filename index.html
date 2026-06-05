@@ -2804,8 +2804,16 @@ function ghGetPAT() { return localStorage.getItem('gh_pat') || ''; }
 function _ghSetStatus(status) {
   _ghSyncStatus = status;
   const dot = document.getElementById('gh-sync-dot');
-  const colors = { ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)', unconfigured: '#9C8A7A' };
-  const tips   = { ok: 'Synced to GitHub', syncing: 'Syncing…', error: 'Sync failed — click to retry', unconfigured: 'Set up cloud sync' };
+  const colors = {
+    ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)',
+    'needs-password': 'var(--red)', 'wrong-password': 'var(--red)', unconfigured: '#9C8A7A'
+  };
+  const tips = {
+    ok: 'Synced to GitHub', syncing: 'Syncing…', error: 'Sync failed — click to retry',
+    'needs-password': 'Enter your password to unlock data',
+    'wrong-password': 'Wrong password — click to fix',
+    unconfigured: 'Set up cloud sync'
+  };
   if (dot) dot.style.background = colors[status] || '#9C8A7A';
   document.getElementById('gh-sync-btn')?.setAttribute('data-tip', tips[status] || 'Cloud sync');
   // Hero sync pill
@@ -2815,6 +2823,8 @@ function _ghSetStatus(status) {
     pill.classList.remove('syncing', 'error', 'unconfigured');
     if (status === 'syncing') { pill.classList.add('syncing'); pillText.textContent = 'Saving…'; }
     else if (status === 'error') { pill.classList.add('error'); pillText.textContent = 'Sync failed'; }
+    else if (status === 'needs-password') { pill.classList.add('error'); pillText.textContent = 'Enter password'; }
+    else if (status === 'wrong-password') { pill.classList.add('error'); pillText.textContent = 'Wrong password'; }
     else if (status === 'unconfigured') { pill.classList.add('unconfigured'); pillText.textContent = 'Set up sync'; }
     else { pillText.textContent = 'Synced ✓'; }
   }
@@ -2842,6 +2852,60 @@ function _ghSetStatus(status) {
 }
 let _ghToastTimeout = null;
 
+// ── ENCRYPTION (AES-256-GCM via WebCrypto, key derived with PBKDF2) ──
+function ghGetEncryptPW() { return localStorage.getItem('gh_encrypt_pw') || ''; }
+
+const _ghKeyCache = new Map(); // pw + base64(salt) → CryptoKey
+async function _ghDeriveKey(pw, salt) {
+  const cacheKey = pw + '|' + _b64(salt);
+  if (_ghKeyCache.has(cacheKey)) return _ghKeyCache.get(cacheKey);
+  const baseKey = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']
+  );
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' },
+    baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+  _ghKeyCache.set(cacheKey, key);
+  return key;
+}
+function _b64(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.byteLength; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s);
+}
+function _unb64(b64) {
+  const s = atob(b64);
+  const bytes = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i);
+  return bytes;
+}
+async function ghEncrypt(plaintext, pw) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await _ghDeriveKey(pw, salt);
+  const ct = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv }, key, new TextEncoder().encode(plaintext)
+  );
+  return JSON.stringify({ v: 1, salt: _b64(salt), iv: _b64(iv), ct: _b64(new Uint8Array(ct)) }, null, 2);
+}
+async function ghDecrypt(jsonString, pw) {
+  const obj = JSON.parse(jsonString);
+  if (!obj || obj.v !== 1 || !obj.salt || !obj.iv || !obj.ct) throw new Error('Not encrypted format');
+  const salt = _unb64(obj.salt);
+  const iv = _unb64(obj.iv);
+  const ct = _unb64(obj.ct);
+  const key = await _ghDeriveKey(pw, salt);
+  const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+  return new TextDecoder().decode(dec);
+}
+function ghIsEncrypted(jsonString) {
+  try {
+    const obj = JSON.parse(jsonString);
+    return !!(obj && obj.v === 1 && obj.salt && obj.iv && obj.ct);
+  } catch { return false; }
+}
+
 async function ghPush() {
   const pat = ghGetPAT();
   if (!pat) return;
@@ -2849,7 +2913,10 @@ async function ghPush() {
   try {
     const payload = {};
     GH_DATA_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v) payload[k] = v; });
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+    let bodyString = JSON.stringify(payload, null, 2);
+    const pw = ghGetEncryptPW();
+    if (pw) bodyString = await ghEncrypt(bodyString, pw);
+    const content = btoa(unescape(encodeURIComponent(bodyString)));
     const url = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
     const headers = { Authorization: `token ${pat}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
     let sha;
@@ -2874,36 +2941,54 @@ function ghSync() {
   _ghSyncTimeout = setTimeout(ghPush, 1500);
 }
 
+// Returns: { ok: bool, reason?: 'no-pat' | 'fetch' | 'needs-password' | 'wrong-password' | 'parse' }
 async function ghPull() {
   const pat = ghGetPAT();
-  if (!pat) return false;
+  if (!pat) return { ok: false, reason: 'no-pat' };
   try {
     const url = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
     const res = await fetch(url, { headers: { Authorization: `token ${pat}`, Accept: 'application/vnd.github.v3+json' } });
-    if (!res.ok) return false;
+    if (!res.ok) return { ok: false, reason: 'fetch' };
     const file = await res.json();
-    const text = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+    let text = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+    if (ghIsEncrypted(text)) {
+      const pw = ghGetEncryptPW();
+      if (!pw) return { ok: false, reason: 'needs-password' };
+      try { text = await ghDecrypt(text, pw); }
+      catch(e) { console.warn('Decryption failed:', e); return { ok: false, reason: 'wrong-password' }; }
+    }
     const data = JSON.parse(text);
     GH_DATA_KEYS.forEach(k => { if (data[k] !== undefined) localStorage.setItem(k, data[k]); });
-    return true;
+    return { ok: true };
   } catch(e) {
     console.warn('GitHub pull failed:', e);
-    return false;
+    return { ok: false, reason: 'parse' };
   }
 }
 
 function ghOpenSettings() {
   const pat = ghGetPAT();
-  const input = document.getElementById('gh-pat-input');
+  const pw = ghGetEncryptPW();
+  const patInput = document.getElementById('gh-pat-input');
+  const pwInput = document.getElementById('gh-pw-input');
   const clearBtn = document.getElementById('gh-clear-btn');
   const statusDot = document.getElementById('gh-modal-status-dot');
   const statusText = document.getElementById('gh-modal-status-text');
-  if (input) input.value = pat;
-  if (clearBtn) clearBtn.style.display = pat ? '' : 'none';
+  if (patInput) patInput.value = pat;
+  if (pwInput) pwInput.value = pw;
+  if (clearBtn) clearBtn.style.display = (pat || pw) ? '' : 'none';
   if (statusDot && statusText) {
-    const colors = { ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)', unconfigured: '#8A97B0' };
-    const labels = { ok: 'Synced', syncing: 'Syncing…', error: 'Last sync failed', unconfigured: 'Not configured' };
-    statusDot.style.background = colors[_ghSyncStatus] || '#8A97B0';
+    const colors = {
+      ok: 'var(--green)', syncing: 'var(--yellow)', error: 'var(--red)',
+      'needs-password': 'var(--red)', 'wrong-password': 'var(--red)', unconfigured: '#9C8A7A'
+    };
+    const labels = {
+      ok: 'Synced', syncing: 'Syncing…', error: 'Last sync failed',
+      'needs-password': 'Data is encrypted — enter password',
+      'wrong-password': 'Wrong password — data can\'t be decrypted',
+      unconfigured: 'Not configured'
+    };
+    statusDot.style.background = colors[_ghSyncStatus] || '#9C8A7A';
     statusText.textContent = labels[_ghSyncStatus] || 'Not configured';
   }
   document.getElementById('gh-sync-modal').classList.add('open');
@@ -2913,28 +2998,52 @@ function ghCloseSettings() {
   document.getElementById('gh-sync-modal').classList.remove('open');
 }
 
-function ghSaveSettings() {
+async function ghSaveSettings() {
   const token = document.getElementById('gh-pat-input').value.trim();
+  const pw = document.getElementById('gh-pw-input').value;
   if (token) localStorage.setItem('gh_pat', token);
+  if (pw) localStorage.setItem('gh_encrypt_pw', pw);
+  else localStorage.removeItem('gh_encrypt_pw');
   ghCloseSettings();
-  if (token) ghPush();
-  else _ghSetStatus('unconfigured');
+  if (!token) { _ghSetStatus('unconfigured'); return; }
+  // If the remote was encrypted and we couldn't read it before, retry the pull
+  // with the new password so the user sees their data immediately.
+  if (_ghSyncStatus === 'needs-password' || _ghSyncStatus === 'wrong-password') {
+    const result = await ghPull();
+    if (result.ok) {
+      _ghSetStatus('ok');
+      flLoad(); schLoad(); checkRestoreAll(); updateProgress();
+      flUpdateStats();
+      return;
+    }
+    _ghSetStatus(result.reason === 'wrong-password' ? 'wrong-password' : 'error');
+    return;
+  }
+  ghPush();
 }
 
 function ghClearPAT() {
   localStorage.removeItem('gh_pat');
+  localStorage.removeItem('gh_encrypt_pw');
+  _ghKeyCache.clear();
   ghCloseSettings();
   _ghSetStatus('unconfigured');
 }
 
 // Pull from GitHub first, then load — runs after all GH constants/functions are defined
 (async function ghInit() {
-  const pulled = await ghPull();
+  const result = await ghPull();
   flLoad();
   schLoad();
   checkRestoreAll();
   updateProgress();
-  _ghSetStatus(ghGetPAT() ? (pulled ? 'ok' : 'error') : 'unconfigured');
+  if (!ghGetPAT()) { _ghSetStatus('unconfigured'); return; }
+  if (result.ok) _ghSetStatus('ok');
+  else if (result.reason === 'needs-password' || result.reason === 'wrong-password') {
+    _ghSetStatus(result.reason);
+    // Auto-open the sync modal so the user can enter the password.
+    ghOpenSettings();
+  } else _ghSetStatus('error');
 })();
 
 </script>
@@ -2996,6 +3105,11 @@ function ghClearPAT() {
     <div class="fl-modal-sub">Your data syncs to <strong>data.json</strong> in your GitHub repo after every save — no more losing hours when a computer dies.<br><br>Create a <a href="https://github.com/settings/tokens/new?scopes=repo&description=Currently+Everywhere+Sync" target="_blank" style="color:var(--heading)">GitHub personal access token</a> with <strong>repo</strong> scope and paste it below. It stays in your browser only.</div>
     <label style="display:block;font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em">GitHub PAT</label>
     <input type="password" id="gh-pat-input" class="gh-sync-modal-token" placeholder="ghp_…" autocomplete="off"/>
+    <label style="display:block;font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em;margin-top:14px">Password (locks your data)</label>
+    <input type="password" id="gh-pw-input" class="gh-sync-modal-token" placeholder="Pick a strong password" autocomplete="new-password"/>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5">
+      Encrypts your data on this device before sending. Use the <strong>same password</strong> on every device. <span style="color:var(--red)">If you forget it, your data is unrecoverable</span> — there's no reset.
+    </div>
     <div class="gh-sync-status-row">
       <span class="gh-sync-status-dot" id="gh-modal-status-dot"></span>
       <span id="gh-modal-status-text">Not configured</span>
