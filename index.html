@@ -610,6 +610,23 @@
   .fit-ex-gif img,
   .fit-ex-gif video { width: 100%; height: 100%; object-fit: cover; }
   .fit-ex-gif:hover { border-color: var(--accent); color: var(--accent); }
+  .fit-ex-gif { position: relative; }
+  .fit-ex-gif.uploading {
+    background: linear-gradient(135deg, #FFF8F2 0%, #FFE8DD 100%);
+    border-style: solid; border-color: var(--accent);
+    color: var(--accent); font-weight: 600;
+  }
+  .fit-ex-media-clear {
+    position: absolute; top: 8px; right: 8px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(45,31,26,0.7); color: #FFFFFF;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; line-height: 1;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .fit-ex-gif:hover .fit-ex-media-clear { opacity: 1; }
+  .fit-ex-media-clear:hover { background: var(--red); }
   .fit-set-header {
     display: grid; grid-template-columns: 50px 1fr 90px 50px;
     gap: 12px; align-items: center;
@@ -3641,8 +3658,12 @@ function fitRenderExercise(ex, exIdx, defaultRest) {
         <input class="fit-ex-name-input" value="${ex.name.replace(/"/g,'&quot;')}" onchange="fitRenameExercise(${exIdx}, this.value)"/>
         <button class="fit-ex-delete" onclick="fitDeleteExercise(${exIdx})" title="Remove exercise">×</button>
       </div>
-      <div class="fit-ex-gif" onclick="fitEditGif(${exIdx})">
-        ${ex.gif ? fitMediaTag(ex.gif, ex.name) : '🏋️ Tap to add a GIF or video URL'}
+      <div class="fit-ex-gif${ex._uploading ? ' uploading' : ''}" onclick="fitMediaSlotClick(event, ${exIdx})">
+        ${ex._uploading
+          ? `Uploading${ex._uploadPct != null ? ' ' + ex._uploadPct + '%' : '…'}`
+          : (ex.gif
+            ? fitMediaTag(ex.gif, ex.name) + `<button type="button" class="fit-ex-media-clear" title="Remove media" onclick="event.stopPropagation();fitClearMedia(${exIdx})">×</button>`
+            : '🎬 Tap to upload a video')}
       </div>
       <div class="fit-set-header">
         <div style="text-align:center">Set</div>
@@ -3705,13 +3726,103 @@ function fitRenameExercise(exIdx, v) {
   fitState.active.exercises[exIdx].name = v.trim() || 'Exercise';
   fitSave();
 }
-function fitEditGif(exIdx) {
-  const ex = fitState.active.exercises[exIdx];
-  const url = prompt('Paste a GIF or video URL for "' + ex.name + '"\n(e.g. media/db-shoulder-press.mp4 if you committed it to the repo)', ex.gif || '');
-  if (url === null) return;
-  ex.gif = url.trim();
+// Click on the media slot — opens a file picker. Used for both empty and
+// already-filled slots (replaces in place). The × button on a filled slot
+// stops propagation and clears instead.
+function fitMediaSlotClick(event, exIdx) {
+  if (!ghGetPAT()) { alert('Set up cloud sync first — the upload needs your GitHub token.'); return; }
+  let input = document.getElementById('fit-media-input');
+  if (!input) {
+    input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'video/*,image/gif,image/*';
+    input.style.display = 'none';
+    input.id = 'fit-media-input';
+    document.body.appendChild(input);
+  }
+  input.onchange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (file) fitUploadFile(exIdx, file);
+  };
+  input.click();
+}
+
+function fitClearMedia(exIdx) {
+  if (!confirm('Remove this video from the exercise? (The file stays in the repo — only the reference is cleared.)')) return;
+  fitState.active.exercises[exIdx].gif = '';
   fitSave();
   fitRenderPlayer();
+}
+
+async function fitUploadFile(exIdx, file) {
+  if (file.size > 25 * 1024 * 1024) {
+    if (!confirm(`This file is ${(file.size/1024/1024).toFixed(1)} MB. GitHub's API accepts up to ~50 MB per file. Keep uploading?`)) return;
+  }
+  const ex = fitState.active.exercises[exIdx];
+  ex._uploading = true;
+  ex._uploadPct = null;
+  fitRenderPlayer();
+  try {
+    const path = await fitUploadMedia(file, (pct) => {
+      ex._uploadPct = pct;
+      // Update only the slot, not the whole page (avoids losing focus/timer flicker)
+      const slot = document.querySelector(`#fit-player-root .fit-exercise:nth-of-type(${exIdx + 1}) .fit-ex-gif`);
+      if (slot) slot.textContent = pct < 100 ? `Uploading ${pct}%` : 'Finishing…';
+    });
+    ex.gif = path;
+    ex._uploading = false;
+    ex._uploadPct = null;
+    fitSave();
+    fitRenderPlayer();
+  } catch(e) {
+    ex._uploading = false;
+    ex._uploadPct = null;
+    fitRenderPlayer();
+    alert('Upload failed: ' + (e.message || e));
+  }
+}
+
+// Sanitize and upload a file to media/<name> in the repo via GitHub Contents API.
+// onProgress is called with an integer percentage while encoding chunks. We
+// can't get true network progress from fetch() so it tops out at ~95% before
+// the actual PUT and jumps to 100 after the response.
+async function fitUploadMedia(file, onProgress) {
+  const pat = ghGetPAT();
+  if (!pat) throw new Error('No GitHub token');
+  // Read the file and base64-encode in chunks (large files blow String.fromCharCode otherwise)
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  const chunkSize = 32 * 1024;
+  let bin = '';
+  for (let i = 0; i < bytes.byteLength; i += chunkSize) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunkSize, bytes.byteLength)));
+    if (onProgress) onProgress(Math.min(95, Math.floor((i / bytes.byteLength) * 95)));
+  }
+  const content = btoa(bin);
+  if (onProgress) onProgress(95);
+  // Sanitize filename — lowercase, only [a-z0-9._-], collapse dashes
+  let safe = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
+  if (!/\.[a-z0-9]+$/i.test(safe)) safe += '.mp4';
+  const path = `media/${safe}`;
+  const apiUrl = `https://api.github.com/repos/${GH_REPO}/contents/${path}`;
+  const headers = { Authorization: `token ${pat}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+  // If the file already exists, we need its sha to overwrite
+  let sha;
+  try {
+    const getRes = await fetch(apiUrl, { headers });
+    if (getRes.ok) sha = (await getRes.json()).sha;
+  } catch(_) {}
+  const putRes = await fetch(apiUrl, {
+    method: 'PUT', headers,
+    body: JSON.stringify({ message: `fitness media: ${safe}`, content, ...(sha ? { sha } : {}) }),
+  });
+  if (!putRes.ok) {
+    const errText = await putRes.text().catch(() => '');
+    throw new Error(`HTTP ${putRes.status}${errText ? ' — ' + errText.slice(0, 200) : ''}`);
+  }
+  if (onProgress) onProgress(100);
+  return path;
 }
 
 // ── GITHUB SYNC ──
