@@ -3325,41 +3325,45 @@ const WEEKLY_DEFAULT_SCHEDULE = {
   6: { label: 'Optional',            template: null    },
   0: { label: 'Optional',            template: null    },
 };
+// Exercises sourced from Women's Health Mag's free-weight + dumbbell guides.
+// Video filenames follow the sanitized lowercase-with-dashes convention
+// the upload flow produces. Pre-populated paths will render as soon as a
+// matching media/<filename>.mp4 exists in the repo.
 const FIT_TEMPLATES = {
   upper: {
     name: 'Upper Body Strength',
     rest: 60,
     exercises: [
-      { name: 'DB Shoulder Press',    sets: 3, target: 10, type: 'reps' },
-      { name: 'DB Bent-Over Row',     sets: 3, target: 10, type: 'reps' },
-      { name: 'Band Lateral Raise',   sets: 3, target: 12, type: 'reps' },
-      { name: 'Push-up',              sets: 3, target: 10, type: 'reps' },
-      { name: 'DB Bicep Curl',        sets: 3, target: 12, type: 'reps' },
-      { name: 'Plank',                sets: 3, target: 60, type: 'time' },
+      { name: 'Floor Press',                       sets: 3, target: 10, type: 'reps', gif: 'media/floor-press.mp4' },
+      { name: 'Bent-Over Row',                     sets: 3, target: 8,  type: 'reps', gif: 'media/bent-over-row.mp4' },
+      { name: 'Shoulder Press',                    sets: 3, target: 10, type: 'reps', gif: 'media/shoulder-press.mp4' },
+      { name: 'Hammer Curl',                       sets: 3, target: 10, type: 'reps', gif: 'media/hammer-curl.mp4' },
+      { name: 'Lying Overhead Triceps Extension',  sets: 3, target: 10, type: 'reps', gif: 'media/lying-overhead-triceps-extension.mp4' },
+      { name: 'Lateral Raise',                     sets: 3, target: 12, type: 'reps', gif: 'media/lateral-raise.mp4' },
     ],
   },
   lower: {
     name: 'Lower + Core',
     rest: 60,
     exercises: [
-      { name: 'DB Goblet Squat',      sets: 3, target: 12, type: 'reps' },
-      { name: 'DB Romanian Deadlift', sets: 3, target: 10, type: 'reps' },
-      { name: 'Band Glute Bridge',    sets: 3, target: 15, type: 'reps' },
-      { name: 'Reverse Lunge',        sets: 3, target: 10, type: 'reps' },
-      { name: 'Russian Twist',        sets: 3, target: 20, type: 'reps' },
-      { name: 'Plank',                sets: 3, target: 60, type: 'time' },
+      { name: 'Goblet Squat',                      sets: 3, target: 10, type: 'reps', gif: 'media/goblet-squat.mp4' },
+      { name: 'Romanian Deadlift',                 sets: 3, target: 8,  type: 'reps', gif: 'media/romanian-deadlift.mp4' },
+      { name: 'Reverse Lunge',                     sets: 3, target: 10, type: 'reps', gif: 'media/reverse-lunge.mp4' },
+      { name: 'Hip Thrusts',                       sets: 3, target: 12, type: 'reps', gif: 'media/hip-thrusts.mp4' },
+      { name: 'Lateral Lunge',                     sets: 3, target: 10, type: 'reps', gif: 'media/lateral-lunge.mp4' },
+      { name: 'Half-Kneeling Wood Chop',           sets: 3, target: 10, type: 'reps', gif: 'media/half-kneeling-wood-chop.mp4' },
     ],
   },
   full: {
     name: 'Full Body Strength',
     rest: 75,
     exercises: [
-      { name: 'DB Squat to Press',    sets: 3, target: 10, type: 'reps' },
-      { name: 'DB Renegade Row',      sets: 3, target: 8,  type: 'reps' },
-      { name: 'Push-up',              sets: 3, target: 10, type: 'reps' },
-      { name: 'Reverse Lunge w/ DBs', sets: 3, target: 10, type: 'reps' },
-      { name: 'DB Romanian Deadlift', sets: 3, target: 10, type: 'reps' },
-      { name: 'Mountain Climber',     sets: 3, target: 30, type: 'reps' },
+      { name: 'Front-Racked Squat',                sets: 3, target: 8,  type: 'reps', gif: 'media/front-racked-squat.mp4' },
+      { name: 'Bent-Over Row',                     sets: 3, target: 8,  type: 'reps', gif: 'media/bent-over-row.mp4' },
+      { name: 'Romanian Deadlift',                 sets: 3, target: 8,  type: 'reps', gif: 'media/romanian-deadlift.mp4' },
+      { name: 'Shoulder Press',                    sets: 3, target: 8,  type: 'reps', gif: 'media/shoulder-press.mp4' },
+      { name: 'Renegade Row',                      sets: 3, target: 8,  type: 'reps', gif: 'media/renegade-row.mp4' },
+      { name: 'Snatch',                            sets: 3, target: 6,  type: 'reps', gif: 'media/snatch.mp4' },
     ],
   },
 };
@@ -3508,7 +3512,7 @@ function fitStartWorkout(templateId) {
     exercises: tpl.exercises.map((e, idx) => ({
       id: Date.now() + idx,
       name: e.name,
-      gif: '',
+      gif: e.gif || '',
       type: e.type,
       sets: Array.from({length: e.sets}, () => ({
         target: e.target, value: e.target, done: false,
