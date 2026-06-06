@@ -3006,18 +3006,23 @@ async function ghSaveSettings() {
   else localStorage.removeItem('gh_encrypt_pw');
   ghCloseSettings();
   if (!token) { _ghSetStatus('unconfigured'); return; }
-  // If the remote was encrypted and we couldn't read it before, retry the pull
-  // with the new password so the user sees their data immediately.
-  if (_ghSyncStatus === 'needs-password' || _ghSyncStatus === 'wrong-password') {
+  // Whenever we don't yet have a successful sync this session, pull FIRST.
+  // Pushing empty/stale local state would silently overwrite real data on
+  // GitHub — the new-device-setup footgun. Only push if the remote really
+  // has nothing for us (fetch failed, no-pat, parse error).
+  if (_ghSyncStatus !== 'ok') {
     const result = await ghPull();
     if (result.ok) {
       _ghSetStatus('ok');
-      flLoad(); schLoad(); checkRestoreAll(); updateProgress();
-      flUpdateStats();
+      flLoad(); schLoad(); checkRestoreAll(); updateProgress(); flUpdateStats();
       return;
     }
-    _ghSetStatus(result.reason === 'wrong-password' ? 'wrong-password' : 'error');
-    return;
+    if (result.reason === 'needs-password' || result.reason === 'wrong-password') {
+      _ghSetStatus(result.reason);
+      return;
+    }
+    // genuine fetch / parse failure — fall through to push so the user can at
+    // least get *something* uploaded if this really is their first device.
   }
   ghPush();
 }
