@@ -607,7 +607,8 @@
     cursor: pointer; overflow: hidden;
     border: 1.5px dashed var(--border);
   }
-  .fit-ex-gif img { width: 100%; height: 100%; object-fit: cover; }
+  .fit-ex-gif img,
+  .fit-ex-gif video { width: 100%; height: 100%; object-fit: cover; }
   .fit-ex-gif:hover { border-color: var(--accent); color: var(--accent); }
   .fit-set-header {
     display: grid; grid-template-columns: 50px 1fr 90px 50px;
@@ -3359,6 +3360,16 @@ function fitIsoWeek(d) {
   const wk = Math.ceil((((x - yearStart) / 86400000) + 1) / 7);
   return x.getUTCFullYear() + '-W' + String(wk).padStart(2, '0');
 }
+function fitMediaTag(url, alt) {
+  const safeUrl = url.replace(/"/g, '&quot;');
+  const safeAlt = (alt || '').replace(/"/g, '&quot;');
+  // Treat anything ending in a known video extension as a video; everything
+  // else (gif, png, jpg, webp, remote URLs without extensions, etc.) as an image.
+  if (/\.(mp4|webm|mov|m4v|ogv)(\?.*)?$/i.test(url)) {
+    return `<video src="${safeUrl}" autoplay loop muted playsinline></video>`;
+  }
+  return `<img src="${safeUrl}" alt="${safeAlt}"/>`;
+}
 function fitFmtSec(s) {
   s = Math.max(0, Math.floor(s));
   const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
@@ -3631,7 +3642,7 @@ function fitRenderExercise(ex, exIdx, defaultRest) {
         <button class="fit-ex-delete" onclick="fitDeleteExercise(${exIdx})" title="Remove exercise">×</button>
       </div>
       <div class="fit-ex-gif" onclick="fitEditGif(${exIdx})">
-        ${ex.gif ? `<img src="${ex.gif}" alt="${ex.name}"/>` : '🏋️ Tap to add a GIF URL'}
+        ${ex.gif ? fitMediaTag(ex.gif, ex.name) : '🏋️ Tap to add a GIF or video URL'}
       </div>
       <div class="fit-set-header">
         <div style="text-align:center">Set</div>
@@ -3696,7 +3707,7 @@ function fitRenameExercise(exIdx, v) {
 }
 function fitEditGif(exIdx) {
   const ex = fitState.active.exercises[exIdx];
-  const url = prompt('Paste a GIF URL for "' + ex.name + '"', ex.gif || '');
+  const url = prompt('Paste a GIF or video URL for "' + ex.name + '"\n(e.g. media/db-shoulder-press.mp4 if you committed it to the repo)', ex.gif || '');
   if (url === null) return;
   ex.gif = url.trim();
   fitSave();
