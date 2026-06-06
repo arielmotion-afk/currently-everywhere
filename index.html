@@ -413,6 +413,71 @@
   .section-header h1 { display: flex; align-items: center; gap: 10px; }
   .note-icon { display: inline-block; vertical-align: -3px; margin-right: 5px; flex-shrink: 0; opacity: 0.7; }
 
+  /* FINANCES + MOM */
+  .fin-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .fin-row:last-child { border-bottom: none; }
+  .fin-row-main { flex: 1; min-width: 0; }
+  .fin-row-name { font-weight: 500; font-size: 14px; margin-bottom: 2px; }
+  .fin-row-info { font-size: 12.5px; color: var(--muted); }
+
+  .fin-cf-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 0; border-bottom: 1px solid var(--border); gap: 12px;
+  }
+  .fin-cf-row.fin-cf-total {
+    border-top: 1.5px solid var(--text); border-bottom: none;
+    margin-top: 6px; padding-top: 14px; font-weight: 600;
+  }
+  .fin-cf-label { font-size: 14px; }
+  .fin-cf-amount {
+    font-family: 'Lora', serif; font-size: 20px;
+    letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+  }
+  .fin-cf-amount.up { color: var(--green); }
+  .fin-cf-amount.down { color: var(--red); }
+  .fin-cf-note {
+    font-size: 12px; color: var(--muted); margin-top: 8px; font-style: italic;
+  }
+
+  .big-task-card {
+    background: linear-gradient(135deg, #FFFCF7 0%, #FFE0CC 100%);
+    border: 1px solid rgba(255, 178, 140, 0.55);
+    border-radius: 18px;
+    padding: 22px 24px; margin-bottom: 16px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 18px rgba(230,106,74,0.08);
+  }
+  .big-task-banner {
+    display: inline-block; background: var(--accent); color: #FFFFFF;
+    padding: 4px 11px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+  .about-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 20px; margin-bottom: 14px;
+  }
+  .future-row {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 10px 0; border-bottom: 1px dashed var(--border);
+    font-size: 13.5px;
+  }
+  .future-row:last-child { border-bottom: none; }
+  .future-row .label { color: var(--muted); }
+  .future-row .val { font-weight: 500; }
+
+  /* RTL: cards/lists that opt in via dir="rtl" */
+  [dir="rtl"] .card-title { flex-direction: row-reverse; }
+  [dir="rtl"] .card-title-left { flex-direction: row-reverse; }
+  [dir="rtl"] .checklist li { flex-direction: row-reverse; }
+  [dir="rtl"] .checklist .item-meta { align-items: flex-end; text-align: right; }
+  [dir="rtl"] .fin-row { flex-direction: row-reverse; }
+  [dir="rtl"] .future-row { flex-direction: row-reverse; }
+
   /* FITNESS */
   .fit-card {
     background: linear-gradient(135deg, #FFFFFF 0%, #FFFAF2 100%);
@@ -1054,6 +1119,12 @@
     <button class="sb-btn" data-section="relocation" data-tip="Relocation">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
     </button>
+    <button class="sb-btn" data-section="finances" data-tip="Finances">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    </button>
+    <button class="sb-btn" data-section="mom" data-tip="Mom">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
   </nav>
   <div class="sb-bottom">
     <div class="sb-divider"></div>
@@ -1369,6 +1440,207 @@
     </div>
 
   </div><!-- end fitness section -->
+
+  <!-- FINANCES -->
+  <div class="section" id="finances">
+    <div class="section-header">
+      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Finances</h1>
+      <p>Assets, cash flow, and admin tasks</p>
+    </div>
+
+    <!-- My Assets -->
+    <div class="card" dir="rtl">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>הנכסים שלי</div>
+      </div>
+      <div class="fin-row">
+        <div class="fin-row-main">
+          <div class="fin-row-name">דירה בת"א</div>
+          <div class="fin-row-info">~2.7M ש"ח · ללא חוב · תמ"א 38 בדרך</div>
+        </div>
+        <span class="tag tag-green" style="font-size:14px">✅</span>
+      </div>
+      <div class="fin-row">
+        <div class="fin-row-main">
+          <div class="fin-row-name">השקעות בבנק הפועלים</div>
+          <div class="fin-row-info">לבדוק יתרה ומסלול</div>
+        </div>
+        <span class="tag tag-yellow">🔍 לבדוק</span>
+      </div>
+      <div class="fin-row">
+        <div class="fin-row-main">
+          <div class="fin-row-name">ספארק / מיטב דש</div>
+          <div class="fin-row-info">לבדוק יתרה וסוג חשבון</div>
+        </div>
+        <span class="tag tag-yellow">🔍 לבדוק</span>
+      </div>
+      <div class="fin-row">
+        <div class="fin-row-main">
+          <div class="fin-row-name">קרן השתלמות — אנליסט</div>
+          <div class="fin-row-info">לבדוק יתרה, נזילות, דמי ניהול</div>
+        </div>
+        <span class="tag tag-yellow">🔍 לבדוק</span>
+      </div>
+      <div class="fin-row">
+        <div class="fin-row-main">
+          <div class="fin-row-name">קרן השתלמות — מנורה מבטחים</div>
+          <div class="fin-row-info">לבדוק יתרה, נזילות, דמי ניהול</div>
+        </div>
+        <span class="tag tag-yellow">🔍 לבדוק</span>
+      </div>
+      <div class="fin-row">
+        <div class="fin-row-main">
+          <div class="fin-row-name">קרן פנסיה — הפניקס</div>
+          <div class="fin-row-info">לבדוק יתרה, קצבה חזויה, כיסויים</div>
+        </div>
+        <span class="tag tag-yellow">🔍 לבדוק</span>
+      </div>
+    </div>
+
+    <!-- Monthly Cash Flow -->
+    <div class="card" dir="rtl">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>תזרים חודשי</div>
+      </div>
+      <div class="fin-cf-row">
+        <span class="fin-cf-label">הכנסה מדירה</span>
+        <span class="fin-cf-amount up">+5,200 ש"ח</span>
+      </div>
+      <div class="fin-cf-row">
+        <span class="fin-cf-label">שכר דירה שלי</span>
+        <span class="fin-cf-amount down">−3,480 ש"ח</span>
+      </div>
+      <div class="fin-cf-row fin-cf-total">
+        <span class="fin-cf-label">גירעון נטו</span>
+        <span class="fin-cf-amount down">−1,780 ש"ח</span>
+      </div>
+      <div class="fin-cf-note">מכוסה מהכנסת פרילנס</div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="card" dir="rtl">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--yellow)"></div>איסוף מידע</div>
+      </div>
+      <ul class="checklist" id="finances-tasks-checklist">
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">אנליסט (analyst.co.il)</span><span class="item-note">יתרה, נזילות, מסלול, דמי ניהול</span></div>
+        </li>
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">הפניקס (fnx.co.il)</span><span class="item-note">יתרה, קצבה חזויה, כיסויים ביטוחיים (נכות? שאירים?)</span></div>
+        </li>
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">מנורה מבטחים (menora-mivtachim.co.il)</span><span class="item-note">יתרה, נזילות, מסלול, דמי ניהול</span></div>
+        </li>
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">בנק הפועלים</span><span class="item-note">יתרת השקעות, מסלול</span></div>
+        </li>
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">מיטב דש / ספארק</span><span class="item-note">יתרה, סוג חשבון</span></div>
+        </li>
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">הר הביטוח (harb.cma.gov.il)</span><span class="item-note">לבדוק פוליסות לא ידועות</span></div>
+        </li>
+      </ul>
+    </div>
+
+  </div><!-- end finances section -->
+
+  <!-- MOM -->
+  <div class="section" id="mom">
+    <div class="section-header">
+      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Mom</h1>
+      <p>Care, admin, and long-term planning</p>
+    </div>
+
+    <!-- About Her -->
+    <div class="card" dir="rtl">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>קצת עליה</div>
+      </div>
+      <div style="font-size:14px;line-height:1.7;color:var(--text)">בת 73 · גרה בבת ים · אין מקורות הכנסה עצמאיים</div>
+    </div>
+
+    <!-- What I manage -->
+    <div class="card" dir="rtl">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>מה אני מנהלת עבורה</div>
+      </div>
+      <ul class="checklist" id="mom-manage-checklist">
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">שכר דירה</span><span class="item-note">3,500 ש"ח / חודש</span></div>
+        </li>
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">ביטוח בריאות</span><span class="item-note">למלא פרטים</span></div>
+        </li>
+        <li onclick="toggle(this)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">מסמכים ורופאים</span><span class="item-note">למלא פרטים</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Big Task — prominent -->
+    <div class="big-task-card" dir="rtl">
+      <span class="big-task-banner">משימה גדולה</span>
+      <div style="font-family:'Lora',serif;font-size:22px;letter-spacing:-0.02em;color:var(--text);margin-bottom:4px">לסדר את הכספים שלה</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-bottom:18px">פעם אחת — לאסוף את כל המידע ולסדר ייפויי כוח</div>
+      <ul class="checklist" id="mom-big-task-checklist">
+        <li onclick="toggle(this)" style="background:rgba(255,255,255,0.5)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">הר הכסף על שמה</span><span class="item-note">itur.mof.gov.il — לראות מה רשום</span></div>
+        </li>
+        <li onclick="toggle(this)" style="background:rgba(255,255,255,0.5)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">הר הביטוח על שמה</span><span class="item-note">harb.cma.gov.il — פוליסות פעילות</span></div>
+        </li>
+        <li onclick="toggle(this)" style="background:rgba(255,255,255,0.5)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">לברר אם יש חסכונות / קופות ישנות</span><span class="item-note"></span></div>
+        </li>
+        <li onclick="toggle(this)" style="background:rgba(255,255,255,0.5)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">לסדר ייפוי כוח</span><span class="item-note">לניהול עתידי מרחוק</span></div>
+        </li>
+        <li onclick="toggle(this)" style="background:rgba(255,255,255,0.5)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">לבדוק זכאות לקצבאות</span><span class="item-note">ביטוח לאומי, משרד הבריאות</span></div>
+        </li>
+        <li onclick="toggle(this)" style="background:rgba(255,255,255,0.5)">
+          <div class="check-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="item-meta"><span class="item-text">לבדוק אפשרות לביטוח סיעודי בגיל 73</span><span class="item-note"></span></div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Future Planning -->
+    <div class="card" dir="rtl">
+      <div class="card-title">
+        <div class="card-title-left"><div class="dot" style="background:var(--yellow)"></div>תכנון לטווח ארוך</div>
+      </div>
+      <div class="future-row">
+        <span class="label">ביטוח סיעודי</span>
+        <span class="val" style="color:var(--red)">אין כרגע</span>
+      </div>
+      <div class="future-row">
+        <span class="label">בית אבות (כשיגיע)</span>
+        <span class="val">12,000–20,000 ש"ח / חודש</span>
+      </div>
+      <div class="future-row">
+        <span class="label">יעד</span>
+        <span class="val">לבנות קרן ייעודית</span>
+      </div>
+    </div>
+
+  </div><!-- end mom section -->
 
   <!-- FREELANCE -->
   <div class="section active" id="freelance">
