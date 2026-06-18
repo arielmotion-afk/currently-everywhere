@@ -519,19 +519,28 @@
   }
   .fit-day-note::placeholder { color: var(--muted); opacity: 0.55; }
   .fit-check {
-    width: 28px; height: 28px; border-radius: 8px;
+    width: 26px; height: 26px; border-radius: 7px;
     border: 1.5px solid var(--border);
     background: #FFFFFF;
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.15s;
-    flex-shrink: 0;
+    cursor: pointer; transition: background 0.18s, border-color 0.18s, transform 0.1s;
+    flex-shrink: 0; padding: 0;
   }
   .fit-check:hover { border-color: var(--accent); }
-  .fit-check svg { width: 16px; height: 16px; opacity: 0; transition: opacity 0.15s; }
-  .fit-check.done { background: #4caf50; border-color: #4caf50; }
+  .fit-check:active { transform: scale(0.88); }
+  .fit-check svg { width: 14px; height: 14px; opacity: 0; transition: opacity 0.18s; }
+  .fit-check.done { background: var(--accent); border-color: var(--accent); }
   .fit-check.done svg { opacity: 1; color: #FFFFFF; }
-  .fit-check.big { width: 44px; height: 44px; border-radius: 10px; }
-  .fit-check.big svg { width: 24px; height: 24px; }
+  .fit-check.just-checked { animation: fit-check-pop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes fit-check-pop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.32); }
+    65%  { transform: scale(0.92); }
+    100% { transform: scale(1); }
+  }
+  .fit-check.big { width: 40px; height: 40px; border-radius: 10px; }
+  .fit-check.big svg { width: 22px; height: 22px; }
+  .fit-check.big.done { background: #4caf50; border-color: #4caf50; } /* day-row check stays green */
 
   /* Workout player */
   .fit-template-grid {
@@ -552,123 +561,154 @@
   .fit-template-count { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 
   .fit-active-bar {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 10px;
     background: #FFFFFF;
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px 18px; margin-bottom: 16px;
+    border-radius: 12px;
+    padding: 9px 14px; margin-bottom: 12px;
     position: sticky; top: calc(var(--sb-height) + 8px); z-index: 30;
-    box-shadow: 0 4px 14px rgba(45,31,26,0.05);
+    box-shadow: 0 3px 12px rgba(45,31,26,0.05);
   }
-  .fit-active-title { flex: 1; font-weight: 600; font-size: 14px; }
+  .fit-active-title { flex: 1; font-weight: 600; font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .fit-active-timer {
-    font-family: 'Lora', serif; font-size: 24px;
+    font-family: 'Lora', serif; font-size: 20px;
     letter-spacing: -0.02em; color: var(--text);
     font-variant-numeric: tabular-nums;
   }
   .fit-finish-btn {
     background: #4caf50; color: #FFFFFF;
-    border: none; border-radius: 10px;
-    padding: 9px 18px; font-weight: 600; font-size: 13px;
+    border: none; border-radius: 8px;
+    padding: 6px 12px; font-weight: 600; font-size: 12px;
     cursor: pointer; transition: background 0.15s;
     font-family: inherit;
   }
   .fit-finish-btn:hover { background: #3d9740; }
   .fit-cancel-btn {
     background: transparent; color: var(--muted);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: 9px 14px; font-size: 13px; cursor: pointer;
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; font-size: 12px; cursor: pointer;
     font-family: inherit;
   }
 
   .fit-exercise {
     background: #FFFFFF;
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 20px; margin-bottom: 12px;
+    border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 10px;
+    overflow: hidden;
   }
-  .fit-ex-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .fit-ex-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .fit-ex-name {
-    flex: 1; font-weight: 600; font-size: 15px;
+    flex: 1; font-weight: 600; font-size: 14px;
     color: var(--accent);
   }
   .fit-ex-name-input {
-    flex: 1; font-weight: 600; font-size: 15px;
+    flex: 1; font-weight: 600; font-size: 14px;
     color: var(--accent);
     border: none; background: transparent; outline: none;
     font-family: inherit; padding: 0;
   }
+  /* 2-column body: square video on the left, sets on the right */
+  .fit-ex-body {
+    display: grid;
+    grid-template-columns: 124px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  @media (max-width: 540px) {
+    .fit-ex-body { grid-template-columns: 100px 1fr; gap: 10px; }
+  }
   .fit-ex-gif {
-    width: 100%; aspect-ratio: 16/9;
+    width: 100%; aspect-ratio: 1; /* square */
     background: var(--bg); border-radius: 10px;
-    margin-bottom: 12px;
     display: flex; align-items: center; justify-content: center;
-    color: var(--muted); font-size: 13px;
+    color: var(--muted); font-size: 11px; text-align: center;
     cursor: pointer; overflow: hidden;
     border: 1.5px dashed var(--border);
+    position: relative;
+    padding: 6px;
   }
   .fit-ex-gif img,
   .fit-ex-gif video { width: 100%; height: 100%; object-fit: cover; }
   .fit-ex-gif:hover { border-color: var(--accent); color: var(--accent); }
-  .fit-ex-gif { position: relative; }
   .fit-ex-gif.uploading {
     background: linear-gradient(135deg, #FFF8F2 0%, #FFE8DD 100%);
     border-style: solid; border-color: var(--accent);
     color: var(--accent); font-weight: 600;
   }
   .fit-ex-media-clear {
-    position: absolute; top: 8px; right: 8px;
-    width: 28px; height: 28px; border-radius: 50%;
+    position: absolute; top: 5px; right: 5px;
+    width: 22px; height: 22px; border-radius: 50%;
     background: rgba(45,31,26,0.7); color: #FFFFFF;
     border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px; line-height: 1;
+    font-size: 14px; line-height: 1;
     opacity: 0; transition: opacity 0.15s;
+    padding: 0;
   }
-  .fit-ex-gif:hover .fit-ex-media-clear { opacity: 1; }
+  .fit-ex-gif:hover .fit-ex-media-clear,
+  .fit-ex-gif:focus-within .fit-ex-media-clear { opacity: 1; }
   .fit-ex-media-clear:hover { background: var(--red); }
+  .fit-ex-sets { min-width: 0; }
   .fit-set-header {
-    display: grid; grid-template-columns: 50px 1fr 90px 50px;
-    gap: 12px; align-items: center;
-    font-size: 11px; color: var(--muted);
+    display: grid; grid-template-columns: 22px 1fr 56px 28px;
+    gap: 8px; align-items: center;
+    font-size: 10px; color: var(--muted);
     text-transform: uppercase; letter-spacing: 0.06em;
-    font-weight: 600; padding: 6px 0;
+    font-weight: 600; padding: 2px 0 6px;
   }
   .fit-set-row {
-    display: grid; grid-template-columns: 50px 1fr 90px 50px;
-    gap: 12px; align-items: center; padding: 8px 0;
-    border-radius: 8px; transition: background 0.15s;
+    display: grid; grid-template-columns: 22px 1fr 56px 28px;
+    gap: 8px; align-items: center; padding: 4px 0;
+    border-radius: 6px; transition: background 0.15s;
   }
-  .fit-set-row.done { background: #E8F5E9; }
-  .fit-set-num { font-weight: 600; font-size: 14px; text-align: center; }
-  .fit-set-prev { color: var(--muted); font-size: 12.5px; }
+  .fit-set-row.done { background: rgba(230,106,74,0.08); }
+  .fit-set-num { font-weight: 600; font-size: 12.5px; text-align: center; }
+  .fit-set-prev { color: var(--muted); font-size: 11.5px; }
   .fit-set-input {
     width: 100%; font-family: 'DM Sans', sans-serif;
-    font-size: 14px; padding: 6px 8px; text-align: center;
-    border: 1px solid var(--border); border-radius: 6px;
+    font-size: 12.5px; padding: 4px 6px; text-align: center;
+    border: 1px solid var(--border); border-radius: 5px;
     background: var(--bg); color: var(--text);
     font-variant-numeric: tabular-nums;
   }
   .fit-set-input:focus { outline: none; border-color: var(--accent); background: #FFFFFF; }
-  .fit-set-row.done .fit-set-input { background: rgba(255,255,255,0.6); }
+  .fit-set-row.done .fit-set-input { background: rgba(255,255,255,0.7); }
+  /* Rest bar spans full card width at the bottom (extends past the card padding) */
   .fit-rest-bar {
-    position: relative; height: 28px;
-    background: var(--bg); border-radius: 8px;
-    overflow: hidden; margin: 6px 0;
-    border: 1px solid var(--border);
+    position: relative; height: 22px;
+    background: var(--bg);
+    overflow: hidden;
+    margin: 12px -16px -14px;
+    border-top: 1px solid var(--border);
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
   }
   .fit-rest-bar-fill {
     position: absolute; top: 0; left: 0; bottom: 0;
-    background: #2196F3;
+    background: linear-gradient(90deg, var(--accent), #FF8B6B);
     transition: width 0.5s linear;
   }
   .fit-rest-bar-text {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 600; color: #FFFFFF;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    font-size: 11.5px; font-weight: 600; color: #FFFFFF;
+    text-shadow: 0 1px 2px rgba(45,31,26,0.25);
     font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
   }
+  /* Big bottom-of-list finish button */
+  .fit-finish-bottom {
+    width: 100%; padding: 14px;
+    background: #4caf50; color: #FFFFFF;
+    border: none; border-radius: 14px;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; margin-top: 14px;
+    box-shadow: 0 4px 14px rgba(76,175,80,0.22);
+    transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+  }
+  .fit-finish-bottom:hover { background: #3d9740; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(76,175,80,0.28); }
+  .fit-finish-bottom:active { transform: translateY(0); }
   .fit-add-set {
     width: 100%; padding: 10px; border: 1px dashed var(--border);
     background: transparent; color: var(--muted);
@@ -3629,54 +3669,59 @@ function fitRenderPlayer() {
     </div>
     ${exHtml}
     <button class="fit-add-ex" onclick="fitAddExercise()">+ Add Exercise</button>
+    <button class="fit-finish-bottom" onclick="fitFinishWorkout()">Finish workout</button>
   `;
 }
 function fitRenderExercise(ex, exIdx, defaultRest) {
   const restSec = ex.rest || defaultRest;
-  const lastWorkout = (fitState.history || []).find(h => h.exercises && h.exercises.some(e => e.name === ex.name));
+  // Only one rest bar per exercise, sticky at the card bottom — it shows whichever set is resting.
+  const isResting = ex.restEndTime != null;
+  const remaining = isResting ? Math.max(0, ex.restEndTime - Date.now()) : 0;
+  const pct = isResting ? Math.max(0, Math.min(100, (remaining / restSec / 1000) * 100)) : 0;
   const setRows = ex.sets.map((s, si) => {
-    const isResting = ex.restEndTime && ex.restingSetIdx === si;
-    const remaining = isResting ? Math.max(0, ex.restEndTime - Date.now()) : 0;
-    const pct = isResting ? Math.max(0, Math.min(100, (remaining / restSec / 1000) * 100)) : 0;
-    const restBar = isResting ? `
-      <div class="fit-rest-bar" style="grid-column: 1 / -1">
-        <div class="fit-rest-bar-fill" id="fit-rest-fill-${ex.id}" style="width:${pct}%"></div>
-        <div class="fit-rest-bar-text" id="fit-rest-txt-${ex.id}">${fitFmtSec(remaining / 1000)}</div>
-      </div>` : '';
     const unit = ex.type === 'time' ? 'sec' : 'reps';
     return `
       <div class="fit-set-row${s.done ? ' done' : ''}">
         <div class="fit-set-num">${si + 1}</div>
         <div class="fit-set-prev">${s.target} ${unit}</div>
         <input class="fit-set-input" type="number" min="0" value="${s.value}" onchange="fitSetValue(${exIdx},${si},this.value)"/>
-        <button class="fit-check${s.done?' done':''}" onclick="fitToggleSet(${exIdx},${si})">
+        <button class="fit-check${s.done?' done':''}" id="fit-check-${ex.id}-${si}" onclick="fitToggleSet(${exIdx},${si})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </button>
       </div>
-      ${restBar}
     `;
   }).join('');
+  const restBar = isResting ? `
+    <div class="fit-rest-bar">
+      <div class="fit-rest-bar-fill" id="fit-rest-fill-${ex.id}" style="width:${pct}%"></div>
+      <div class="fit-rest-bar-text" id="fit-rest-txt-${ex.id}">${fitFmtSec(remaining / 1000)}</div>
+    </div>` : '';
   return `
     <div class="fit-exercise">
       <div class="fit-ex-header">
         <input class="fit-ex-name-input" value="${ex.name.replace(/"/g,'&quot;')}" onchange="fitRenameExercise(${exIdx}, this.value)"/>
         <button class="fit-ex-delete" onclick="fitDeleteExercise(${exIdx})" title="Remove exercise">×</button>
       </div>
-      <div class="fit-ex-gif${ex._uploading ? ' uploading' : ''}" onclick="fitMediaSlotClick(event, ${exIdx})">
-        ${ex._uploading
-          ? `Uploading${ex._uploadPct != null ? ' ' + ex._uploadPct + '%' : '…'}`
-          : (ex.gif
-            ? fitMediaTag(ex.gif, ex.name) + `<button type="button" class="fit-ex-media-clear" title="Remove media" onclick="event.stopPropagation();fitClearMedia(${exIdx})">×</button>`
-            : '🎬 Tap to upload a video')}
+      <div class="fit-ex-body">
+        <div class="fit-ex-gif${ex._uploading ? ' uploading' : ''}" onclick="fitMediaSlotClick(event, ${exIdx})">
+          ${ex._uploading
+            ? `Uploading${ex._uploadPct != null ? ' ' + ex._uploadPct + '%' : '…'}`
+            : (ex.gif
+              ? fitMediaTag(ex.gif, ex.name) + `<button type="button" class="fit-ex-media-clear" title="Remove media" onclick="event.stopPropagation();fitClearMedia(${exIdx})">×</button>`
+              : '🎬 Tap to upload')}
+        </div>
+        <div class="fit-ex-sets">
+          <div class="fit-set-header">
+            <div style="text-align:center">Set</div>
+            <div>Target</div>
+            <div style="text-align:center">${ex.type === 'time' ? 'Sec' : 'Reps'}</div>
+            <div style="text-align:center">✓</div>
+          </div>
+          ${setRows}
+          <button class="fit-add-set" onclick="fitAddSet(${exIdx})">+ Add Set</button>
+        </div>
       </div>
-      <div class="fit-set-header">
-        <div style="text-align:center">Set</div>
-        <div>Target</div>
-        <div style="text-align:center">${ex.type === 'time' ? 'Seconds' : 'Reps'}</div>
-        <div style="text-align:center">✓</div>
-      </div>
-      ${setRows}
-      <button class="fit-add-set" onclick="fitAddSet(${exIdx})">+ Add Set</button>
+      ${restBar}
     </div>
   `;
 }
@@ -3688,18 +3733,28 @@ function fitSetValue(exIdx, setIdx, v) {
 function fitToggleSet(exIdx, setIdx) {
   const ex = fitState.active.exercises[exIdx];
   const s = ex.sets[setIdx];
+  const wasDone = s.done;
   s.done = !s.done;
   if (s.done) {
     ex.restEndTime = Date.now() + (ex.rest || fitState.active.rest) * 1000;
     ex.restingSetIdx = setIdx;
-  } else {
-    if (ex.restingSetIdx === setIdx) {
-      ex.restEndTime = null;
-      ex.restingSetIdx = null;
-    }
+  } else if (ex.restingSetIdx === setIdx) {
+    ex.restEndTime = null;
+    ex.restingSetIdx = null;
   }
   fitSave();
   fitRenderPlayer();
+  // Pop animation on the specific button we clicked — only when going from
+  // unchecked → checked. Class is added after render so it doesn't get wiped,
+  // and removed shortly after so consecutive clicks animate fresh each time.
+  if (!wasDone) {
+    requestAnimationFrame(() => {
+      const btn = document.getElementById(`fit-check-${ex.id}-${setIdx}`);
+      if (!btn) return;
+      btn.classList.add('just-checked');
+      setTimeout(() => btn.classList.remove('just-checked'), 340);
+    });
+  }
 }
 function fitAddSet(exIdx) {
   const ex = fitState.active.exercises[exIdx];
