@@ -2497,10 +2497,18 @@ function flRenderMonthEntries(id) {
     el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:14px 0;text-align:center">No hours logged this month yet</div>';
     return;
   }
+  // When the user didn't type a custom description (or it's the legacy
+  // "Timer session" filler), show the project name as the label instead.
+  const labelFor = (e) => {
+    const desc = (e.desc || '').trim();
+    if (desc && desc.toLowerCase() !== 'timer session') return desc;
+    const p = (c.projects||[]).find(x => x.id === e.pid);
+    return p ? p.name : '—';
+  };
   el.innerHTML = entries.map(e => `
     <div class="fl-entry">
       <span class="fl-entry-date">${e.date.slice(5).replace('-','/')}</span>
-      <div class="fl-entry-desc">${e.desc||'—'}</div>
+      <div class="fl-entry-desc">${labelFor(e)}</div>
       <span class="fl-entry-hours">${e.hours}h</span>
       <div class="fl-entry-actions">
         <button onclick="flEditEntry(${id},${e.pid},${e.id})" class="fl-act-btn">Edit</button>
@@ -2669,7 +2677,7 @@ function flRenderProjectEntries(cid, pid) {
   el.innerHTML = p.entries.map(e => `
     <div class="fl-entry">
       <span class="fl-entry-date">${e.date}</span>
-      <div class="fl-entry-desc" style="flex:1">${e.desc||'—'}</div>
+      <div class="fl-entry-desc" style="flex:1">${(e.desc && e.desc.trim().toLowerCase() !== 'timer session') ? e.desc : '—'}</div>
       <span class="fl-entry-hours">${e.hours}h · ₪${Math.round(e.hours*c.rate).toLocaleString()}</span>
       <div class="fl-entry-actions">
         <button onclick="flEditEntry(${cid},${pid},${e.id})" class="fl-act-btn">Edit</button>
@@ -2870,7 +2878,7 @@ function flLogSave() {
   const c = flClients.find(x => x.id===cid);
   const p = c && (c.projects||[]).find(x => x.id===pid);
   if (!p) { flHideModal('fl-log-modal'); return; }
-  const desc = document.getElementById('fl-log-desc').value.trim() || 'Timer session';
+  const desc = document.getElementById('fl-log-desc').value.trim();
   const today = new Date().toISOString().slice(0,10);
   p.entries.unshift({ id: Date.now(), date: today, hours, desc });
   flHideModal('fl-log-modal'); _flLogCtx = null;
