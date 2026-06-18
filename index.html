@@ -531,11 +531,10 @@
   .fit-check svg { width: 14px; height: 14px; opacity: 0; transition: opacity 0.18s; }
   .fit-check.done { background: var(--accent); border-color: var(--accent); }
   .fit-check.done svg { opacity: 1; color: #FFFFFF; }
-  .fit-check.just-checked { animation: fit-check-pop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .fit-check.just-checked { animation: fit-check-pop 0.22s ease-out; }
   @keyframes fit-check-pop {
     0%   { transform: scale(1); }
-    35%  { transform: scale(1.32); }
-    65%  { transform: scale(0.92); }
+    50%  { transform: scale(1.12); }
     100% { transform: scale(1); }
   }
   .fit-check.big { width: 40px; height: 40px; border-radius: 10px; }
@@ -611,12 +610,15 @@
   /* 2-column body: square video on the left, sets on the right */
   .fit-ex-body {
     display: grid;
-    grid-template-columns: 124px 1fr;
-    gap: 14px;
+    grid-template-columns: 240px 1fr;
+    gap: 16px;
     align-items: start;
   }
   @media (max-width: 540px) {
-    .fit-ex-body { grid-template-columns: 100px 1fr; gap: 10px; }
+    .fit-ex-body { grid-template-columns: 180px 1fr; gap: 12px; }
+  }
+  @media (max-width: 380px) {
+    .fit-ex-body { grid-template-columns: 140px 1fr; gap: 10px; }
   }
   .fit-ex-gif {
     width: 100%; aspect-ratio: 1; /* square */
@@ -3752,7 +3754,7 @@ function fitToggleSet(exIdx, setIdx) {
       const btn = document.getElementById(`fit-check-${ex.id}-${setIdx}`);
       if (!btn) return;
       btn.classList.add('just-checked');
-      setTimeout(() => btn.classList.remove('just-checked'), 340);
+      setTimeout(() => btn.classList.remove('just-checked'), 240);
     });
   }
 }
