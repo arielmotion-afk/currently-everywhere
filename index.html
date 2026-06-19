@@ -784,6 +784,67 @@
   .fl-sync-pill.error .fl-sync-pill-dot { background: var(--red); }
   .fl-sync-pill.unconfigured .fl-sync-pill-dot { background: #9C8A7A; }
 
+  /* FREELANCE DAILY LOG */
+  .fl-daily-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 12px; gap: 14px;
+  }
+  .fl-daily-month-name {
+    font-family: 'Lora', serif; font-size: 22px;
+    letter-spacing: -0.02em; color: var(--text);
+  }
+  .fl-daily-total { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .fl-daily-total b { color: var(--text); font-weight: 600; }
+  .fl-daily-row {
+    display: grid;
+    grid-template-columns: 92px 1fr auto;
+    gap: 14px; align-items: center;
+    padding: 12px 16px; border-radius: 12px;
+    margin-bottom: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+  .fl-daily-row.weekend { opacity: 0.55; background: var(--bg); }
+  .fl-daily-row.empty-weekday {
+    background: linear-gradient(135deg, #FFF8F2 0%, #FFE8DD 100%);
+    border-color: rgba(255,200,170,0.55);
+  }
+  .fl-daily-row.today {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(230,106,74,0.14);
+  }
+  .fl-daily-row.future { opacity: 0.32; }
+  .fl-daily-weekday {
+    font-size: 10.5px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    font-weight: 700; margin-bottom: 2px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .fl-daily-date { font-weight: 500; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .fl-daily-today-tag {
+    background: var(--accent); color: #FFFFFF;
+    padding: 1px 7px; border-radius: 999px;
+    font-size: 9px; letter-spacing: 0.08em;
+  }
+  .fl-daily-clients {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    font-size: 12.5px; color: var(--text);
+  }
+  .fl-daily-client { display: inline-flex; align-items: center; gap: 6px; }
+  .fl-daily-client-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .fl-daily-client b { font-weight: 600; }
+  .fl-daily-hours {
+    font-family: 'Lora', serif; font-size: 22px;
+    letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+    white-space: nowrap; color: var(--text);
+  }
+  .fl-daily-hours.empty { color: var(--muted); font-size: 16px; font-family: inherit; }
+  .fl-daily-row.empty-weekday .fl-daily-hours { color: var(--accent); font-weight: 500; }
+  .fl-daily-empty-note {
+    color: var(--accent); font-weight: 500; font-size: 12.5px;
+  }
+
   /* FREELANCE STAT CARDS */
   .fl-stat-grid {
     display: grid; grid-template-columns: 1fr 1fr;
@@ -1738,6 +1799,13 @@
       </div>
     </div>
 
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('freelance', 'clients', this)">Clients</button>
+      <button class="tab-btn" onclick="flSwitchToDaily(this)">Daily log</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-freelance-clients">
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <p style="color:var(--muted);font-size:13px" id="fl-empty-hint">Add your first client to get started.</p>
       <button class="btn btn-primary" onclick="flOpenNewClient()">+ New client</button>
@@ -1772,6 +1840,13 @@
     </div>
 
     <div id="fl-client-cards"></div>
+
+    </div><!-- end tab-freelance-clients -->
+
+    <div class="tab-panel" id="tab-freelance-daily">
+      <div id="fl-daily-root"></div>
+    </div>
+
   </div><!-- end freelance section -->
 
 
@@ -2387,6 +2462,89 @@ function flUpdateStats() {
   if (mEl) mEl.textContent = FL_MONTHS[new Date().getMonth()];
   const hint = document.getElementById('fl-empty-hint');
   if (hint) hint.style.display = flClients.length>0 ? 'none' : '';
+  flRenderDaily();
+}
+
+// ── DAILY LOG ──
+// Renders the current month as a vertical list of days. Past weekdays with
+// nothing logged get a coral tint to nudge the user to fill them in — the
+// whole point of the tab. Weekends + future days are dimmed.
+function flRenderDaily() {
+  const root = document.getElementById('fl-daily-root');
+  if (!root) return;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+  const todayStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  // Day map for this month
+  const dayMap = {};
+  flClients.forEach(c => {
+    (c.projects || []).forEach(p => {
+      (p.entries || []).forEach(e => {
+        if (!e.date || e.date.slice(0, 7) !== year + '-' + String(month + 1).padStart(2, '0')) return;
+        if (!dayMap[e.date]) dayMap[e.date] = { hours: 0, byClient: {} };
+        dayMap[e.date].hours += e.hours;
+        if (!dayMap[e.date].byClient[c.id]) dayMap[e.date].byClient[c.id] = { name: c.name, color: c.color || 'var(--accent)', hours: 0 };
+        dayMap[e.date].byClient[c.id].hours += e.hours;
+      });
+    });
+  });
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  let totalHours = 0, loggedDays = 0, emptyWeekdays = 0;
+  const rows = [];
+  // Newest first: today at top, then descending
+  for (let d = daysInMonth; d >= 1; d--) {
+    const dt = new Date(year, month, d);
+    const ds = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const dow = dt.getDay();
+    const isWeekend = dow === 0 || dow === 6;
+    const isToday = ds === todayStr;
+    const isFuture = ds > todayStr;
+    const data = dayMap[ds];
+    const hasHours = data && data.hours > 0;
+    if (hasHours) { totalHours += data.hours; loggedDays++; }
+    const isEmptyWeekday = !isWeekend && !isFuture && !isToday && !hasHours;
+    if (isEmptyWeekday) emptyWeekdays++;
+    const cls = ['fl-daily-row'];
+    if (isToday) cls.push('today');
+    if (isFuture) cls.push('future');
+    if (isWeekend) cls.push('weekend');
+    if (isEmptyWeekday) cls.push('empty-weekday');
+    const fmtH = (h) => (h % 1 === 0 ? h : h.toFixed(1)) + 'h';
+    const clientsHtml = data
+      ? Object.values(data.byClient).sort((a, b) => b.hours - a.hours).map(b =>
+          `<span class="fl-daily-client"><span class="fl-daily-client-dot" style="background:${b.color}"></span>${b.name} <b>${fmtH(b.hours)}</b></span>`
+        ).join('')
+      : (isEmptyWeekday ? '<span class="fl-daily-empty-note">Nothing logged yet</span>' : '');
+    const hoursHtml = hasHours
+      ? `<div class="fl-daily-hours">${fmtH(data.hours)}</div>`
+      : `<div class="fl-daily-hours empty">—</div>`;
+    rows.push(`<div class="${cls.join(' ')}">
+      <div>
+        <div class="fl-daily-weekday">${dayNames[dow]}${isToday ? '<span class="fl-daily-today-tag">Today</span>' : ''}</div>
+        <div class="fl-daily-date">${String(month + 1).padStart(2, '0')}/${String(d).padStart(2, '0')}</div>
+      </div>
+      <div class="fl-daily-clients">${clientsHtml}</div>
+      ${hoursHtml}
+    </div>`);
+  }
+  const monthName = FL_MONTHS[month] + ' ' + year;
+  const gapNote = emptyWeekdays > 0
+    ? ` · <span style="color:var(--accent);font-weight:500">${emptyWeekdays} weekday${emptyWeekdays === 1 ? '' : 's'} unlogged</span>`
+    : '';
+  root.innerHTML = `
+    <div class="fl-daily-header">
+      <div class="fl-daily-month-name">${monthName}</div>
+      <div class="fl-daily-total"><b>${totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1)}h</b> across ${loggedDays} day${loggedDays === 1 ? '' : 's'}${gapNote}</div>
+    </div>
+    ${rows.join('')}
+  `;
+}
+
+function flSwitchToDaily(btn) {
+  switchTab('freelance', 'daily', btn);
+  flRenderDaily();
 }
 
 // ── PERSISTENCE ──
