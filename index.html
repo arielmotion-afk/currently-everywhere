@@ -860,7 +860,7 @@
     flex: 1;
     display: flex; flex-direction: column-reverse;
     align-items: stretch; justify-content: flex-start;
-    border-radius: 4px 4px 0 0;
+    border-radius: 6px;
     overflow: hidden;
     transition: opacity 0.15s;
   }
@@ -2689,12 +2689,15 @@ function flSwitchToDaily(btn) {
 function flRenderDaily() {
   const root = document.getElementById('fl-daily-root');
   if (!root) return;
-  const html = _flDailyMode === 'week' ? flRenderDailyWeek() : flRenderDailyDay();
+  const html = _flDailyMode === 'week' ? flRenderDailyWeek()
+             : _flDailyMode === 'month' ? flRenderDailyMonth()
+             : flRenderDailyDay();
   root.innerHTML = `
     <div class="fl-daily-card">
       <div class="fl-daily-toggle">
         <button class="${_flDailyMode === 'day' ? 'active' : ''}" onclick="flSetDailyMode('day')">Day</button>
         <button class="${_flDailyMode === 'week' ? 'active' : ''}" onclick="flSetDailyMode('week')">Week</button>
+        <button class="${_flDailyMode === 'month' ? 'active' : ''}" onclick="flSetDailyMode('month')">Month</button>
       </div>
       ${html}
     </div>
@@ -2908,6 +2911,125 @@ function flRenderDailyWeek() {
     <div style="margin-top:14px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:700">Week breakdown</div>
     <div style="margin-top:6px">${list}</div>
   `;
+}
+
+// Month mode — last 6 calendar months ending with the current one. Bars show
+// total monthly hours, segmented by client; the hero stat is the monthly
+// average across logged months; mini list adds income per month at the user
+// rates currently set on each client. Outlier cap is 250h/month so a single
+// fixed-fee 50h day inside an otherwise normal month doesn't dominate.
+const FL_MONTH_CAP_HOURS = 250;
+function flRenderDailyMonth() {
+  const now = new Date();
+  const todayMonth = now.getFullYear() * 12 + now.getMonth();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const prefix = year + '-' + String(month + 1).padStart(2, '0');
+    months.push({
+      year, month, prefix,
+      label: FL_MONTHS[month],
+      labelLong: FL_MONTHS[month] + ' ' + year,
+      isCurrent: (year * 12 + month) === todayMonth,
+    });
+  }
+  // Aggregate per-month: total hours, per-client hours, and income via rates.
+  months.forEach(m => {
+    const lastDay = new Date(m.year, m.month + 1, 0).getDate();
+    const map = flBuildDayMap(m.prefix + '-01', m.prefix + '-' + String(lastDay).padStart(2, '0'));
+    m.byClient = {};
+    m.hours = 0;
+    m.income = 0;
+    m.loggedDays = 0;
+    Object.values(map).forEach(d => {
+      m.hours += d.hours;
+      if (d.hours > 0) m.loggedDays++;
+      Object.entries(d.byClient).forEach(([cid, b]) => {
+        if (!m.byClient[cid]) m.byClient[cid] = { name: b.name, color: b.color, hours: 0 };
+        m.byClient[cid].hours += b.hours;
+      });
+    });
+    Object.entries(m.byClient).forEach(([cid, b]) => {
+      const c = flClients.find(x => String(x.id) === String(cid));
+      if (c) m.income += b.hours * (c.rate || 0);
+    });
+  });
+  // Chart scale — non-outlier max with a cap floor so a sleepy month doesn't make every other month tower.
+  const monthHours = months.map(m => m.hours);
+  const normalMax = Math.max(0, ...monthHours.filter(h => h > 0 && h <= FL_MONTH_CAP_HOURS));
+  const chartMax = normalMax > 0 ? normalMax : Math.max(1, ...monthHours);
+  const pxPerHour = 152 / chartMax;
+  const cols = months.map(m => {
+    const cls = ['fl-chart-col'];
+    if (m.isCurrent) cls.push('today');
+    const isCapped = m.hours > chartMax;
+    if (isCapped) cls.push('capped');
+    const ratio = isCapped ? chartMax / m.hours : 1;
+    const segs = Object.values(m.byClient).sort((a, b) => a.name.localeCompare(b.name)).map(c =>
+      `<div class="fl-chart-seg" style="background:${flPastel(c.color)};height:${(c.hours * ratio * pxPerHour).toFixed(1)}px"></div>`
+    ).join('');
+    const barH = Math.min(m.hours, chartMax) * pxPerHour;
+    const capLabel = isCapped ? `<div class="fl-chart-cap-label">${flFmtH(m.hours)}</div>` : '';
+    const tooltip = m.hours > 0
+      ? `<div class="fl-chart-tooltip">${m.labelLong} · ${flFmtH(m.hours)}${m.income > 0 ? ' · ₪' + Math.round(m.income).toLocaleString() : ''}</div>`
+      : '';
+    return `<div class="${cls.join(' ')}">
+      ${capLabel}
+      <div class="fl-chart-col-bar" style="height:${barH.toFixed(1)}px">${segs}</div>
+      ${tooltip}
+    </div>`;
+  }).join('');
+  const axis = months.map(m =>
+    `<div class="fl-chart-axis-cell ${m.isCurrent ? 'today' : ''}">${m.label}</div>`
+  ).join('');
+  // Legend over the visible 6-month window
+  const legendMap = {};
+  months.forEach(m => Object.entries(m.byClient).forEach(([cid, b]) => {
+    if (!legendMap[cid]) legendMap[cid] = { name: b.name, color: b.color, hours: 0 };
+    legendMap[cid].hours += b.hours;
+  }));
+  const legend = flLegendFromAgg(legendMap);
+  const totalHours = months.reduce((s, m) => s + m.hours, 0);
+  const totalIncome = months.reduce((s, m) => s + m.income, 0);
+  const loggedMonths = months.filter(m => m.hours > 0).length;
+  const avg = loggedMonths > 0 ? totalHours / loggedMonths : 0;
+  const list = [...months].reverse().map(m => flRenderDailyMiniMonth(m)).join('');
+  return `
+    <div class="fl-daily-hero">
+      <div class="fl-daily-hero-left">
+        <div class="fl-daily-hero-label">Last 6 months · monthly average</div>
+        <div class="fl-daily-hero-value">${flFmtH(avg)}</div>
+      </div>
+      <div class="fl-daily-hero-right">
+        <div><b>${flFmtH(totalHours)}</b> total · ${loggedMonths} of 6 months</div>
+        ${totalIncome > 0 ? `<div style="margin-top:3px"><b style="color:var(--text)">₪${Math.round(totalIncome).toLocaleString()}</b> income</div>` : ''}
+      </div>
+    </div>
+    ${legend}
+    <div class="fl-chart-bars">${cols}</div>
+    <div class="fl-chart-axis">${axis}</div>
+    <div style="margin-top:14px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:700">Month breakdown</div>
+    <div style="margin-top:6px">${list}</div>
+  `;
+}
+function flRenderDailyMiniMonth(m) {
+  const cls = ['fl-daily-mini'];
+  if (m.isCurrent) cls.push('today');
+  const clientsHtml = Object.values(m.byClient).length
+    ? Object.values(m.byClient).sort((a, b) => b.hours - a.hours).map(b =>
+        `<span class="fl-daily-mini-client"><span class="fl-daily-mini-client-dot" style="background:${b.color}"></span>${b.name} ${flFmtH(b.hours)}</span>`
+      ).join('')
+    : '<span class="fl-daily-mini-empty-note" style="color:var(--muted);font-weight:400">No hours</span>';
+  const hoursBlock = m.hours > 0
+    ? `<div class="fl-daily-mini-hours">${flFmtH(m.hours)}${m.income > 0 ? `<div style="font-size:11px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:400;letter-spacing:0;margin-top:1px">₪${Math.round(m.income).toLocaleString()}</div>` : ''}</div>`
+    : `<div class="fl-daily-mini-hours empty">—</div>`;
+  return `<div class="${cls.join(' ')}">
+    <div class="fl-daily-mini-date"><span class="wd">${m.isCurrent ? 'Now' : ''}</span>${m.labelLong}</div>
+    <div class="fl-daily-mini-clients">${clientsHtml}</div>
+    ${hoursBlock}
+  </div>`;
 }
 
 function flLegendHTML(dayMap) {
