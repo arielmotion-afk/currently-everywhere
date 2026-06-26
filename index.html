@@ -876,6 +876,22 @@
   }
   .fl-chart-col.future { opacity: 0.25; }
   .fl-chart-col.today .fl-chart-axis-label { color: var(--accent); font-weight: 700; }
+  /* Outlier bars: real total floats above the capped bar */
+  .fl-chart-col.capped .fl-chart-col-bar {
+    border-top: 2px dashed rgba(230,106,74,0.7);
+  }
+  .fl-chart-cap-label {
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
   .fl-chart-axis {
     display: flex; gap: 3px; margin-top: 4px;
   }
@@ -2594,6 +2610,29 @@ function flIsoWeekKey(d) {
 }
 function flFmtH(h) { return (h % 1 === 0 ? h : h.toFixed(1)) + 'h'; }
 
+// Lighten a hex color toward white for soft pastel chart fills. Keeps the
+// client's hue identity but stops dark colors (e.g. Sticklight #3b3d38)
+// from rendering as flat black slabs in the bar chart.
+function flPastel(hex) {
+  if (!hex || hex[0] !== '#') return hex; // pass through vars like 'var(--accent)'
+  let h = hex.slice(1);
+  if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  if (h.length !== 6) return hex;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const blend = 0.55; // ratio toward white — higher = more pastel
+  const pr = Math.round(r + (255 - r) * blend);
+  const pg = Math.round(g + (255 - g) * blend);
+  const pb = Math.round(b + (255 - b) * blend);
+  return `rgb(${pr},${pg},${pb})`;
+}
+
+// Anything above this single-day total is treated as a fixed-fee outlier
+// and gets capped in the chart so the rest of the bars stay readable.
+const FL_DAY_CAP_HOURS = 12;
+const FL_WEEK_CAP_HOURS = 60;
+
 // Build a date-string → { hours, byClient: {id → {name, color, hours}} } map
 // covering only entries that fall inside the given [start, end] window
 // (both inclusive, ISO date strings).
@@ -2667,25 +2706,36 @@ function flRenderDailyDay() {
     days.push({ dt, ds, dow, isWeekend, isToday, isFuture, isEmptyWeekday, data, hasHours });
   }
 
-  // Bar heights: scale by max-hours-day so the tallest bar fills the chart.
-  const maxH = Math.max(...days.map(x => x.data ? x.data.hours : 0), 1);
-  const pxPerHour = 152 / maxH;
+  // Scale by the tallest *non-outlier* day so fixed-fee 50h days don't make
+  // every normal 4h day shrink to a sliver. Outliers are still drawn — capped
+  // at the chart max with a coral label showing their real total above.
+  const dayHours = days.map(x => x.data ? x.data.hours : 0);
+  const normalMax = Math.max(0, ...dayHours.filter(h => h > 0 && h <= FL_DAY_CAP_HOURS));
+  const chartMax = normalMax > 0 ? normalMax : Math.max(1, ...dayHours);
+  const pxPerHour = 152 / chartMax;
 
   days.forEach(x => {
     const cls = ['fl-chart-col'];
     if (x.isToday) cls.push('today');
     if (x.isFuture) cls.push('future');
     if (x.isEmptyWeekday) cls.push('empty-weekday');
-    const segs = x.data
-      ? Object.values(x.data.byClient).sort((a, b) => a.name.localeCompare(b.name)).map(c =>
-          `<div class="fl-chart-seg" style="background:${c.color};height:${(c.hours * pxPerHour).toFixed(1)}px"></div>`
-        ).join('')
-      : '';
-    const barH = x.data ? x.data.hours * pxPerHour : 0;
+    let segs = '', capLabel = '', barH = 0;
+    if (x.data) {
+      const isCapped = x.data.hours > chartMax;
+      if (isCapped) cls.push('capped');
+      // Scale each segment by the same ratio so colors stay proportional within the bar.
+      const ratio = isCapped ? chartMax / x.data.hours : 1;
+      segs = Object.values(x.data.byClient).sort((a, b) => a.name.localeCompare(b.name)).map(c =>
+        `<div class="fl-chart-seg" style="background:${flPastel(c.color)};height:${(c.hours * ratio * pxPerHour).toFixed(1)}px"></div>`
+      ).join('');
+      barH = Math.min(x.data.hours, chartMax) * pxPerHour;
+      if (isCapped) capLabel = `<div class="fl-chart-cap-label">${flFmtH(x.data.hours)}</div>`;
+    }
     const tooltip = x.hasHours
       ? `<div class="fl-chart-tooltip">${dayNames[x.dow]} ${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')} · ${flFmtH(x.data.hours)}</div>`
       : (x.isEmptyWeekday ? `<div class="fl-chart-tooltip">${dayNames[x.dow]} ${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')} · nothing logged</div>` : '');
     cols.push(`<div class="${cls.join(' ')}">
+      ${capLabel}
       <div class="fl-chart-col-bar" style="height:${barH.toFixed(1)}px">${segs}</div>
       ${tooltip}
     </div>`);
@@ -2762,22 +2812,32 @@ function flRenderDailyWeek() {
     w.isFuture = w.start > now;
   });
 
-  const maxH = Math.max(...weeks.map(w => w.hours), 1);
-  const pxPerHour = 152 / maxH;
+  // Scale by the heaviest *non-outlier* week — a single 50h fixed-fee day
+  // dropped into one week shouldn't squash the other 7.
+  const weekHours = weeks.map(w => w.hours);
+  const normalMax = Math.max(0, ...weekHours.filter(h => h > 0 && h <= FL_WEEK_CAP_HOURS));
+  const chartMax = normalMax > 0 ? normalMax : Math.max(1, ...weekHours);
+  const pxPerHour = 152 / chartMax;
 
   const cols = weeks.map(w => {
     const cls = ['fl-chart-col'];
     if (w.isCurrent) cls.push('today');
     if (w.isFuture) cls.push('future');
+    let capLabel = '';
+    const isCapped = w.hours > chartMax;
+    if (isCapped) cls.push('capped');
+    const ratio = isCapped ? chartMax / w.hours : 1;
     const segs = Object.values(w.byClient).sort((a, b) => a.name.localeCompare(b.name)).map(c =>
-      `<div class="fl-chart-seg" style="background:${c.color};height:${(c.hours * pxPerHour).toFixed(1)}px"></div>`
+      `<div class="fl-chart-seg" style="background:${flPastel(c.color)};height:${(c.hours * ratio * pxPerHour).toFixed(1)}px"></div>`
     ).join('');
-    const barH = w.hours * pxPerHour;
+    const barH = Math.min(w.hours, chartMax) * pxPerHour;
+    if (isCapped) capLabel = `<div class="fl-chart-cap-label">${flFmtH(w.hours)}</div>`;
     const label = `${(w.start.getMonth() + 1)}/${w.start.getDate()}`;
     const tooltip = w.hours > 0
       ? `<div class="fl-chart-tooltip">Wk of ${label} · ${flFmtH(w.hours)}</div>`
       : '';
     return `<div class="${cls.join(' ')}">
+      ${capLabel}
       <div class="fl-chart-col-bar" style="height:${barH.toFixed(1)}px">${segs}</div>
       ${tooltip}
     </div>`;
