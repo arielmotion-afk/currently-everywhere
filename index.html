@@ -846,8 +846,8 @@
   /* Stacked bar chart */
   .fl-chart-bars {
     display: flex; gap: 3px; align-items: flex-end;
-    height: 160px; margin: 0 0 6px;
-    padding-top: 4px;
+    height: 180px; margin: 0 0 6px;
+    padding-top: 22px; /* breathing room above bars for cap labels */
   }
   .fl-chart-col {
     flex: 1; min-width: 0;
@@ -877,15 +877,12 @@
   .fl-chart-col.future { opacity: 0.25; }
   .fl-chart-col.today .fl-chart-axis-label { color: var(--accent); font-weight: 700; }
   /* Outlier bars: real total floats above the capped bar */
-  .fl-chart-col.capped .fl-chart-col-bar {
-    border-top: 2px dashed rgba(230,106,74,0.7);
-  }
   .fl-chart-cap-label {
     position: absolute;
-    bottom: calc(100% + 2px);
+    bottom: calc(100% + 4px);
     left: 50%;
     transform: translateX(-50%);
-    font-size: 9.5px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--accent);
     white-space: nowrap;
@@ -2610,22 +2607,50 @@ function flIsoWeekKey(d) {
 }
 function flFmtH(h) { return (h % 1 === 0 ? h : h.toFixed(1)) + 'h'; }
 
-// Lighten a hex color toward white for soft pastel chart fills. Keeps the
-// client's hue identity but stops dark colors (e.g. Sticklight #3b3d38)
-// from rendering as flat black slabs in the bar chart.
+// Pastel a hex color via HSL: bump lightness into the soft range and soften
+// saturation. Better than a plain white-blend because dark hues keep their
+// identity (a deep navy becomes a soft sky blue, not a pale wash).
 function flPastel(hex) {
-  if (!hex || hex[0] !== '#') return hex; // pass through vars like 'var(--accent)'
+  if (!hex || hex[0] !== '#') return hex; // pass through CSS vars
   let h = hex.slice(1);
   if (h.length === 3) h = h.split('').map(c => c + c).join('');
   if (h.length !== 6) return hex;
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  const blend = 0.55; // ratio toward white — higher = more pastel
-  const pr = Math.round(r + (255 - r) * blend);
-  const pg = Math.round(g + (255 - g) * blend);
-  const pb = Math.round(b + (255 - b) * blend);
-  return `rgb(${pr},${pg},${pb})`;
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  // RGB → HSL
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const L0 = (max + min) / 2;
+  let H = 0, S = 0;
+  if (max !== min) {
+    const d = max - min;
+    S = L0 > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) H = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) H = ((b - r) / d + 2) / 6;
+    else H = ((r - g) / d + 4) / 6;
+  }
+  // Pastel transform: push lightness into the soft band, dial saturation
+  // down so the result reads as "candy" rather than fully neon.
+  const L = Math.max(0.74, Math.min(0.82, L0 * 0.45 + 0.55));
+  const Sp = Math.min(0.62, Math.max(S * 0.85, S === 0 ? 0 : 0.25));
+  // HSL → RGB
+  let R, G, B;
+  if (Sp === 0) { R = G = B = L; }
+  else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1; if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    };
+    const q = L < 0.5 ? L * (1 + Sp) : L + Sp - L * Sp;
+    const p = 2 * L - q;
+    R = hue2rgb(p, q, H + 1 / 3);
+    G = hue2rgb(p, q, H);
+    B = hue2rgb(p, q, H - 1 / 3);
+  }
+  return `rgb(${Math.round(R * 255)},${Math.round(G * 255)},${Math.round(B * 255)})`;
 }
 
 // Anything above this single-day total is treated as a fixed-fee outlier
