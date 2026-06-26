@@ -785,64 +785,165 @@
   .fl-sync-pill.unconfigured .fl-sync-pill-dot { background: #9C8A7A; }
 
   /* FREELANCE DAILY LOG */
-  .fl-daily-header {
+  .fl-daily-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #FFFAF2 100%);
+    border: 1px solid rgba(236,227,214,0.6);
+    border-radius: 18px;
+    padding: 18px 20px; margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(45,31,26,0.03);
+  }
+  .fl-daily-toggle {
+    display: inline-flex; align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px; margin-bottom: 14px;
+  }
+  .fl-daily-toggle button {
+    background: transparent; border: none;
+    padding: 6px 16px; border-radius: 999px;
+    font-size: 12px; color: var(--muted);
+    font-family: inherit; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .fl-daily-toggle button.active {
+    background: var(--accent); color: #FFFFFF;
+  }
+  .fl-daily-hero {
     display: flex; align-items: baseline; justify-content: space-between;
-    margin-bottom: 12px; gap: 14px;
+    gap: 14px; margin-bottom: 14px; flex-wrap: wrap;
   }
-  .fl-daily-month-name {
-    font-family: 'Lora', serif; font-size: 22px;
+  .fl-daily-hero-left .fl-daily-hero-label {
+    font-size: 10.5px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    font-weight: 700; margin-bottom: 4px;
+  }
+  .fl-daily-hero-left .fl-daily-hero-value {
+    font-family: 'Lora', serif; font-size: 30px;
     letter-spacing: -0.02em; color: var(--text);
+    line-height: 1.05; font-variant-numeric: tabular-nums;
   }
-  .fl-daily-total { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .fl-daily-total b { color: var(--text); font-weight: 600; }
-  .fl-daily-row {
+  .fl-daily-hero-right {
+    text-align: right; font-size: 12.5px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .fl-daily-hero-right b { color: var(--text); font-weight: 600; }
+  .fl-daily-gap-note {
+    color: var(--accent); font-weight: 600; font-size: 11.5px;
+    margin-top: 3px;
+  }
+  .fl-daily-legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    font-size: 12px; color: var(--muted);
+    padding: 10px 12px; margin-bottom: 14px;
+    background: var(--bg); border-radius: 10px;
+  }
+  .fl-daily-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+  .fl-daily-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .fl-daily-legend b { color: var(--text); font-weight: 600; }
+
+  /* Stacked bar chart */
+  .fl-chart-bars {
+    display: flex; gap: 3px; align-items: flex-end;
+    height: 160px; margin: 0 0 6px;
+    padding-top: 4px;
+  }
+  .fl-chart-col {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column;
+    align-items: stretch; height: 100%;
+    cursor: default;
+    position: relative;
+  }
+  .fl-chart-col-bar {
+    flex: 1;
+    display: flex; flex-direction: column-reverse;
+    align-items: stretch; justify-content: flex-start;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    transition: opacity 0.15s;
+  }
+  .fl-chart-col:hover .fl-chart-col-bar { opacity: 0.85; }
+  .fl-chart-seg {
+    width: 100%; min-height: 1px;
+    transition: opacity 0.15s;
+  }
+  .fl-chart-col.empty-weekday .fl-chart-col-bar {
+    background: rgba(230,106,74,0.07);
+    border: 1px dashed rgba(230,106,74,0.32);
+    box-sizing: border-box;
+  }
+  .fl-chart-col.future { opacity: 0.25; }
+  .fl-chart-col.today .fl-chart-axis-label { color: var(--accent); font-weight: 700; }
+  .fl-chart-axis {
+    display: flex; gap: 3px; margin-top: 4px;
+  }
+  .fl-chart-axis-cell {
+    flex: 1; min-width: 0;
+    text-align: center;
+    font-size: 9.5px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    white-space: nowrap; overflow: hidden;
+  }
+  .fl-chart-tooltip {
+    position: absolute; bottom: 100%; left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    background: rgba(45,31,26,0.95); color: #FFFFFF;
+    padding: 6px 10px; border-radius: 8px;
+    font-size: 11.5px; font-weight: 500;
+    white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity 0.12s;
+    z-index: 10;
+  }
+  .fl-chart-col:hover .fl-chart-tooltip { opacity: 1; }
+
+  /* Condensed row list under the chart */
+  .fl-daily-mini {
     display: grid;
-    grid-template-columns: 92px 1fr auto;
-    gap: 14px; align-items: center;
-    padding: 12px 16px; border-radius: 12px;
-    margin-bottom: 6px;
+    grid-template-columns: 60px 1fr auto;
+    gap: 12px; align-items: center;
+    padding: 8px 12px; border-radius: 8px;
+    margin-bottom: 3px;
+    font-size: 12.5px;
     background: var(--surface);
     border: 1px solid var(--border);
-    transition: background 0.12s;
   }
-  .fl-daily-row.weekend { opacity: 0.55; background: var(--bg); }
-  .fl-daily-row.empty-weekday {
+  .fl-daily-mini.weekend { opacity: 0.5; background: var(--bg); }
+  .fl-daily-mini.empty-weekday {
     background: linear-gradient(135deg, #FFF8F2 0%, #FFE8DD 100%);
     border-color: rgba(255,200,170,0.55);
   }
-  .fl-daily-row.today {
+  .fl-daily-mini.today {
     border-color: var(--accent);
     box-shadow: 0 0 0 2px rgba(230,106,74,0.14);
   }
-  .fl-daily-row.future { opacity: 0.32; }
-  .fl-daily-weekday {
-    font-size: 10.5px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.07em;
-    font-weight: 700; margin-bottom: 2px;
-    display: flex; align-items: center; gap: 6px;
+  .fl-daily-mini.future { opacity: 0.32; }
+  .fl-daily-mini-date {
+    font-weight: 500; font-variant-numeric: tabular-nums;
+    color: var(--text);
   }
-  .fl-daily-date { font-weight: 500; font-size: 14px; font-variant-numeric: tabular-nums; }
-  .fl-daily-today-tag {
-    background: var(--accent); color: #FFFFFF;
-    padding: 1px 7px; border-radius: 999px;
-    font-size: 9px; letter-spacing: 0.08em;
+  .fl-daily-mini-date .wd {
+    color: var(--muted); font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    font-weight: 700; margin-right: 6px;
   }
-  .fl-daily-clients {
-    display: flex; gap: 14px; flex-wrap: wrap;
-    font-size: 12.5px; color: var(--text);
+  .fl-daily-mini-clients {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    color: var(--text);
   }
-  .fl-daily-client { display: inline-flex; align-items: center; gap: 6px; }
-  .fl-daily-client-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .fl-daily-client b { font-weight: 600; }
-  .fl-daily-hours {
-    font-family: 'Lora', serif; font-size: 22px;
+  .fl-daily-mini-client { display: inline-flex; align-items: center; gap: 5px; }
+  .fl-daily-mini-client-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .fl-daily-mini-hours {
+    font-family: 'Lora', serif; font-size: 16px;
     letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
-    white-space: nowrap; color: var(--text);
+    white-space: nowrap;
   }
-  .fl-daily-hours.empty { color: var(--muted); font-size: 16px; font-family: inherit; }
-  .fl-daily-row.empty-weekday .fl-daily-hours { color: var(--accent); font-weight: 500; }
-  .fl-daily-empty-note {
-    color: var(--accent); font-weight: 500; font-size: 12.5px;
+  .fl-daily-mini-hours.empty { color: var(--muted); font-size: 13px; font-family: inherit; }
+  .fl-daily-mini.empty-weekday .fl-daily-mini-hours { color: var(--accent); }
+  .fl-daily-mini-empty-note {
+    color: var(--accent); font-weight: 500; font-size: 11.5px;
   }
 
   /* FREELANCE STAT CARDS */
@@ -2466,85 +2567,319 @@ function flUpdateStats() {
 }
 
 // ── DAILY LOG ──
-// Renders the current month as a vertical list of days. Past weekdays with
-// nothing logged get a coral tint to nudge the user to fill them in — the
-// whole point of the tab. Weekends + future days are dimmed.
-function flRenderDaily() {
-  const root = document.getElementById('fl-daily-root');
-  if (!root) return;
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // 0-indexed
-  const todayStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-  // Day map for this month
-  const dayMap = {};
+// Chart-first view of when hours were logged. Day mode shows the current
+// month one column per day; Week mode shows the last 8 ISO-weeks. Stacked
+// segments use each client's color so the user can see at a glance how
+// the day/week was distributed. Past weekdays with no hours get a dashed
+// coral placeholder both in the chart and the condensed list below.
+let _flDailyMode = 'day'; // 'day' | 'week'
+
+function flDateStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+// ISO-8601 week number + a Monday-anchored start date for that week.
+function flIsoWeekStart(d) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = x.getDay() || 7; // Sun = 7
+  x.setDate(x.getDate() - day + 1); // Monday
+  return x;
+}
+function flIsoWeekKey(d) {
+  const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = x.getUTCDay() || 7;
+  x.setUTCDate(x.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(x.getUTCFullYear(), 0, 1));
+  const wk = Math.ceil((((x - yearStart) / 86400000) + 1) / 7);
+  return x.getUTCFullYear() + '-W' + String(wk).padStart(2, '0');
+}
+function flFmtH(h) { return (h % 1 === 0 ? h : h.toFixed(1)) + 'h'; }
+
+// Build a date-string → { hours, byClient: {id → {name, color, hours}} } map
+// covering only entries that fall inside the given [start, end] window
+// (both inclusive, ISO date strings).
+function flBuildDayMap(startStr, endStr) {
+  const map = {};
   flClients.forEach(c => {
     (c.projects || []).forEach(p => {
       (p.entries || []).forEach(e => {
-        if (!e.date || e.date.slice(0, 7) !== year + '-' + String(month + 1).padStart(2, '0')) return;
-        if (!dayMap[e.date]) dayMap[e.date] = { hours: 0, byClient: {} };
-        dayMap[e.date].hours += e.hours;
-        if (!dayMap[e.date].byClient[c.id]) dayMap[e.date].byClient[c.id] = { name: c.name, color: c.color || 'var(--accent)', hours: 0 };
-        dayMap[e.date].byClient[c.id].hours += e.hours;
+        if (!e.date || e.date < startStr || e.date > endStr) return;
+        if (!map[e.date]) map[e.date] = { hours: 0, byClient: {} };
+        map[e.date].hours += e.hours;
+        if (!map[e.date].byClient[c.id]) map[e.date].byClient[c.id] = { name: c.name, color: c.color || 'var(--accent)', hours: 0 };
+        map[e.date].byClient[c.id].hours += e.hours;
       });
     });
   });
+  return map;
+}
+
+function flSetDailyMode(mode) {
+  _flDailyMode = mode;
+  flRenderDaily();
+}
+function flSwitchToDaily(btn) {
+  switchTab('freelance', 'daily', btn);
+  flRenderDaily();
+}
+
+function flRenderDaily() {
+  const root = document.getElementById('fl-daily-root');
+  if (!root) return;
+  const html = _flDailyMode === 'week' ? flRenderDailyWeek() : flRenderDailyDay();
+  root.innerHTML = `
+    <div class="fl-daily-card">
+      <div class="fl-daily-toggle">
+        <button class="${_flDailyMode === 'day' ? 'active' : ''}" onclick="flSetDailyMode('day')">Day</button>
+        <button class="${_flDailyMode === 'week' ? 'active' : ''}" onclick="flSetDailyMode('week')">Week</button>
+      </div>
+      ${html}
+    </div>
+  `;
+}
+
+// Day mode — current month, one column per day, today on the right
+function flRenderDailyDay() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const todayStr = flDateStr(now);
+  const monthPrefix = year + '-' + String(month + 1).padStart(2, '0');
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const map = flBuildDayMap(monthPrefix + '-01', monthPrefix + '-' + String(daysInMonth).padStart(2, '0'));
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
   let totalHours = 0, loggedDays = 0, emptyWeekdays = 0;
-  const rows = [];
-  // Newest first: today at top, then descending
-  for (let d = daysInMonth; d >= 1; d--) {
+  const cols = [];
+  const days = []; // for the condensed list below
+
+  for (let d = 1; d <= daysInMonth; d++) {
     const dt = new Date(year, month, d);
-    const ds = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const ds = monthPrefix + '-' + String(d).padStart(2, '0');
     const dow = dt.getDay();
     const isWeekend = dow === 0 || dow === 6;
     const isToday = ds === todayStr;
     const isFuture = ds > todayStr;
-    const data = dayMap[ds];
+    const data = map[ds];
     const hasHours = data && data.hours > 0;
     if (hasHours) { totalHours += data.hours; loggedDays++; }
     const isEmptyWeekday = !isWeekend && !isFuture && !isToday && !hasHours;
     if (isEmptyWeekday) emptyWeekdays++;
-    const cls = ['fl-daily-row'];
-    if (isToday) cls.push('today');
-    if (isFuture) cls.push('future');
-    if (isWeekend) cls.push('weekend');
-    if (isEmptyWeekday) cls.push('empty-weekday');
-    const fmtH = (h) => (h % 1 === 0 ? h : h.toFixed(1)) + 'h';
-    const clientsHtml = data
-      ? Object.values(data.byClient).sort((a, b) => b.hours - a.hours).map(b =>
-          `<span class="fl-daily-client"><span class="fl-daily-client-dot" style="background:${b.color}"></span>${b.name} <b>${fmtH(b.hours)}</b></span>`
-        ).join('')
-      : (isEmptyWeekday ? '<span class="fl-daily-empty-note">Nothing logged yet</span>' : '');
-    const hoursHtml = hasHours
-      ? `<div class="fl-daily-hours">${fmtH(data.hours)}</div>`
-      : `<div class="fl-daily-hours empty">—</div>`;
-    rows.push(`<div class="${cls.join(' ')}">
-      <div>
-        <div class="fl-daily-weekday">${dayNames[dow]}${isToday ? '<span class="fl-daily-today-tag">Today</span>' : ''}</div>
-        <div class="fl-daily-date">${String(month + 1).padStart(2, '0')}/${String(d).padStart(2, '0')}</div>
-      </div>
-      <div class="fl-daily-clients">${clientsHtml}</div>
-      ${hoursHtml}
-    </div>`);
+    days.push({ dt, ds, dow, isWeekend, isToday, isFuture, isEmptyWeekday, data, hasHours });
   }
-  const monthName = FL_MONTHS[month] + ' ' + year;
-  const gapNote = emptyWeekdays > 0
-    ? ` · <span style="color:var(--accent);font-weight:500">${emptyWeekdays} weekday${emptyWeekdays === 1 ? '' : 's'} unlogged</span>`
-    : '';
-  root.innerHTML = `
-    <div class="fl-daily-header">
-      <div class="fl-daily-month-name">${monthName}</div>
-      <div class="fl-daily-total"><b>${totalHours % 1 === 0 ? totalHours : totalHours.toFixed(1)}h</b> across ${loggedDays} day${loggedDays === 1 ? '' : 's'}${gapNote}</div>
+
+  // Bar heights: scale by max-hours-day so the tallest bar fills the chart.
+  const maxH = Math.max(...days.map(x => x.data ? x.data.hours : 0), 1);
+  const pxPerHour = 152 / maxH;
+
+  days.forEach(x => {
+    const cls = ['fl-chart-col'];
+    if (x.isToday) cls.push('today');
+    if (x.isFuture) cls.push('future');
+    if (x.isEmptyWeekday) cls.push('empty-weekday');
+    const segs = x.data
+      ? Object.values(x.data.byClient).sort((a, b) => a.name.localeCompare(b.name)).map(c =>
+          `<div class="fl-chart-seg" style="background:${c.color};height:${(c.hours * pxPerHour).toFixed(1)}px"></div>`
+        ).join('')
+      : '';
+    const barH = x.data ? x.data.hours * pxPerHour : 0;
+    const tooltip = x.hasHours
+      ? `<div class="fl-chart-tooltip">${dayNames[x.dow]} ${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')} · ${flFmtH(x.data.hours)}</div>`
+      : (x.isEmptyWeekday ? `<div class="fl-chart-tooltip">${dayNames[x.dow]} ${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')} · nothing logged</div>` : '');
+    cols.push(`<div class="${cls.join(' ')}">
+      <div class="fl-chart-col-bar" style="height:${barH.toFixed(1)}px">${segs}</div>
+      ${tooltip}
+    </div>`);
+  });
+  const axis = days.map(x => `<div class="fl-chart-axis-cell ${x.isToday ? 'today' : ''}">${x.dt.getDate()}</div>`).join('');
+
+  // Legend
+  const legend = flLegendHTML(map);
+
+  const avg = loggedDays > 0 ? (totalHours / loggedDays) : 0;
+  const gap = emptyWeekdays > 0 ? `<div class="fl-daily-gap-note">${emptyWeekdays} weekday${emptyWeekdays === 1 ? '' : 's'} unlogged</div>` : '';
+
+  // Condensed list — newest first, current month, only the last 14 days to stay compact
+  const recent = [...days].reverse().slice(0, 14);
+  const list = recent.map(x => flRenderDailyMiniRow(x, dayNames)).join('');
+
+  return `
+    <div class="fl-daily-hero">
+      <div class="fl-daily-hero-left">
+        <div class="fl-daily-hero-label">${FL_MONTHS[month]} ${year} · daily average</div>
+        <div class="fl-daily-hero-value">${flFmtH(avg)}</div>
+      </div>
+      <div class="fl-daily-hero-right">
+        <div><b>${flFmtH(totalHours)}</b> total · ${loggedDays} day${loggedDays === 1 ? '' : 's'} logged</div>
+        ${gap}
+      </div>
     </div>
-    ${rows.join('')}
+    ${legend}
+    <div class="fl-chart-bars">${cols.join('')}</div>
+    <div class="fl-chart-axis">${axis}</div>
+    <div style="margin-top:14px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:700">Last 14 days</div>
+    <div style="margin-top:6px">${list}</div>
   `;
 }
 
-function flSwitchToDaily(btn) {
-  switchTab('freelance', 'daily', btn);
-  flRenderDaily();
+// Week mode — last 8 ISO weeks ending with the current week.
+function flRenderDailyWeek() {
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const now = new Date();
+  const todayStr = flDateStr(now);
+  const thisWeekStart = flIsoWeekStart(now);
+  const weeks = [];
+  // Oldest first → newest last so chart reads left-to-right like Day mode
+  for (let i = 7; i >= 0; i--) {
+    const start = new Date(thisWeekStart);
+    start.setDate(start.getDate() - i * 7);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    weeks.push({ start, end, key: flIsoWeekKey(start) });
+  }
+  // Pull a window covering all weeks
+  const map = flBuildDayMap(flDateStr(weeks[0].start), flDateStr(weeks[weeks.length - 1].end));
+
+  // Aggregate per week
+  weeks.forEach(w => {
+    w.byClient = {};
+    w.hours = 0;
+    w.days = []; // days inside the week with at least 1 hour
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(w.start);
+      d.setDate(d.getDate() + i);
+      const ds = flDateStr(d);
+      const data = map[ds];
+      if (data) {
+        w.hours += data.hours;
+        w.days.push({ dt: d, ds, data, dow: d.getDay() });
+        Object.entries(data.byClient).forEach(([cid, b]) => {
+          if (!w.byClient[cid]) w.byClient[cid] = { name: b.name, color: b.color, hours: 0 };
+          w.byClient[cid].hours += b.hours;
+        });
+      }
+    }
+    w.isCurrent = (w.start <= now && now <= w.end);
+    w.isFuture = w.start > now;
+  });
+
+  const maxH = Math.max(...weeks.map(w => w.hours), 1);
+  const pxPerHour = 152 / maxH;
+
+  const cols = weeks.map(w => {
+    const cls = ['fl-chart-col'];
+    if (w.isCurrent) cls.push('today');
+    if (w.isFuture) cls.push('future');
+    const segs = Object.values(w.byClient).sort((a, b) => a.name.localeCompare(b.name)).map(c =>
+      `<div class="fl-chart-seg" style="background:${c.color};height:${(c.hours * pxPerHour).toFixed(1)}px"></div>`
+    ).join('');
+    const barH = w.hours * pxPerHour;
+    const label = `${(w.start.getMonth() + 1)}/${w.start.getDate()}`;
+    const tooltip = w.hours > 0
+      ? `<div class="fl-chart-tooltip">Wk of ${label} · ${flFmtH(w.hours)}</div>`
+      : '';
+    return `<div class="${cls.join(' ')}">
+      <div class="fl-chart-col-bar" style="height:${barH.toFixed(1)}px">${segs}</div>
+      ${tooltip}
+    </div>`;
+  }).join('');
+
+  const axis = weeks.map(w => {
+    const cls = ['fl-chart-axis-cell'];
+    if (w.isCurrent) cls.push('today');
+    return `<div class="${cls.join(' ')}">${(w.start.getMonth() + 1)}/${w.start.getDate()}</div>`;
+  }).join('');
+
+  // Aggregate map for legend (last 8 weeks)
+  const legendMap = {};
+  weeks.forEach(w => Object.entries(w.byClient).forEach(([cid, b]) => {
+    if (!legendMap[cid]) legendMap[cid] = { name: b.name, color: b.color, hours: 0 };
+    legendMap[cid].hours += b.hours;
+  }));
+  const legend = flLegendFromAgg(legendMap);
+
+  const totalHours = weeks.reduce((s, w) => s + w.hours, 0);
+  const loggedWeeks = weeks.filter(w => w.hours > 0).length;
+  const avg = loggedWeeks > 0 ? totalHours / loggedWeeks : 0;
+  const completedWeeks = weeks.filter(w => !w.isCurrent && !w.isFuture && w.hours === 0).length;
+  const gap = completedWeeks > 0 ? `<div class="fl-daily-gap-note">${completedWeeks} week${completedWeeks === 1 ? '' : 's'} with no hours</div>` : '';
+
+  // Condensed weekly list — newest first
+  const list = [...weeks].reverse().map(w => flRenderDailyMiniWeek(w, dayNames)).join('');
+
+  return `
+    <div class="fl-daily-hero">
+      <div class="fl-daily-hero-left">
+        <div class="fl-daily-hero-label">Last 8 weeks · weekly average</div>
+        <div class="fl-daily-hero-value">${flFmtH(avg)}</div>
+      </div>
+      <div class="fl-daily-hero-right">
+        <div><b>${flFmtH(totalHours)}</b> total · ${loggedWeeks} of 8 weeks</div>
+        ${gap}
+      </div>
+    </div>
+    ${legend}
+    <div class="fl-chart-bars">${cols}</div>
+    <div class="fl-chart-axis">${axis}</div>
+    <div style="margin-top:14px;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:700">Week breakdown</div>
+    <div style="margin-top:6px">${list}</div>
+  `;
+}
+
+function flLegendHTML(dayMap) {
+  const agg = {};
+  Object.values(dayMap).forEach(d => Object.entries(d.byClient).forEach(([cid, b]) => {
+    if (!agg[cid]) agg[cid] = { name: b.name, color: b.color, hours: 0 };
+    agg[cid].hours += b.hours;
+  }));
+  return flLegendFromAgg(agg);
+}
+function flLegendFromAgg(agg) {
+  const items = Object.values(agg).sort((a, b) => b.hours - a.hours);
+  if (!items.length) return '';
+  return `<div class="fl-daily-legend">${items.map(b =>
+    `<span class="fl-daily-legend-item"><span class="fl-daily-legend-dot" style="background:${b.color}"></span>${b.name} <b>${flFmtH(b.hours)}</b></span>`
+  ).join('')}</div>`;
+}
+
+function flRenderDailyMiniRow(x, dayNames) {
+  const cls = ['fl-daily-mini'];
+  if (x.isToday) cls.push('today');
+  if (x.isFuture) cls.push('future');
+  if (x.isWeekend) cls.push('weekend');
+  if (x.isEmptyWeekday) cls.push('empty-weekday');
+  const clientsHtml = x.data
+    ? Object.values(x.data.byClient).sort((a, b) => b.hours - a.hours).map(b =>
+        `<span class="fl-daily-mini-client"><span class="fl-daily-mini-client-dot" style="background:${b.color}"></span>${b.name} ${flFmtH(b.hours)}</span>`
+      ).join('')
+    : (x.isEmptyWeekday ? '<span class="fl-daily-mini-empty-note">Nothing logged</span>' : '');
+  const hoursHtml = x.hasHours
+    ? `<div class="fl-daily-mini-hours">${flFmtH(x.data.hours)}</div>`
+    : `<div class="fl-daily-mini-hours empty">—</div>`;
+  return `<div class="${cls.join(' ')}">
+    <div class="fl-daily-mini-date"><span class="wd">${dayNames[x.dow]}</span>${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')}</div>
+    <div class="fl-daily-mini-clients">${clientsHtml}</div>
+    ${hoursHtml}
+  </div>`;
+}
+function flRenderDailyMiniWeek(w, dayNames) {
+  const cls = ['fl-daily-mini'];
+  if (w.isCurrent) cls.push('today');
+  if (w.isFuture) cls.push('future');
+  const clientsHtml = Object.values(w.byClient).length
+    ? Object.values(w.byClient).sort((a, b) => b.hours - a.hours).map(b =>
+        `<span class="fl-daily-mini-client"><span class="fl-daily-mini-client-dot" style="background:${b.color}"></span>${b.name} ${flFmtH(b.hours)}</span>`
+      ).join('')
+    : '<span class="fl-daily-mini-empty-note" style="color:var(--muted);font-weight:400">No hours</span>';
+  const hoursHtml = w.hours > 0
+    ? `<div class="fl-daily-mini-hours">${flFmtH(w.hours)}</div>`
+    : `<div class="fl-daily-mini-hours empty">—</div>`;
+  const endLabel = `${(w.end.getMonth() + 1)}/${w.end.getDate()}`;
+  const startLabel = `${(w.start.getMonth() + 1)}/${w.start.getDate()}`;
+  return `<div class="${cls.join(' ')}">
+    <div class="fl-daily-mini-date"><span class="wd">${w.isCurrent ? 'This wk' : 'Wk'}</span>${startLabel}–${endLabel}</div>
+    <div class="fl-daily-mini-clients">${clientsHtml}</div>
+    ${hoursHtml}
+  </div>`;
 }
 
 // ── PERSISTENCE ──
