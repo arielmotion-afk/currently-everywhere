@@ -852,12 +852,14 @@
   .fl-chart-col {
     flex: 1; min-width: 0;
     display: flex; flex-direction: column;
-    align-items: stretch; height: 100%;
+    align-items: stretch; justify-content: flex-end; /* bar hugs the bottom */
+    height: 100%;
     cursor: default;
     position: relative;
   }
   .fl-chart-col-bar {
-    flex: 1;
+    flex: 0 0 auto; /* honor the inline height instead of filling the column */
+    width: 100%;
     display: flex; flex-direction: column-reverse;
     align-items: stretch; justify-content: flex-start;
     border-radius: 6px;
