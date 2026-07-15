@@ -2862,9 +2862,29 @@ function flRenderDailyDay() {
     : '';
   const todayLabel = todayEntry ? `Today · ${dayNames[todayEntry.dow]} ${String(todayEntry.dt.getMonth() + 1).padStart(2, '0')}/${String(todayEntry.dt.getDate()).padStart(2, '0')}` : 'Today';
 
-  // Condensed list — newest first, current month, only the last 14 days to stay compact
-  const recent = [...days].reverse().slice(0, 14);
-  const list = recent.map(x => flRenderDailyMiniRow(x, dayNames)).join('');
+  // Real "last 14 days" list — walk back from today so we always show the
+  // most recent 14 days ending today, spanning into the previous month if
+  // today is early in the current month. The old slice pulled the last 14
+  // *dates of the current month*, which meant early-in-the-month users saw
+  // 14 future days with no vacation button (button only shows for past/today).
+  const recentDays = [];
+  const recentStart = new Date(now);
+  recentStart.setDate(now.getDate() - 13);
+  const recentMap = flBuildDayMap(flDateStr(recentStart), todayStr);
+  for (let i = 0; i < 14; i++) {
+    const dt = new Date(now);
+    dt.setDate(now.getDate() - i);
+    const ds = flDateStr(dt);
+    const dow = dt.getDay();
+    const isWeekend = dow === 0 || dow === 6;
+    const isToday = ds === todayStr;
+    const isVacation = vacations.has(ds);
+    const data = recentMap[ds];
+    const hasHours = data && data.hours > 0;
+    const isEmptyWeekday = !isWeekend && !isToday && !hasHours && !isVacation;
+    recentDays.push({ dt, ds, dow, isWeekend, isToday, isFuture: false, isVacation, isEmptyWeekday, data, hasHours });
+  }
+  const list = recentDays.map(x => flRenderDailyMiniRow(x, dayNames)).join('');
 
   return `
     <div class="fl-daily-hero">
