@@ -878,6 +878,58 @@
   }
   .fl-chart-col.future { opacity: 0.25; }
   .fl-chart-col.today .fl-chart-axis-label { color: var(--accent); font-weight: 700; }
+  /* Vacation days — muted beige, separate from the coral "empty weekday" nudge */
+  .fl-chart-col.vacation .fl-chart-col-bar {
+    background: rgba(176, 144, 64, 0.09);
+    border: 1px dashed rgba(176, 144, 64, 0.35);
+    box-sizing: border-box;
+  }
+  .fl-daily-mini.vacation {
+    background: linear-gradient(135deg, #FCF8F0 0%, #F5EDDA 100%);
+    border-color: rgba(200, 175, 130, 0.4);
+  }
+  .fl-daily-mini.vacation .fl-daily-mini-hours {
+    color: rgba(140, 110, 65, 0.75);
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .fl-daily-vac-note {
+    color: rgba(140, 110, 65, 0.85);
+    font-weight: 500;
+    font-size: 12px;
+  }
+  .fl-daily-vac-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: inherit;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .fl-daily-mini:hover .fl-daily-vac-btn { opacity: 1; }
+  .fl-daily-vac-btn:hover { background: var(--bg); color: var(--text); }
+  .fl-daily-mini.vacation .fl-daily-vac-btn {
+    opacity: 1;
+    color: rgba(140, 110, 65, 0.85);
+    border-color: rgba(200, 175, 130, 0.5);
+  }
+  .fl-daily-mini.vacation .fl-daily-vac-btn:hover {
+    background: rgba(200, 175, 130, 0.2);
+  }
+  /* Today-first hero variant: big "today" number, secondary line for the rest */
+  .fl-daily-hero-sub {
+    font-size: 12.5px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+  }
+  .fl-daily-hero-sub b { color: var(--text); font-weight: 600; }
+  .fl-daily-hero-sub .divider { margin: 0 6px; opacity: 0.45; }
+
   /* Outlier bars: real total floats above the capped bar */
   .fl-chart-cap-label {
     position: absolute;
@@ -2609,6 +2661,26 @@ function flIsoWeekKey(d) {
 }
 function flFmtH(h) { return (h % 1 === 0 ? h : h.toFixed(1)) + 'h'; }
 
+// Vacation days — dates the user explicitly marked off. They don't count
+// toward the "N weekdays unlogged" nudge and get their own muted styling
+// so gaps in the log don't feel like guilt when they were intentional.
+function flLoadVacations() {
+  try {
+    const raw = localStorage.getItem('currently_vacations');
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch { return new Set(); }
+}
+function flSaveVacations(set) {
+  localStorage.setItem('currently_vacations', JSON.stringify([...set]));
+  if (typeof ghSync === 'function') ghSync();
+}
+function flToggleVacation(dateStr) {
+  const s = flLoadVacations();
+  if (s.has(dateStr)) s.delete(dateStr); else s.add(dateStr);
+  flSaveVacations(s);
+  flRenderDaily();
+}
+
 // Pastel a hex color via HSL: bump lightness into the soft range and soften
 // saturation. Better than a plain white-blend because dark hues keep their
 // identity (a deep navy becomes a soft sky blue, not a pale wash).
@@ -2716,6 +2788,7 @@ function flRenderDailyDay() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const map = flBuildDayMap(monthPrefix + '-01', monthPrefix + '-' + String(daysInMonth).padStart(2, '0'));
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const vacations = flLoadVacations();
 
   let totalHours = 0, loggedDays = 0, emptyWeekdays = 0;
   const cols = [];
@@ -2728,13 +2801,17 @@ function flRenderDailyDay() {
     const isWeekend = dow === 0 || dow === 6;
     const isToday = ds === todayStr;
     const isFuture = ds > todayStr;
+    const isVacation = vacations.has(ds);
     const data = map[ds];
     const hasHours = data && data.hours > 0;
     if (hasHours) { totalHours += data.hours; loggedDays++; }
-    const isEmptyWeekday = !isWeekend && !isFuture && !isToday && !hasHours;
+    // Vacation days sit outside the "did I remember to log?" nudge.
+    const isEmptyWeekday = !isWeekend && !isFuture && !isToday && !hasHours && !isVacation;
     if (isEmptyWeekday) emptyWeekdays++;
-    days.push({ dt, ds, dow, isWeekend, isToday, isFuture, isEmptyWeekday, data, hasHours });
+    days.push({ dt, ds, dow, isWeekend, isToday, isFuture, isVacation, isEmptyWeekday, data, hasHours });
   }
+  const todayEntry = days.find(x => x.isToday);
+  const todayHours = todayEntry && todayEntry.data ? todayEntry.data.hours : 0;
 
   // Scale by the tallest *non-outlier* day so fixed-fee 50h days don't make
   // every normal 4h day shrink to a sliver. Outliers are still drawn — capped
@@ -2748,7 +2825,8 @@ function flRenderDailyDay() {
     const cls = ['fl-chart-col'];
     if (x.isToday) cls.push('today');
     if (x.isFuture) cls.push('future');
-    if (x.isEmptyWeekday) cls.push('empty-weekday');
+    if (x.isVacation) cls.push('vacation');
+    else if (x.isEmptyWeekday) cls.push('empty-weekday');
     let segs = '', capLabel = '', barH = 0;
     if (x.data) {
       const isCapped = x.data.hours > chartMax;
@@ -2761,9 +2839,12 @@ function flRenderDailyDay() {
       barH = Math.min(x.data.hours, chartMax) * pxPerHour;
       if (isCapped) capLabel = `<div class="fl-chart-cap-label">${flFmtH(x.data.hours)}</div>`;
     }
-    const tooltip = x.hasHours
-      ? `<div class="fl-chart-tooltip">${dayNames[x.dow]} ${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')} · ${flFmtH(x.data.hours)}</div>`
-      : (x.isEmptyWeekday ? `<div class="fl-chart-tooltip">${dayNames[x.dow]} ${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')} · nothing logged</div>` : '');
+    const datePart = `${dayNames[x.dow]} ${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')}`;
+    const tooltipText = x.hasHours ? `${datePart} · ${flFmtH(x.data.hours)}`
+      : x.isVacation ? `${datePart} · vacation 🌴`
+      : x.isEmptyWeekday ? `${datePart} · nothing logged`
+      : '';
+    const tooltip = tooltipText ? `<div class="fl-chart-tooltip">${tooltipText}</div>` : '';
     cols.push(`<div class="${cls.join(' ')}">
       ${capLabel}
       <div class="fl-chart-col-bar" style="height:${barH.toFixed(1)}px">${segs}</div>
@@ -2776,7 +2857,10 @@ function flRenderDailyDay() {
   const legend = flLegendHTML(map);
 
   const avg = loggedDays > 0 ? (totalHours / loggedDays) : 0;
-  const gap = emptyWeekdays > 0 ? `<div class="fl-daily-gap-note">${emptyWeekdays} weekday${emptyWeekdays === 1 ? '' : 's'} unlogged</div>` : '';
+  const gap = emptyWeekdays > 0
+    ? `<span class="fl-daily-gap-note"> · ${emptyWeekdays} weekday${emptyWeekdays === 1 ? '' : 's'} unlogged</span>`
+    : '';
+  const todayLabel = todayEntry ? `Today · ${dayNames[todayEntry.dow]} ${String(todayEntry.dt.getMonth() + 1).padStart(2, '0')}/${String(todayEntry.dt.getDate()).padStart(2, '0')}` : 'Today';
 
   // Condensed list — newest first, current month, only the last 14 days to stay compact
   const recent = [...days].reverse().slice(0, 14);
@@ -2785,12 +2869,11 @@ function flRenderDailyDay() {
   return `
     <div class="fl-daily-hero">
       <div class="fl-daily-hero-left">
-        <div class="fl-daily-hero-label">${FL_MONTHS[month]} ${year} · daily average</div>
-        <div class="fl-daily-hero-value">${flFmtH(avg)}</div>
-      </div>
-      <div class="fl-daily-hero-right">
-        <div><b>${flFmtH(totalHours)}</b> total · ${loggedDays} day${loggedDays === 1 ? '' : 's'} logged</div>
-        ${gap}
+        <div class="fl-daily-hero-label">${todayLabel}</div>
+        <div class="fl-daily-hero-value">${flFmtH(todayHours)}</div>
+        <div class="fl-daily-hero-sub">
+          <b>${flFmtH(avg)}</b> daily avg<span class="divider">·</span><b>${flFmtH(totalHours)}</b> total this month<span class="divider">·</span>${loggedDays} day${loggedDays === 1 ? '' : 's'} logged${gap}
+        </div>
       </div>
     </div>
     ${legend}
@@ -2891,7 +2974,12 @@ function flRenderDailyWeek() {
   const loggedWeeks = weeks.filter(w => w.hours > 0).length;
   const avg = loggedWeeks > 0 ? totalHours / loggedWeeks : 0;
   const completedWeeks = weeks.filter(w => !w.isCurrent && !w.isFuture && w.hours === 0).length;
-  const gap = completedWeeks > 0 ? `<div class="fl-daily-gap-note">${completedWeeks} week${completedWeeks === 1 ? '' : 's'} with no hours</div>` : '';
+  const gap = completedWeeks > 0
+    ? `<span class="fl-daily-gap-note"> · ${completedWeeks} week${completedWeeks === 1 ? '' : 's'} with no hours</span>`
+    : '';
+  const currentWeek = weeks.find(w => w.isCurrent);
+  const currentHours = currentWeek ? currentWeek.hours : 0;
+  const currentLabel = currentWeek ? `This week · ${(currentWeek.start.getMonth() + 1)}/${currentWeek.start.getDate()}–${(currentWeek.end.getMonth() + 1)}/${currentWeek.end.getDate()}` : 'This week';
 
   // Condensed weekly list — newest first
   const list = [...weeks].reverse().map(w => flRenderDailyMiniWeek(w, dayNames)).join('');
@@ -2899,12 +2987,11 @@ function flRenderDailyWeek() {
   return `
     <div class="fl-daily-hero">
       <div class="fl-daily-hero-left">
-        <div class="fl-daily-hero-label">Last 8 weeks · weekly average</div>
-        <div class="fl-daily-hero-value">${flFmtH(avg)}</div>
-      </div>
-      <div class="fl-daily-hero-right">
-        <div><b>${flFmtH(totalHours)}</b> total · ${loggedWeeks} of 8 weeks</div>
-        ${gap}
+        <div class="fl-daily-hero-label">${currentLabel}</div>
+        <div class="fl-daily-hero-value">${flFmtH(currentHours)}</div>
+        <div class="fl-daily-hero-sub">
+          <b>${flFmtH(avg)}</b> weekly avg<span class="divider">·</span><b>${flFmtH(totalHours)}</b> total across 8 weeks<span class="divider">·</span>${loggedWeeks} of 8 weeks logged${gap}
+        </div>
       </div>
     </div>
     ${legend}
@@ -2997,16 +3084,19 @@ function flRenderDailyMonth() {
   const totalIncome = months.reduce((s, m) => s + m.income, 0);
   const loggedMonths = months.filter(m => m.hours > 0).length;
   const avg = loggedMonths > 0 ? totalHours / loggedMonths : 0;
+  const currentMonth = months.find(m => m.isCurrent);
+  const currentHours = currentMonth ? currentMonth.hours : 0;
+  const currentIncome = currentMonth ? currentMonth.income : 0;
+  const currentLabel = currentMonth ? `This month · ${currentMonth.labelLong}` : 'This month';
   const list = [...months].reverse().map(m => flRenderDailyMiniMonth(m)).join('');
   return `
     <div class="fl-daily-hero">
       <div class="fl-daily-hero-left">
-        <div class="fl-daily-hero-label">Last 6 months · monthly average</div>
-        <div class="fl-daily-hero-value">${flFmtH(avg)}</div>
-      </div>
-      <div class="fl-daily-hero-right">
-        <div><b>${flFmtH(totalHours)}</b> total · ${loggedMonths} of 6 months</div>
-        ${totalIncome > 0 ? `<div style="margin-top:3px"><b style="color:var(--text)">₪${Math.round(totalIncome).toLocaleString()}</b> income</div>` : ''}
+        <div class="fl-daily-hero-label">${currentLabel}</div>
+        <div class="fl-daily-hero-value">${flFmtH(currentHours)}</div>
+        <div class="fl-daily-hero-sub">
+          ${currentIncome > 0 ? `<b>₪${Math.round(currentIncome).toLocaleString()}</b> this month<span class="divider">·</span>` : ''}<b>${flFmtH(avg)}</b> monthly avg<span class="divider">·</span><b>${flFmtH(totalHours)}</b> across 6 months${totalIncome > 0 ? `<span class="divider">·</span><b>₪${Math.round(totalIncome).toLocaleString()}</b> total income` : ''}
+        </div>
       </div>
     </div>
     ${legend}
@@ -3055,18 +3145,29 @@ function flRenderDailyMiniRow(x, dayNames) {
   if (x.isToday) cls.push('today');
   if (x.isFuture) cls.push('future');
   if (x.isWeekend) cls.push('weekend');
-  if (x.isEmptyWeekday) cls.push('empty-weekday');
+  if (x.isVacation) cls.push('vacation');
+  else if (x.isEmptyWeekday) cls.push('empty-weekday');
   const clientsHtml = x.data
     ? Object.values(x.data.byClient).sort((a, b) => b.hours - a.hours).map(b =>
         `<span class="fl-daily-mini-client"><span class="fl-daily-mini-client-dot" style="background:${b.color}"></span>${b.name} ${flFmtH(b.hours)}</span>`
       ).join('')
-    : (x.isEmptyWeekday ? '<span class="fl-daily-mini-empty-note">Nothing logged</span>' : '');
+    : (x.isVacation ? '<span class="fl-daily-vac-note">🌴 Vacation</span>'
+      : x.isEmptyWeekday ? '<span class="fl-daily-mini-empty-note">Nothing logged</span>'
+      : '');
   const hoursHtml = x.hasHours
     ? `<div class="fl-daily-mini-hours">${flFmtH(x.data.hours)}</div>`
+    : x.isVacation
+    ? `<div class="fl-daily-mini-hours">🌴</div>`
     : `<div class="fl-daily-mini-hours empty">—</div>`;
-  return `<div class="${cls.join(' ')}">
+  // Toggle button — hidden until row hover, always visible for vacation days
+  // so users can clear the mark without hunting for the affordance.
+  const vacBtn = (!x.isFuture)
+    ? `<button class="fl-daily-vac-btn" title="${x.isVacation ? 'Unmark vacation' : 'Mark as vacation'}" onclick="flToggleVacation('${x.ds}')">${x.isVacation ? '× vacation' : '🌴'}</button>`
+    : '';
+  return `<div class="${cls.join(' ')}" style="grid-template-columns:60px 1fr auto auto;gap:10px">
     <div class="fl-daily-mini-date"><span class="wd">${dayNames[x.dow]}</span>${String(x.dt.getMonth() + 1).padStart(2, '0')}/${String(x.dt.getDate()).padStart(2, '0')}</div>
     <div class="fl-daily-mini-clients">${clientsHtml}</div>
+    ${vacBtn}
     ${hoursHtml}
   </div>`;
 }
@@ -4599,7 +4700,7 @@ async function fitUploadMedia(file, onProgress) {
 // ── GITHUB SYNC ──
 const GH_REPO = 'arielmotion-afk/currently-everywhere';
 const GH_FILE = 'data.json';
-const GH_DATA_KEYS = ['currently_fl', 'currently_sch', 'currently_checks', 'currently_fit'];
+const GH_DATA_KEYS = ['currently_fl', 'currently_sch', 'currently_checks', 'currently_fit', 'currently_vacations'];
 let _ghSyncTimeout = null;
 let _ghSyncStatus = 'unconfigured';
 
