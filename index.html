@@ -907,12 +907,12 @@
     border-radius: 6px;
     font-size: 11px;
     font-family: inherit;
-    opacity: 0;
+    opacity: 0.5; /* always visible so touch users can find it */
     transition: opacity 0.15s, background 0.15s, color 0.15s;
     white-space: nowrap;
   }
   .fl-daily-mini:hover .fl-daily-vac-btn { opacity: 1; }
-  .fl-daily-vac-btn:hover { background: var(--bg); color: var(--text); }
+  .fl-daily-vac-btn:hover { background: var(--bg); color: var(--text); opacity: 1; }
   .fl-daily-mini.vacation .fl-daily-vac-btn {
     opacity: 1;
     color: rgba(140, 110, 65, 0.85);
