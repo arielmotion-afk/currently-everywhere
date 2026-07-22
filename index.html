@@ -2461,18 +2461,83 @@ function flAddProject(cid) {
   flCloseNewProject(cid);
 }
 
+let _flDelProjCtx = null;
 function flDeleteProject(cid, pid) {
-  const c = flClients.find(x => x.id===cid);
+  const c = flClients.find(x => x.id === cid);
   if (!c) return;
-  const p = c.projects.find(x => x.id===pid);
+  const p = c.projects.find(x => x.id === pid);
   if (!p) return;
-  const entryCount = (p.entries||[]).length;
-  const doDelete = () => { c.projects = c.projects.filter(x => x.id!==pid); flRenderProjects(cid); flUpdateStats(); flSave(); };
-  if (entryCount > 0) {
-    flConfirm(`Remove "${p.name}" and its ${entryCount} logged entries?`, doDelete, 'Remove project');
-  } else {
-    doDelete();
+  const entryCount = (p.entries || []).length;
+  // Empty project: single-step remove, no need for the entry-relocation picker.
+  if (entryCount === 0) {
+    flConfirm(`Remove "${p.name}"?`, () => {
+      c.projects = c.projects.filter(x => x.id !== pid);
+      flRenderProjects(cid); flUpdateStats(); flSave();
+    }, 'Remove project');
+    return;
   }
+  // Has entries — open the picker so the user chooses where the entries go.
+  _flDelProjCtx = { cid, pid };
+  const msgEl = document.getElementById('fl-del-proj-msg');
+  const escaped = p.name.replace(/</g, '&lt;');
+  msgEl.innerHTML = `<b>${escaped}</b> has <b>${entryCount}</b> logged ${entryCount === 1 ? 'entry' : 'entries'}. Pick where they should go.`;
+  const sel = document.getElementById('fl-del-proj-target');
+  const otherProjects = (c.projects || []).filter(x => x.id !== pid);
+  const opts = otherProjects.map(op =>
+    `<option value="${op.id}">Move to "${op.name.replace(/"/g, '&quot;')}"</option>`
+  );
+  // Offer to create a General bucket only if there isn't one already.
+  if (!otherProjects.some(op => op.name.toLowerCase() === 'general')) {
+    opts.push(`<option value="__general__">Move to a new "General" project</option>`);
+  }
+  opts.push(`<option value="__delete__">Delete the entries too</option>`);
+  sel.innerHTML = opts.join('');
+  flDelProjUpdateButton();
+  flShowModal('fl-del-proj-modal');
+}
+function flDelProjCancel() {
+  flHideModal('fl-del-proj-modal');
+  _flDelProjCtx = null;
+}
+function flDelProjUpdateButton() {
+  const btn = document.getElementById('fl-del-proj-ok');
+  const target = document.getElementById('fl-del-proj-target').value;
+  if (target === '__delete__') {
+    btn.textContent = 'Delete all';
+    btn.className = 'btn btn-red';
+  } else {
+    btn.textContent = 'Move & remove';
+    btn.className = 'btn btn-primary';
+  }
+}
+function flDelProjConfirm() {
+  const ctx = _flDelProjCtx;
+  if (!ctx) return flDelProjCancel();
+  const c = flClients.find(x => x.id === ctx.cid);
+  const p = c && c.projects.find(x => x.id === ctx.pid);
+  if (!c || !p) return flDelProjCancel();
+  const target = document.getElementById('fl-del-proj-target').value;
+  if (target !== '__delete__') {
+    // Resolve the destination project (create General on demand).
+    let targetProj;
+    if (target === '__general__') {
+      targetProj = c.projects.find(x => x.name.toLowerCase() === 'general');
+      if (!targetProj) {
+        targetProj = flMakeProject('General');
+        c.projects.push(targetProj);
+      }
+    } else {
+      targetProj = c.projects.find(x => String(x.id) === String(target));
+    }
+    if (targetProj) {
+      targetProj.entries = [...(p.entries || []), ...(targetProj.entries || [])];
+    }
+  }
+  c.projects = c.projects.filter(x => x.id !== ctx.pid);
+  flHideModal('fl-del-proj-modal');
+  _flDelProjCtx = null;
+  flRenderProjects(ctx.cid);
+  flUpdateStats(); flSave();
 }
 
 function flToggleProject(cid, pid) {
@@ -4987,6 +5052,22 @@ function ghClearPAT() {
     <div class="fl-modal-actions">
       <button class="btn" onclick="flConfirmCancel()">Cancel</button>
       <button class="btn btn-red" id="fl-confirm-ok" onclick="flConfirmOk()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE PROJECT MODAL -->
+<div class="fl-modal-overlay" id="fl-del-proj-modal" onclick="if(event.target===this)flDelProjCancel()">
+  <div class="fl-modal">
+    <h3>Remove project</h3>
+    <div class="fl-modal-sub" id="fl-del-proj-msg"></div>
+    <div class="field" style="margin-bottom:0">
+      <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em">Entries go to</label>
+      <select id="fl-del-proj-target" onchange="flDelProjUpdateButton()" style="width:100%;font-family:'DM Sans',sans-serif;font-size:14px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);cursor:pointer"></select>
+    </div>
+    <div class="fl-modal-actions">
+      <button class="btn" onclick="flDelProjCancel()">Cancel</button>
+      <button class="btn btn-primary" id="fl-del-proj-ok" onclick="flDelProjConfirm()">Move &amp; remove</button>
     </div>
   </div>
 </div>
