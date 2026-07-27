@@ -1146,6 +1146,8 @@
     color: var(--muted); cursor: pointer; transition: all 0.1s; line-height: 1.4;
   }
   .fl-act-btn:hover { color: var(--text); border-color: var(--muted); }
+  .fl-act-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .fl-act-btn:disabled:hover { color: var(--muted); border-color: var(--border); }
   .fl-brief-item {
     display: flex; align-items: center; gap: 8px;
     padding: 9px 12px; border-radius: 8px;
@@ -2418,8 +2420,50 @@ function flRemoveClient(id) {
     flClients = flClients.filter(x => x.id!==id);
     const card = document.getElementById(`fl-card-${id}`);
     if (card) card.remove();
+    flUpdateReorderButtons();
     flUpdateStats(); flSave();
   }, 'Remove client');
+}
+
+// Reorder cards via up/down buttons in the header. Preserves the DOM node
+// (and any transient state inside — open sub-panels, unsaved input, running
+// timers) instead of re-rendering, so the interaction feels instant.
+function flMoveClient(cid, dir) {
+  const idx = flClients.findIndex(x => x.id === cid);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= flClients.length) return;
+  // Swap in the data model
+  const [c] = flClients.splice(idx, 1);
+  flClients.splice(newIdx, 0, c);
+  // Mirror the move in the DOM
+  const container = document.getElementById('fl-client-cards');
+  const cardEl = document.getElementById(`fl-card-${cid}`);
+  if (container && cardEl) {
+    if (dir < 0) {
+      // Moving up: insert before what used to be at idx-1 (now still above at newIdx)
+      const beforeEl = container.children[newIdx];
+      if (beforeEl && beforeEl !== cardEl) container.insertBefore(cardEl, beforeEl);
+    } else {
+      // Moving down: insert after what used to be at idx+1 (now at newIdx-1)
+      const afterEl = container.children[newIdx];
+      if (afterEl && afterEl !== cardEl) container.insertBefore(cardEl, afterEl.nextSibling);
+    }
+  }
+  flUpdateReorderButtons();
+  flUpdateStats(); flSave();
+}
+
+// Re-sync the disabled state on every up/down button after a reorder or
+// removal — no full re-render needed.
+function flUpdateReorderButtons() {
+  const total = flClients.length;
+  flClients.forEach((c, i) => {
+    const up = document.getElementById(`fl-up-${c.id}`);
+    const down = document.getElementById(`fl-down-${c.id}`);
+    if (up) up.disabled = (i === 0);
+    if (down) down.disabled = (i === total - 1);
+  });
 }
 
 // ── PROJECT MANAGEMENT ──
@@ -3874,6 +3918,9 @@ function flClientCardHTML(c) {
   const logoStyle = c.logo ? `background-image:url(${c.logo});background-size:72%;background-repeat:no-repeat;background-position:center;background-color:#ffffff` : `background:${c.color}22;border-color:${c.color}`;
   const logoInner = c.logo ? '' : `<span style="font-size:18px;color:${c.color}">＋</span>`;
   const chevronStyle = c.collapsed ? 'transform:rotate(-90deg)' : '';
+  const idx = flClients.findIndex(x => x.id === c.id);
+  const isFirst = idx <= 0;
+  const isLast = idx >= flClients.length - 1;
 
   const cardBg = `linear-gradient(135deg, ${c.color}0A 0%, ${c.color}24 100%), #FFFFFF`;
   return `<div class="card fl-client-card" id="fl-card-${c.id}" style="margin-bottom:20px;border-left-color:${c.color};background:${cardBg}">
@@ -3887,6 +3934,8 @@ function flClientCardHTML(c) {
     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
       <input type="color" value="${c.color}" title="Brand color" onchange="flUpdateColor(${c.id},this.value)" style="width:22px;height:22px;border:none;border-radius:50%;cursor:pointer;padding:0;background:none"/>
       <span id="fl-client-status-${c.id}" class="tag ${statusClass}">${c.status}</span>
+      <button id="fl-up-${c.id}" onclick="flMoveClient(${c.id}, -1)" class="fl-act-btn" title="Move up" ${isFirst ? 'disabled' : ''} style="padding:4px 6px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><polyline points="18 15 12 9 6 15"/></svg></button>
+      <button id="fl-down-${c.id}" onclick="flMoveClient(${c.id}, 1)" class="fl-act-btn" title="Move down" ${isLast ? 'disabled' : ''} style="padding:4px 6px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><polyline points="6 9 12 15 18 9"/></svg></button>
       <button onclick="flToggleEditPanel(${c.id})" class="fl-act-btn" title="Edit client info" style="padding:3px 8px"> Edit</button>
       <button onclick="flRemoveClient(${c.id})" class="fl-act-btn" title="Remove client">&times;</button>
       <button onclick="flToggleCollapse(${c.id})" class="fl-act-btn" title="${c.collapsed?'Expand':'Minimize'}" style="padding:4px 7px"><svg id="fl-card-chevron-${c.id}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;transition:transform 0.15s;${chevronStyle}"><polyline points="6 9 12 15 18 9"/></svg></button>
