@@ -2862,6 +2862,13 @@ function flIsoWeekKey(d) {
   return x.getUTCFullYear() + '-W' + String(wk).padStart(2, '0');
 }
 function flFmtH(h) { return (h % 1 === 0 ? h : h.toFixed(1)) + 'h'; }
+// Higher-precision hours for the invoice report — up to 2 decimals with
+// trailing zeros stripped, so 2.75 stays "2.75h" instead of rounding to
+// "2.8h" and making the (accurate) income column look off by a few shekels.
+function flFmtHExact(h) {
+  if (h % 1 === 0) return h + 'h';
+  return parseFloat(h.toFixed(2)) + 'h';
+}
 
 // Vacation days — dates the user explicitly marked off. They don't count
 // toward the "N weekdays unlogged" nudge and get their own muted styling
@@ -3020,13 +3027,13 @@ function flReportToText(report, monthLabel) {
   report.clients.forEach(c => {
     lines.push(`${c.name} — ₪${c.rate}/hr`);
     c.projects.forEach(p => {
-      lines.push(`  • ${p.name}: ${flFmtH(p.hours)}  →  ₪${Math.round(p.income).toLocaleString()}`);
+      lines.push(`  • ${p.name}: ${flFmtHExact(p.hours)}  →  ₪${Math.round(p.income).toLocaleString()}`);
     });
-    lines.push(`  Total: ${flFmtH(c.hours)}  →  ₪${Math.round(c.income).toLocaleString()}`);
+    lines.push(`  Total: ${flFmtHExact(c.hours)}  →  ₪${Math.round(c.income).toLocaleString()}`);
     lines.push('');
   });
   lines.push('-'.repeat(40));
-  lines.push(`Grand total: ${flFmtH(report.grandHours)}  →  ₪${Math.round(report.grandIncome).toLocaleString()}`);
+  lines.push(`Grand total: ${flFmtHExact(report.grandHours)}  →  ₪${Math.round(report.grandIncome).toLocaleString()}`);
   return lines.join('\n');
 }
 
@@ -3096,7 +3103,7 @@ function flRenderReport() {
         const rows = c.projects.map(p => `
           <div class="fl-report-row">
             <span class="fl-report-proj-name">${p.name.replace(/</g, '&lt;')}</span>
-            <span class="fl-report-hours">${flFmtH(p.hours)}</span>
+            <span class="fl-report-hours">${flFmtHExact(p.hours)}</span>
             <span class="fl-report-income">₪${Math.round(p.income).toLocaleString()}</span>
           </div>`).join('');
         return `
@@ -3108,7 +3115,7 @@ function flRenderReport() {
             ${rows}
             <div class="fl-report-total">
               <span>Total</span>
-              <span class="fl-report-hours">${flFmtH(c.hours)}</span>
+              <span class="fl-report-hours">${flFmtHExact(c.hours)}</span>
               <span class="fl-report-income">₪${Math.round(c.income).toLocaleString()}</span>
             </div>
           </div>`;
@@ -3117,7 +3124,7 @@ function flRenderReport() {
   const grand = report.clients.length > 0 ? `
     <div class="fl-report-grand">
       <span>Grand total</span>
-      <span class="fl-report-hours">${flFmtH(report.grandHours)}</span>
+      <span class="fl-report-hours">${flFmtHExact(report.grandHours)}</span>
       <span class="fl-report-income">₪${Math.round(report.grandIncome).toLocaleString()}</span>
     </div>` : '';
 
