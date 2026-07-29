@@ -784,6 +784,94 @@
   .fl-sync-pill.error .fl-sync-pill-dot { background: var(--red); }
   .fl-sync-pill.unconfigured .fl-sync-pill-dot { background: #9C8A7A; }
 
+  /* FREELANCE MONTHLY REPORT */
+  .fl-report-controls {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .fl-report-select {
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    padding: 7px 12px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    background: #FFFFFF; color: var(--text);
+    cursor: pointer;
+  }
+  .fl-report-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #FFFAF2 100%);
+    border: 1px solid rgba(236,227,214,0.6);
+    border-radius: 16px;
+    padding: 18px 22px; margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(45,31,26,0.03);
+  }
+  .fl-report-card-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin-bottom: 10px;
+    border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  }
+  .fl-report-card-name {
+    font-family: 'Lora', serif; font-size: 20px;
+    letter-spacing: -0.02em; font-weight: 500;
+  }
+  .fl-report-card-rate {
+    font-size: 12.5px; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .fl-report-card-rate b { color: var(--text); font-weight: 600; }
+  .fl-report-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px; align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  .fl-report-proj-name { color: var(--text); }
+  .fl-report-hours { color: var(--muted); text-align: right; min-width: 52px; }
+  .fl-report-income { color: var(--text); text-align: right; min-width: 76px; font-weight: 500; }
+  .fl-report-total {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px; align-items: center;
+    padding: 10px 0 0;
+    margin-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 13.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .fl-report-total .fl-report-hours,
+  .fl-report-total .fl-report-income { color: var(--text); }
+  .fl-report-grand {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px; align-items: baseline;
+    padding: 18px 22px;
+    background: linear-gradient(140deg, #FFF8EE 0%, #FFE0CC 100%);
+    border: 1px solid rgba(255,178,140,0.5);
+    border-radius: 16px;
+    margin-top: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .fl-report-grand > span:first-child {
+    font-family: 'Lora', serif; font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+  .fl-report-grand .fl-report-hours {
+    color: var(--muted); font-size: 14px; text-align: right;
+  }
+  .fl-report-grand .fl-report-income {
+    font-family: 'Lora', serif; font-size: 26px;
+    letter-spacing: -0.02em; color: var(--text);
+    text-align: right;
+  }
+  .fl-report-empty {
+    color: var(--muted); font-size: 13px;
+    padding: 32px; text-align: center;
+    background: var(--surface); border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+
   /* FREELANCE DAILY LOG */
   .fl-daily-card {
     background: linear-gradient(135deg, #FFFFFF 0%, #FFFAF2 100%);
@@ -1972,6 +2060,7 @@
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('freelance', 'clients', this)">Clients</button>
       <button class="tab-btn" onclick="flSwitchToDaily(this)">Daily log</button>
+      <button class="tab-btn" onclick="flSwitchToReport(this)">Report</button>
     </div>
 
     <div class="tab-panel active" id="tab-freelance-clients">
@@ -2015,6 +2104,10 @@
 
     <div class="tab-panel" id="tab-freelance-daily">
       <div id="fl-daily-root"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-freelance-report">
+      <div id="fl-report-root"></div>
     </div>
 
   </div><!-- end freelance section -->
@@ -2867,6 +2960,179 @@ function flSetDailyMode(mode) {
 function flSwitchToDaily(btn) {
   switchTab('freelance', 'daily', btn);
   flRenderDaily();
+}
+
+// ── MONTHLY REPORT (invoice helper) ──
+// Simple per-client / per-project hours + income breakdown for one month.
+// Not styled for a client's eyes — this is a scratchpad the user copies
+// into whatever invoicing tool they actually use.
+let _flReportMonth = null; // 'YYYY-MM'; null → default to current month on first render
+
+function flReportMonthOptions() {
+  // Last 12 months, newest first (current month at top of the dropdown).
+  const now = new Date();
+  const options = [];
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    options.push({ mk, label: FL_MONTHS[d.getMonth()] + ' ' + d.getFullYear() });
+  }
+  return options;
+}
+
+function flBuildReport(mk) {
+  const clients = [];
+  let grandHours = 0, grandIncome = 0;
+  flClients.forEach(c => {
+    const projects = [];
+    let cHours = 0;
+    (c.projects || []).forEach(p => {
+      let pHours = 0;
+      (p.entries || []).forEach(e => {
+        if (e.date && e.date.slice(0, 7) === mk) pHours += e.hours;
+      });
+      if (pHours > 0) {
+        projects.push({ name: p.name, hours: pHours, income: pHours * (c.rate || 0) });
+        cHours += pHours;
+      }
+    });
+    if (cHours > 0) {
+      const cIncome = cHours * (c.rate || 0);
+      clients.push({ name: c.name, rate: c.rate || 0, color: c.color, projects, hours: cHours, income: cIncome });
+      grandHours += cHours;
+      grandIncome += cIncome;
+    }
+  });
+  return { clients, grandHours, grandIncome };
+}
+
+// Plain-text version used by copy + download — deliberately monospace-friendly
+// so it pastes cleanly into invoicing apps, emails, or a notes app.
+function flReportToText(report, monthLabel) {
+  const lines = [];
+  lines.push(`${monthLabel} — Invoice report`);
+  lines.push('='.repeat(monthLabel.length + 18));
+  lines.push('');
+  if (!report.clients.length) {
+    lines.push('No hours logged this month.');
+    return lines.join('\n');
+  }
+  report.clients.forEach(c => {
+    lines.push(`${c.name} — ₪${c.rate}/hr`);
+    c.projects.forEach(p => {
+      lines.push(`  • ${p.name}: ${flFmtH(p.hours)}  →  ₪${Math.round(p.income).toLocaleString()}`);
+    });
+    lines.push(`  Total: ${flFmtH(c.hours)}  →  ₪${Math.round(c.income).toLocaleString()}`);
+    lines.push('');
+  });
+  lines.push('-'.repeat(40));
+  lines.push(`Grand total: ${flFmtH(report.grandHours)}  →  ₪${Math.round(report.grandIncome).toLocaleString()}`);
+  return lines.join('\n');
+}
+
+function flSetReportMonth(mk) {
+  _flReportMonth = mk;
+  flRenderReport();
+}
+
+function flSwitchToReport(btn) {
+  switchTab('freelance', 'report', btn);
+  if (!_flReportMonth) {
+    const now = new Date();
+    _flReportMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  }
+  flRenderReport();
+}
+
+function flCopyReport() {
+  const ta = document.getElementById('fl-report-text');
+  if (!ta) return;
+  const btn = document.getElementById('fl-report-copy-btn');
+  const orig = btn ? btn.textContent : '';
+  const flash = () => {
+    if (!btn) return;
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = orig; }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value).then(flash).catch(() => {
+      ta.select(); document.execCommand('copy'); flash();
+    });
+  } else {
+    ta.select(); document.execCommand('copy'); flash();
+  }
+}
+
+function flDownloadReport() {
+  const ta = document.getElementById('fl-report-text');
+  const sel = document.getElementById('fl-report-month');
+  if (!ta || !sel) return;
+  const blob = new Blob([ta.value], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `invoice-${sel.value}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function flRenderReport() {
+  const root = document.getElementById('fl-report-root');
+  if (!root) return;
+  const mk = _flReportMonth || (() => {
+    const now = new Date();
+    return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  })();
+  const options = flReportMonthOptions();
+  const selectedOption = options.find(o => o.mk === mk) || options[0];
+  const report = flBuildReport(mk);
+  const text = flReportToText(report, selectedOption.label);
+
+  const clientCards = report.clients.length === 0
+    ? `<div class="fl-report-empty">No hours logged in ${selectedOption.label}.</div>`
+    : report.clients.map(c => {
+        const rows = c.projects.map(p => `
+          <div class="fl-report-row">
+            <span class="fl-report-proj-name">${p.name.replace(/</g, '&lt;')}</span>
+            <span class="fl-report-hours">${flFmtH(p.hours)}</span>
+            <span class="fl-report-income">₪${Math.round(p.income).toLocaleString()}</span>
+          </div>`).join('');
+        return `
+          <div class="fl-report-card">
+            <div class="fl-report-card-head">
+              <div class="fl-report-card-name" style="color:${c.color}">${c.name.replace(/</g, '&lt;')}</div>
+              <div class="fl-report-card-rate"><b>₪${c.rate}</b>/hr</div>
+            </div>
+            ${rows}
+            <div class="fl-report-total">
+              <span>Total</span>
+              <span class="fl-report-hours">${flFmtH(c.hours)}</span>
+              <span class="fl-report-income">₪${Math.round(c.income).toLocaleString()}</span>
+            </div>
+          </div>`;
+      }).join('');
+
+  const grand = report.clients.length > 0 ? `
+    <div class="fl-report-grand">
+      <span>Grand total</span>
+      <span class="fl-report-hours">${flFmtH(report.grandHours)}</span>
+      <span class="fl-report-income">₪${Math.round(report.grandIncome).toLocaleString()}</span>
+    </div>` : '';
+
+  root.innerHTML = `
+    <div class="fl-report-controls">
+      <select id="fl-report-month" class="fl-report-select" onchange="flSetReportMonth(this.value)">
+        ${options.map(o => `<option value="${o.mk}"${o.mk === mk ? ' selected' : ''}>${o.label}</option>`).join('')}
+      </select>
+      <button id="fl-report-copy-btn" class="btn btn-primary" onclick="flCopyReport()">Copy</button>
+      <button class="btn" onclick="flDownloadReport()">Download .txt</button>
+    </div>
+    ${clientCards}
+    ${grand}
+    <textarea id="fl-report-text" readonly aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">${text.replace(/</g, '&lt;')}</textarea>
+  `;
 }
 
 function flRenderDaily() {
