@@ -871,6 +871,45 @@
     background: var(--surface); border: 1px dashed var(--border);
     border-radius: 12px;
   }
+  .fl-report-status {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding: 8px 0 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .fl-report-check {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; color: var(--muted);
+    cursor: pointer; user-select: none;
+    padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    font-family: inherit;
+  }
+  .fl-report-check:hover { border-color: var(--muted); color: var(--text); }
+  .fl-report-check.on {
+    background: var(--green-light);
+    color: var(--green);
+    border-color: transparent;
+    font-weight: 600;
+  }
+  .fl-report-check input[type="checkbox"] {
+    margin: 0; width: 12px; height: 12px;
+    accent-color: var(--green);
+    cursor: pointer;
+  }
+  .fl-report-summary {
+    font-size: 12px; color: var(--muted);
+    padding: 6px 12px;
+    background: var(--bg);
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    margin-left: auto;
+  }
+  .fl-report-summary b { color: var(--text); font-weight: 600; }
+  .fl-report-summary .divider { opacity: 0.4; margin: 0 4px; }
 
   /* FREELANCE DAILY LOG */
   .fl-daily-card {
@@ -3005,12 +3044,48 @@ function flBuildReport(mk) {
     });
     if (cHours > 0) {
       const cIncome = cHours * (c.rate || 0);
-      clients.push({ name: c.name, rate: c.rate || 0, color: c.color, projects, hours: cHours, income: cIncome });
+      const monthState = (c.months && c.months[mk]) || {};
+      clients.push({
+        id: c.id, name: c.name, rate: c.rate || 0, color: c.color,
+        projects, hours: cHours, income: cIncome,
+        invoiced: !!monthState.invoiced,
+        paid: !!monthState.paid,
+      });
       grandHours += cHours;
       grandIncome += cIncome;
     }
   });
   return { clients, grandHours, grandIncome };
+}
+
+// Per-client per-month flag toggle. Reuses c.months[mk] which already
+// backs the Monthly tab's Paid pill, so ticking a box here also lights
+// up there.
+function flReportToggleFlag(cid, mk, field) {
+  const c = flClients.find(x => x.id === cid);
+  if (!c) return;
+  c.months = c.months || {};
+  c.months[mk] = c.months[mk] || {};
+  c.months[mk][field] = !c.months[mk][field];
+  flSave();
+  flRenderReport();
+  // The Monthly tab's Paid pill for this client should also reflect the change.
+  if (typeof flRenderMonthly === 'function') flRenderMonthly(cid);
+}
+
+// Roll up a single month's sent/paid status across clients — used for the
+// month picker suffix ("Jun 2026 · paid" etc.) so past months at a glance
+// show what still needs attention.
+function flReportMonthStatus(mk) {
+  const report = flBuildReport(mk);
+  if (!report.clients.length) return '';
+  const total = report.clients.length;
+  const sent = report.clients.filter(c => c.invoiced).length;
+  const paid = report.clients.filter(c => c.paid).length;
+  if (paid === total) return ' · ✓ paid';
+  if (sent === total && paid === 0) return ' · sent';
+  if (sent > 0 || paid > 0) return ' · partial';
+  return '';
 }
 
 // Plain-text version used by copy + download — deliberately monospace-friendly
@@ -3112,6 +3187,16 @@ function flRenderReport() {
               <div class="fl-report-card-name" style="color:${c.color}">${c.name.replace(/</g, '&lt;')}</div>
               <div class="fl-report-card-rate"><b>₪${c.rate}</b>/hr</div>
             </div>
+            <div class="fl-report-status">
+              <label class="fl-report-check${c.invoiced ? ' on' : ''}">
+                <input type="checkbox"${c.invoiced ? ' checked' : ''} onchange="flReportToggleFlag(${c.id}, '${mk}', 'invoiced')"/>
+                <span>${c.invoiced ? '✓ ' : ''}Invoice sent</span>
+              </label>
+              <label class="fl-report-check${c.paid ? ' on' : ''}">
+                <input type="checkbox"${c.paid ? ' checked' : ''} onchange="flReportToggleFlag(${c.id}, '${mk}', 'paid')"/>
+                <span>${c.paid ? '✓ ' : ''}Payment received</span>
+              </label>
+            </div>
             ${rows}
             <div class="fl-report-total">
               <span>Total</span>
@@ -3128,13 +3213,23 @@ function flRenderReport() {
       <span class="fl-report-income">₪${Math.round(report.grandIncome).toLocaleString()}</span>
     </div>` : '';
 
+  // Roll-up counts for the selected month — surfaces "how much is left to do"
+  // above the client cards so past months don't need re-reading each row.
+  const totalClients = report.clients.length;
+  const sentCount = report.clients.filter(c => c.invoiced).length;
+  const paidCount = report.clients.filter(c => c.paid).length;
+  const summary = totalClients > 0
+    ? `<div class="fl-report-summary"><b>${sentCount}</b>/${totalClients} invoiced <span class="divider">·</span> <b>${paidCount}</b>/${totalClients} paid</div>`
+    : '';
+
   root.innerHTML = `
     <div class="fl-report-controls">
       <select id="fl-report-month" class="fl-report-select" onchange="flSetReportMonth(this.value)">
-        ${options.map(o => `<option value="${o.mk}"${o.mk === mk ? ' selected' : ''}>${o.label}</option>`).join('')}
+        ${options.map(o => `<option value="${o.mk}"${o.mk === mk ? ' selected' : ''}>${o.label}${flReportMonthStatus(o.mk)}</option>`).join('')}
       </select>
       <button id="fl-report-copy-btn" class="btn btn-primary" onclick="flCopyReport()">Copy</button>
       <button class="btn" onclick="flDownloadReport()">Download .txt</button>
+      ${summary}
     </div>
     ${clientCards}
     ${grand}
