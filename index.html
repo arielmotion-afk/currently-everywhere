@@ -784,6 +784,223 @@
   .fl-sync-pill.error .fl-sync-pill-dot { background: var(--red); }
   .fl-sync-pill.unconfigured .fl-sync-pill-dot { background: #9C8A7A; }
 
+  /* GERMAN — der/die/das color coding used throughout */
+  .de-art { font-weight: 600; }
+  .de-art.de-der { color: #3d6680; }  /* blue */
+  .de-art.de-die { color: #b6555c; }  /* rose */
+  .de-art.de-das { color: #b09040; }  /* amber */
+
+  /* German — declension table */
+  .de-table-wrap { overflow-x: auto; }
+  .de-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 14px; font-variant-numeric: tabular-nums;
+  }
+  .de-table th, .de-table td {
+    padding: 10px 12px; text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .de-table thead th {
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    font-weight: 600; border-bottom: 1.5px solid var(--border);
+  }
+  .de-table tbody th {
+    text-align: left; font-weight: 600;
+    color: var(--text);
+    background: var(--bg); border-right: 1px solid var(--border);
+  }
+  .de-table tbody tr:last-child td, .de-table tbody tr:last-child th { border-bottom: none; }
+  .de-example {
+    margin-top: 14px; padding: 10px 14px;
+    background: var(--bg); border-radius: 8px;
+    font-size: 14px; color: var(--muted);
+    text-align: center;
+  }
+
+  /* German — prepositions grid */
+  .de-prep-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 540px) { .de-prep-grid { grid-template-columns: 1fr; } }
+  .de-prep-card {
+    background: var(--bg); border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+  .de-prep-case {
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    font-weight: 700; margin-bottom: 6px;
+  }
+  .de-prep-list { font-size: 13.5px; color: var(--text); line-height: 1.7; }
+  .de-prep-list b { color: var(--accent); font-weight: 600; }
+
+  /* German — contractions list */
+  .de-contract-list { display: flex; flex-direction: column; gap: 8px; }
+  .de-contract-row {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr;
+    gap: 10px; align-items: center;
+    padding: 10px 14px;
+    background: var(--bg); border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 13.5px;
+  }
+  .de-contract-formula { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .de-contract-eq { color: var(--muted); }
+  .de-contract-result {
+    font-weight: 600; color: var(--accent);
+    padding: 2px 10px; border-radius: 999px;
+    background: var(--accent-light);
+  }
+  .de-contract-ex { color: var(--text); text-align: right; font-size: 13px; }
+  .de-contract-ex b { color: var(--accent); }
+  @media (max-width: 540px) {
+    .de-contract-row { grid-template-columns: auto auto auto; }
+    .de-contract-ex { grid-column: 1 / -1; text-align: left; }
+  }
+
+  /* German — Akkusativ/Dativ mnemonic */
+  .de-mnemonic-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 12px;
+  }
+  @media (max-width: 640px) { .de-mnemonic-grid { grid-template-columns: 1fr; } }
+  .de-mnemonic-half {
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .de-mnemonic-half.akk {
+    background: linear-gradient(135deg, #FFFBF6 0%, #FFEED8 100%);
+    border-color: rgba(200, 160, 100, 0.35);
+  }
+  .de-mnemonic-half.dat {
+    background: linear-gradient(135deg, #F4F9F1 0%, #DCEFD1 100%);
+    border-color: rgba(120, 165, 110, 0.4);
+  }
+  .de-mnemonic-title {
+    font-family: 'Lora', serif; font-size: 17px;
+    letter-spacing: -0.02em; margin-bottom: 6px;
+  }
+  .de-mnemonic-half.akk .de-mnemonic-title { color: #b07830; }
+  .de-mnemonic-half.dat .de-mnemonic-title { color: #4d7c62; }
+  .de-mnemonic-p { font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 12px; }
+  .de-mnemonic-shifts {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 8px 0; margin-bottom: 10px;
+    border-top: 1px dashed rgba(45,31,26,0.14);
+    border-bottom: 1px dashed rgba(45,31,26,0.14);
+  }
+  .de-shift {
+    display: grid; grid-template-columns: 22px 42px 14px 42px auto;
+    align-items: center; gap: 6px;
+    padding: 3px 4px; font-size: 13px;
+  }
+  .de-shift-g { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .de-shift-from { text-align: center; font-weight: 500; opacity: 0.8; }
+  .de-shift-arrow { color: var(--muted); }
+  .de-shift-to { text-align: center; font-weight: 700; }
+  .de-shift-tag {
+    justify-self: end; font-size: 10.5px; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px;
+  }
+  .de-shift-tag.changes { background: rgba(230,106,74,0.14); color: var(--accent); }
+  .de-shift-tag.same { background: rgba(45,31,26,0.05); color: var(--muted); }
+  .de-chant {
+    font-family: 'Lora', serif; font-size: 20px;
+    letter-spacing: -0.02em; text-align: center;
+    padding: 6px 0 2px;
+  }
+  .de-mnemonic-half.akk .de-chant { color: #b07830; }
+  .de-mnemonic-half.dat .de-chant { color: #4d7c62; }
+  .de-chant-note {
+    text-align: center; font-size: 10.5px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+  }
+  .de-mnemonic-scene, .de-mnemonic-verbs {
+    background: var(--bg); border-radius: 10px;
+    padding: 12px 14px; margin-top: 8px;
+    font-size: 13px; line-height: 1.55;
+  }
+  .de-mnemonic-verbs b { color: var(--text); }
+
+  /* German — Practice mode */
+  .de-practice { max-width: 480px; margin: 0 auto; padding: 8px 0; }
+  .de-stats-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; margin-bottom: 16px;
+    background: var(--bg); border-radius: 10px;
+    font-size: 13px; color: var(--muted);
+  }
+  .de-stats-bar b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .de-stats-reset {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); font-size: 11.5px; font-family: inherit;
+    padding: 4px 10px; border-radius: 6px; cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .de-stats-reset:hover { color: var(--text); border-color: var(--muted); }
+  .de-card-wrap {
+    background: linear-gradient(140deg, #FFFCF7 0%, #FFF1E5 100%);
+    border: 1px solid rgba(236,227,214,0.6);
+    border-radius: 20px;
+    padding: 40px 24px 32px;
+    text-align: center;
+    box-shadow: 0 4px 18px rgba(45,31,26,0.05);
+    transition: background 0.2s, border-color 0.2s;
+    min-height: 200px;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  }
+  .de-card-wrap.right {
+    background: linear-gradient(140deg, #F2F8F0 0%, #D7E9CD 100%);
+    border-color: rgba(120,165,110,0.4);
+  }
+  .de-card-wrap.wrong {
+    background: linear-gradient(140deg, #FAECEC 0%, #F0D2D2 100%);
+    border-color: rgba(200,120,120,0.4);
+  }
+  .de-card-noun {
+    font-family: 'Lora', serif;
+    font-size: 40px; letter-spacing: -0.03em;
+    color: var(--text); line-height: 1.1;
+  }
+  .de-card-answer {
+    font-family: 'Lora', serif; font-size: 26px; letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .de-card-en { font-size: 14px; color: var(--muted); font-style: italic; }
+  .de-choices {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; margin-top: 18px;
+  }
+  .de-choice {
+    background: #FFFFFF; border: 1.5px solid var(--border);
+    color: var(--text); font-family: 'Lora', serif;
+    font-size: 22px; letter-spacing: -0.02em;
+    padding: 14px 0; border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.15s, background 0.15s;
+  }
+  .de-choice:hover { transform: translateY(-1px); }
+  .de-choice.de-der:hover { border-color: #3d6680; background: rgba(61,102,128,0.06); }
+  .de-choice.de-die:hover { border-color: #b6555c; background: rgba(182,85,92,0.06); }
+  .de-choice.de-das:hover { border-color: #b09040; background: rgba(176,144,64,0.06); }
+  .de-choice.de-der { color: #3d6680; }
+  .de-choice.de-die { color: #b6555c; }
+  .de-choice.de-das { color: #b09040; }
+  .de-next {
+    display: block; width: 100%; margin-top: 18px;
+    padding: 14px; border-radius: 12px;
+    background: var(--accent); color: #FFFFFF;
+    border: none; font-family: inherit;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .de-next:hover { background: #D45A3F; }
+
   /* FREELANCE MONTHLY REPORT */
   .fl-report-controls {
     display: flex; align-items: center; gap: 10px;
@@ -1543,6 +1760,9 @@
     <button class="sb-btn" data-section="mom" data-tip="Mom">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     </button>
+    <button class="sb-btn" data-section="german" data-tip="German">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </button>
   </nav>
   <div class="sb-bottom">
     <div class="sb-divider"></div>
@@ -2059,6 +2279,126 @@
     </div>
 
   </div><!-- end mom section -->
+
+  <!-- GERMAN -->
+  <div class="section" id="german">
+    <div class="section-header">
+      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>German — A1.2</h1>
+      <p>Practice drills + reference tables</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="deSwitchToPractice(this)">Practice</button>
+      <button class="tab-btn" onclick="switchTab('german', 'reference', this)">Reference</button>
+    </div>
+
+    <!-- PRACTICE -->
+    <div class="tab-panel active" id="tab-german-practice">
+      <div id="de-practice-root"></div>
+    </div>
+
+    <!-- REFERENCE -->
+    <div class="tab-panel" id="tab-german-reference">
+      <!-- Declension table -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Declension — der/die/das across cases</div>
+        </div>
+        <div class="de-table-wrap">
+          <table class="de-table">
+            <thead>
+              <tr><th></th><th>maskulin</th><th>feminin</th><th>neutral</th><th>plural</th></tr>
+            </thead>
+            <tbody>
+              <tr><th>Nominativ</th><td><span class="de-art de-der">der</span></td><td><span class="de-art de-die">die</span></td><td><span class="de-art de-das">das</span></td><td><span class="de-art de-die">die</span></td></tr>
+              <tr><th>Akkusativ</th><td><span class="de-art de-der">den</span></td><td><span class="de-art de-die">die</span></td><td><span class="de-art de-das">das</span></td><td><span class="de-art de-die">die</span></td></tr>
+              <tr><th>Dativ</th><td><span class="de-art de-der">dem</span></td><td><span class="de-art de-die">der</span></td><td><span class="de-art de-das">dem</span></td><td><span class="de-art de-die">den +n</span></td></tr>
+              <tr><th>Genitiv</th><td><span class="de-art de-der">des +(e)s</span></td><td><span class="de-art de-die">der</span></td><td><span class="de-art de-das">des +(e)s</span></td><td><span class="de-art de-die">der</span></td></tr>
+            </tbody>
+          </table>
+          <div class="de-example">der Mann → den Mann → dem Mann → des Mannes</div>
+        </div>
+      </div>
+
+      <!-- Preposition triggers -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Preposition triggers</div>
+        </div>
+        <div class="de-prep-grid">
+          <div class="de-prep-card">
+            <div class="de-prep-case">Nominativ</div>
+            <div class="de-prep-list">Subjekt — <em>wer? / was?</em></div>
+          </div>
+          <div class="de-prep-card">
+            <div class="de-prep-case">Akkusativ</div>
+            <div class="de-prep-list"><b>für</b>, <b>durch</b>, <b>ohne</b>, <b>um</b>, <b>gegen</b></div>
+          </div>
+          <div class="de-prep-card">
+            <div class="de-prep-case">Dativ</div>
+            <div class="de-prep-list"><b>aus</b>, <b>bei</b>, <b>mit</b>, <b>nach</b>, <b>seit</b>, <b>von</b>, <b>zu</b></div>
+          </div>
+          <div class="de-prep-card">
+            <div class="de-prep-case">Genitiv</div>
+            <div class="de-prep-list"><b>wegen</b>, <b>während</b>, <b>trotz</b>, <b>statt</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contractions -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--yellow)"></div>Common Dativ contractions</div>
+        </div>
+        <div class="de-contract-list">
+          <div class="de-contract-row"><span class="de-contract-formula">bei + dem</span><span class="de-contract-eq">=</span><span class="de-contract-result">beim</span><span class="de-contract-ex">Ich war <b>beim</b> Arzt.</span></div>
+          <div class="de-contract-row"><span class="de-contract-formula">von + dem</span><span class="de-contract-eq">=</span><span class="de-contract-result">vom</span><span class="de-contract-ex">Ich hole dich <b>vom</b> Bahnhof ab.</span></div>
+          <div class="de-contract-row"><span class="de-contract-formula">zu + dem</span><span class="de-contract-eq">=</span><span class="de-contract-result">zum</span><span class="de-contract-ex">Wir fahren <b>zum</b> Garten.</span></div>
+          <div class="de-contract-row"><span class="de-contract-formula">zu + der</span><span class="de-contract-eq">=</span><span class="de-contract-result">zur</span><span class="de-contract-ex">Ich gehe <b>zur</b> Schule.</span></div>
+        </div>
+      </div>
+
+      <!-- Package vs Address mnemonic -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--green)"></div>Akkusativ &amp; Dativ — the package and the address</div>
+        </div>
+        <div class="de-mnemonic-grid">
+          <div class="de-mnemonic-half akk">
+            <div class="de-mnemonic-title">📦 Akkusativ — the package</div>
+            <p class="de-mnemonic-p">The thing being acted on directly. It just sits there — barely changes. Only the male package gets sealed differently.</p>
+            <div class="de-mnemonic-shifts">
+              <div class="de-shift"><span class="de-shift-g">m</span><span class="de-shift-from de-der">der</span><span class="de-shift-arrow">→</span><span class="de-shift-to de-der">den</span><span class="de-shift-tag changes">changes</span></div>
+              <div class="de-shift"><span class="de-shift-g">f</span><span class="de-shift-from de-die">die</span><span class="de-shift-arrow">→</span><span class="de-shift-to de-die">die</span><span class="de-shift-tag same">same</span></div>
+              <div class="de-shift"><span class="de-shift-g">n</span><span class="de-shift-from de-das">das</span><span class="de-shift-arrow">→</span><span class="de-shift-to de-das">das</span><span class="de-shift-tag same">same</span></div>
+              <div class="de-shift"><span class="de-shift-g">pl</span><span class="de-shift-from de-die">die</span><span class="de-shift-arrow">→</span><span class="de-shift-to de-die">die</span><span class="de-shift-tag same">same</span></div>
+            </div>
+            <div class="de-chant">den · die · das · die</div>
+            <div class="de-chant-note">Only the first one moves</div>
+          </div>
+          <div class="de-mnemonic-half dat">
+            <div class="de-mnemonic-title">🏠 Dativ — the address</div>
+            <p class="de-mnemonic-p">Who or what the action is going toward. Every doorbell rings differently — all four forms shift.</p>
+            <div class="de-mnemonic-shifts">
+              <div class="de-shift"><span class="de-shift-g">m</span><span class="de-shift-from de-der">der</span><span class="de-shift-arrow">→</span><span class="de-shift-to de-der">dem</span><span class="de-shift-tag changes">changes</span></div>
+              <div class="de-shift"><span class="de-shift-g">f</span><span class="de-shift-from de-die">die</span><span class="de-shift-arrow">→</span><span class="de-shift-to de-die">der</span><span class="de-shift-tag changes">changes</span></div>
+              <div class="de-shift"><span class="de-shift-g">n</span><span class="de-shift-from de-das">das</span><span class="de-shift-arrow">→</span><span class="de-shift-to de-das">dem</span><span class="de-shift-tag changes">changes</span></div>
+              <div class="de-shift"><span class="de-shift-g">pl</span><span class="de-shift-from de-die">die</span><span class="de-shift-arrow">→</span><span class="de-shift-to de-die">den</span><span class="de-shift-tag changes">changes</span></div>
+            </div>
+            <div class="de-chant">dem · der · dem · den</div>
+            <div class="de-chant-note">Every single one moves</div>
+          </div>
+        </div>
+        <div class="de-mnemonic-scene">
+          <b>The scene:</b> you're a delivery driver. The 📦 package is boring cargo — it doesn't transform, except the male one gets a special seal (der → den). The 🏠 address is where the real change happens — every label gets re-stamped for whoever's picking it up. Ask first: <em>is this noun the thing being moved, or the thing it's going to?</em>
+        </div>
+        <div class="de-mnemonic-verbs">
+          <b>🏠-only verbs (no package needed):</b> <b>helfen</b> (help) · <b>danken</b> (thank) · <b>folgen</b> (follow) · <b>gefallen</b> (please) · <b>gehören</b> (belong to). These always take Dativ alone — even with one noun, it's still an address, not a package.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end german section -->
 
   <!-- FREELANCE -->
   <div class="section active" id="freelance">
@@ -4669,6 +5009,163 @@ function schLoad() {
   else { schTrips = [...SCH_DEFAULT_TRIPS]; schSave(); }
   schRender();
 }
+
+// ── GERMAN — der/die/das flashcards (A1.2) ──
+// Seed deck of ~55 common A1 nouns. Focused on words the user is likely to
+// meet at A1.2: home, food, family, transport, places, time, everyday objects.
+const DE_NOUNS = [
+  // People / family
+  { noun: 'Mann',      article: 'der', en: 'man' },
+  { noun: 'Frau',      article: 'die', en: 'woman' },
+  { noun: 'Kind',      article: 'das', en: 'child' },
+  { noun: 'Vater',     article: 'der', en: 'father' },
+  { noun: 'Mutter',    article: 'die', en: 'mother' },
+  { noun: 'Bruder',    article: 'der', en: 'brother' },
+  { noun: 'Schwester', article: 'die', en: 'sister' },
+  { noun: 'Junge',     article: 'der', en: 'boy' },
+  { noun: 'Mädchen',   article: 'das', en: 'girl' },
+  { noun: 'Freund',    article: 'der', en: 'friend (m)' },
+  { noun: 'Freundin',  article: 'die', en: 'friend (f)' },
+  // Home
+  { noun: 'Haus',      article: 'das', en: 'house' },
+  { noun: 'Zimmer',    article: 'das', en: 'room' },
+  { noun: 'Tür',       article: 'die', en: 'door' },
+  { noun: 'Fenster',   article: 'das', en: 'window' },
+  { noun: 'Tisch',     article: 'der', en: 'table' },
+  { noun: 'Stuhl',     article: 'der', en: 'chair' },
+  { noun: 'Bett',      article: 'das', en: 'bed' },
+  { noun: 'Küche',     article: 'die', en: 'kitchen' },
+  // Food / drink
+  { noun: 'Wasser',    article: 'das', en: 'water' },
+  { noun: 'Brot',      article: 'das', en: 'bread' },
+  { noun: 'Milch',     article: 'die', en: 'milk' },
+  { noun: 'Kaffee',    article: 'der', en: 'coffee' },
+  { noun: 'Tee',       article: 'der', en: 'tea' },
+  { noun: 'Bier',      article: 'das', en: 'beer' },
+  { noun: 'Wein',      article: 'der', en: 'wine' },
+  { noun: 'Apfel',     article: 'der', en: 'apple' },
+  { noun: 'Butter',    article: 'die', en: 'butter' },
+  // Transport / places
+  { noun: 'Auto',      article: 'das', en: 'car' },
+  { noun: 'Bus',       article: 'der', en: 'bus' },
+  { noun: 'Zug',       article: 'der', en: 'train' },
+  { noun: 'Fahrrad',   article: 'das', en: 'bicycle' },
+  { noun: 'Bahnhof',   article: 'der', en: 'train station' },
+  { noun: 'Flughafen', article: 'der', en: 'airport' },
+  { noun: 'Stadt',     article: 'die', en: 'city' },
+  { noun: 'Land',      article: 'das', en: 'country' },
+  { noun: 'Straße',    article: 'die', en: 'street' },
+  { noun: 'Schule',    article: 'die', en: 'school' },
+  { noun: 'Büro',      article: 'das', en: 'office' },
+  { noun: 'Arbeit',    article: 'die', en: 'work' },
+  { noun: 'Arzt',      article: 'der', en: 'doctor' },
+  { noun: 'Garten',    article: 'der', en: 'garden' },
+  { noun: 'Park',      article: 'der', en: 'park' },
+  { noun: 'Fest',      article: 'das', en: 'party, celebration' },
+  // Time
+  { noun: 'Tag',       article: 'der', en: 'day' },
+  { noun: 'Woche',     article: 'die', en: 'week' },
+  { noun: 'Monat',     article: 'der', en: 'month' },
+  { noun: 'Jahr',      article: 'das', en: 'year' },
+  { noun: 'Zeit',      article: 'die', en: 'time' },
+  { noun: 'Nacht',     article: 'die', en: 'night' },
+  { noun: 'Uhr',       article: 'die', en: 'clock, watch' },
+  // Nature / animals
+  { noun: 'Sonne',     article: 'die', en: 'sun' },
+  { noun: 'Mond',      article: 'der', en: 'moon' },
+  { noun: 'Baum',      article: 'der', en: 'tree' },
+  { noun: 'Hund',      article: 'der', en: 'dog' },
+  { noun: 'Katze',     article: 'die', en: 'cat' },
+  // Objects
+  { noun: 'Buch',      article: 'das', en: 'book' },
+  { noun: 'Geld',      article: 'das', en: 'money' },
+  { noun: 'Handy',     article: 'das', en: 'mobile phone' },
+  { noun: 'Name',      article: 'der', en: 'name' },
+];
+
+// Session-only state (no persistence for now — v1). Reset with the Reset button
+// or by refreshing the page; per-noun mastery tracking can come later.
+let deState = { order: [], idx: 0, seen: 0, correct: 0, revealed: false, pickedArticle: null };
+
+function deShuffle(n) {
+  const a = Array.from({ length: n }, (_, i) => i);
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function deInitSession() {
+  deState.order = deShuffle(DE_NOUNS.length);
+  deState.idx = 0;
+  deState.seen = 0;
+  deState.correct = 0;
+  deState.revealed = false;
+  deState.pickedArticle = null;
+  deRender();
+}
+function deReset() { deInitSession(); }
+function dePick(article) {
+  if (deState.revealed) return;
+  const card = DE_NOUNS[deState.order[deState.idx]];
+  const isRight = card.article === article;
+  deState.revealed = true;
+  deState.pickedArticle = article;
+  deState.pickedRight = isRight;
+  deState.seen++;
+  if (isRight) deState.correct++;
+  deRender();
+}
+function deNext() {
+  deState.idx++;
+  if (deState.idx >= deState.order.length) {
+    // End of deck — reshuffle so practice loops indefinitely
+    deState.order = deShuffle(DE_NOUNS.length);
+    deState.idx = 0;
+  }
+  deState.revealed = false;
+  deState.pickedArticle = null;
+  deState.pickedRight = null;
+  deRender();
+}
+function deRender() {
+  const root = document.getElementById('de-practice-root');
+  if (!root) return;
+  if (!deState.order.length) deInitSession();
+  const card = DE_NOUNS[deState.order[deState.idx]];
+  const accuracy = deState.seen > 0 ? Math.round(deState.correct / deState.seen * 100) : 0;
+  const cardCls = deState.revealed ? (deState.pickedRight ? 'right' : 'wrong') : '';
+  const revealBlock = deState.revealed ? `
+    <div class="de-card-answer"><span class="de-art de-${card.article}">${card.article}</span> ${card.noun}</div>
+    <div class="de-card-en">${card.en}</div>
+  ` : '';
+  const controls = deState.revealed
+    ? `<button class="de-next" onclick="deNext()">Next card →</button>`
+    : `<div class="de-choices">
+        <button class="de-choice de-der" onclick="dePick('der')">der</button>
+        <button class="de-choice de-die" onclick="dePick('die')">die</button>
+        <button class="de-choice de-das" onclick="dePick('das')">das</button>
+      </div>`;
+  root.innerHTML = `
+    <div class="de-practice">
+      <div class="de-stats-bar">
+        <span><b>${deState.correct}</b>/${deState.seen}${deState.seen ? ' <span style="opacity:0.6">·</span> ' + accuracy + '%' : ''}</span>
+        <button class="de-stats-reset" onclick="deReset()">Reset session</button>
+      </div>
+      <div class="de-card-wrap ${cardCls}">
+        <div class="de-card-noun">${card.noun}</div>
+        ${revealBlock}
+      </div>
+      ${controls}
+    </div>
+  `;
+}
+function deSwitchToPractice(btn) {
+  switchTab('german', 'practice', btn);
+  if (!deState.order.length) deInitSession();
+  else deRender();
+}
+
 // ── FITNESS ──
 const FIT_DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const WEEKLY_DEFAULT_SCHEDULE = {
