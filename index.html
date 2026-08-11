@@ -157,6 +157,79 @@
     font-size: 13.5px;
   }
 
+  /* Per-section themed hero header: each subject gets its own soft gradient +
+     accent hue so the top of every tab feels distinct without breaking the
+     overall coral base. Freelance skips this — it has its own fl-page-hero. */
+  #german .section-header,
+  #fitness .section-header,
+  #relocation .section-header,
+  #finances .section-header,
+  #mom .section-header {
+    padding: 22px 26px;
+    border-radius: 18px;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 3px rgba(45,31,26,0.03);
+  }
+  #german .section-header h1 svg,
+  #fitness .section-header h1 svg,
+  #relocation .section-header h1 svg,
+  #finances .section-header h1 svg,
+  #mom .section-header h1 svg { opacity: 0.85; }
+
+  /* German — sage / mint (learning, fresh) */
+  #german .section-header {
+    background: linear-gradient(135deg, #F4F9F1 0%, #D8ECCD 100%);
+    border-color: rgba(120, 165, 110, 0.32);
+  }
+  #german .section-header h1 { color: #4d7c62; }
+  #german .section-header p { color: rgba(77, 124, 98, 0.75); }
+
+  /* Fitness — soft cool blue (movement, energy) */
+  #fitness .section-header {
+    background: linear-gradient(135deg, #F0F5FA 0%, #D3E1EF 100%);
+    border-color: rgba(90, 143, 165, 0.28);
+  }
+  #fitness .section-header h1 { color: #3d6680; }
+  #fitness .section-header p { color: rgba(61, 102, 128, 0.7); }
+
+  /* Relocation — periwinkle (travel, sky) */
+  #relocation .section-header {
+    background: linear-gradient(135deg, #F5F3FA 0%, #E1DAEE 100%);
+    border-color: rgba(138, 107, 165, 0.28);
+  }
+  #relocation .section-header h1 { color: #6b5091; }
+  #relocation .section-header p { color: rgba(107, 80, 145, 0.7); }
+
+  /* Finances — soft green (money, growth) */
+  #finances .section-header {
+    background: linear-gradient(135deg, #F2F8F0 0%, #D2E6C9 100%);
+    border-color: rgba(107, 143, 100, 0.32);
+  }
+  #finances .section-header h1 { color: #5a7d50; }
+  #finances .section-header p { color: rgba(90, 125, 80, 0.7); }
+
+  /* Mom — warm rose (care, warmth) */
+  #mom .section-header {
+    background: linear-gradient(135deg, #FBF2F3 0%, #F1D8DD 100%);
+    border-color: rgba(176, 107, 122, 0.28);
+  }
+  #mom .section-header h1 { color: #a8556a; }
+  #mom .section-header p { color: rgba(168, 85, 106, 0.7); }
+
+  /* Mobile: shrink hero padding + heading so it doesn't dominate small screens */
+  @media (max-width: 640px) {
+    #german .section-header,
+    #fitness .section-header,
+    #relocation .section-header,
+    #finances .section-header,
+    #mom .section-header { padding: 16px 18px; border-radius: 14px; }
+    #german .section-header h1,
+    #fitness .section-header h1,
+    #relocation .section-header h1,
+    #finances .section-header h1,
+    #mom .section-header h1 { font-size: 22px; }
+  }
+
   /* CARDS */
   .card {
     background: var(--surface);
@@ -799,6 +872,21 @@
   .de-table th, .de-table td {
     padding: 10px 12px; text-align: center;
     border-bottom: 1px solid var(--border);
+  }
+  @media (max-width: 640px) {
+    /* Fit the 5-col table into ~360px without side-scroll */
+    .de-table { table-layout: fixed; }
+    .de-table th, .de-table td { padding: 8px 4px; font-size: 12px; word-break: break-word; }
+    .de-table thead th { font-size: 9.5px; letter-spacing: 0.03em; }
+    .de-table tbody th { font-size: 11px; padding-left: 6px; text-align: left; }
+    .de-example { font-size: 12.5px; padding: 10px 12px; }
+    /* Shift table narrows too — let cells wrap and drop the "changes/same" tag width */
+    .de-shift { grid-template-columns: 20px 34px 12px 34px auto; gap: 4px; font-size: 12px; }
+    .de-shift-tag { font-size: 9.5px; padding: 2px 6px; }
+    /* Prep grid single column already at 540, but tighten padding */
+    .de-prep-card { padding: 10px 12px; }
+    /* Contraction rows: shorter formulas + wider example on mobile */
+    .de-contract-row { padding: 10px 12px; font-size: 12.5px; gap: 6px; }
   }
   .de-table thead th {
     font-size: 11px; color: var(--muted);
