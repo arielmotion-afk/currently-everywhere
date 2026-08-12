@@ -924,6 +924,104 @@
   }
   .de-prep-list { font-size: 13.5px; color: var(--text); line-height: 1.7; }
   .de-prep-list b { color: var(--accent); font-weight: 600; }
+  .de-prep-q {
+    font-family: 'Lora', serif; font-size: 13px;
+    font-weight: 500; color: var(--accent);
+    text-transform: none; letter-spacing: 0;
+    margin-left: 6px; font-style: italic;
+  }
+
+  /* German — Akk/Dat color coding for the pronoun table + inline highlights */
+  .de-akk { color: #a84d4d; font-weight: 600; }
+  .de-dat { color: #3d6680; font-weight: 600; }
+
+  /* German — pronoun reference block */
+  .de-pron-header {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 12px;
+  }
+  @media (max-width: 540px) { .de-pron-header { grid-template-columns: 1fr; } }
+  .de-pron-header-card {
+    padding: 14px 16px; border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .de-pron-header-card.akk { border-color: rgba(168, 77, 77, 0.28); background: linear-gradient(135deg, #FFFCF7 0%, #FAECEC 100%); }
+  .de-pron-header-card.dat { border-color: rgba(61, 102, 128, 0.28); background: linear-gradient(135deg, #F7FAFC 0%, #E4EEF5 100%); }
+  .de-pron-header-q {
+    font-size: 11.5px; color: var(--muted);
+    font-style: italic; margin-bottom: 4px;
+  }
+  .de-pron-header-name { font-size: 15px; color: var(--text); }
+  .de-pron-header-card.akk .de-pron-header-name b { color: #a84d4d; }
+  .de-pron-header-card.dat .de-pron-header-name b { color: #3d6680; }
+  .de-pron-header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .de-pron-example {
+    background: var(--bg); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 14px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .de-pron-example-sent {
+    font-family: 'Lora', serif; font-size: 20px;
+    letter-spacing: -0.02em; color: var(--text);
+    margin-bottom: 8px;
+  }
+  .de-pron-example-key {
+    font-size: 12.5px; color: var(--muted);
+  }
+  .de-dot { opacity: 0.4; margin: 0 8px; }
+
+  .de-pron-table-wrap { overflow-x: auto; }
+  .de-pron-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 14px; font-variant-numeric: tabular-nums;
+  }
+  .de-pron-table th, .de-pron-table td {
+    padding: 10px 12px; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .de-pron-table thead th {
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    font-weight: 600; border-bottom: 1.5px solid var(--border);
+    text-align: left;
+  }
+  .de-pron-table thead th .de-akk,
+  .de-pron-table thead th .de-dat { font-size: 12px; text-transform: uppercase; }
+  .de-pron-th-sub {
+    display: inline-block; margin-top: 2px;
+    font-size: 10px; color: var(--muted);
+    font-weight: 500; letter-spacing: 0.04em;
+    font-style: italic; text-transform: none;
+  }
+  .de-pron-table tbody th {
+    font-weight: 600; background: var(--bg);
+    color: var(--text);
+  }
+  .de-pron-tag {
+    display: inline-block; margin-left: 6px;
+    font-size: 9.5px; padding: 2px 6px;
+    background: rgba(45,31,26,0.06); color: var(--muted);
+    border-radius: 999px; text-transform: uppercase;
+    letter-spacing: 0.06em; font-weight: 600;
+  }
+  .de-pron-trick {
+    margin-top: 12px; padding: 12px 14px;
+    background: linear-gradient(135deg, #FFFCF7 0%, #FFF1E5 100%);
+    border: 1px solid rgba(200, 175, 130, 0.35);
+    border-radius: 10px;
+    font-size: 13px; line-height: 1.55;
+  }
+  .de-pron-trick b { color: var(--text); }
+
+  @media (max-width: 640px) {
+    .de-pron-example-sent { font-size: 17px; }
+    .de-pron-table th, .de-pron-table td { padding: 8px 6px; font-size: 12.5px; }
+    .de-pron-table thead th { font-size: 9.5px; }
+    .de-pron-tag { font-size: 9px; padding: 1px 5px; }
+  }
 
   /* German — contractions list */
   .de-contract-list { display: flex; flex-direction: column; gap: 8px; }
@@ -1060,8 +1158,37 @@
     color: var(--text);
   }
   .de-card-en { font-size: 14px; color: var(--muted); font-style: italic; }
+  .de-card-sub {
+    font-size: 11px; color: var(--muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.09em;
+    margin-bottom: -6px;
+  }
+  .de-card-context {
+    font-size: 13px; color: var(--muted); font-style: italic;
+    margin-top: -8px;
+  }
+  /* Deck picker at the top of Practice */
+  .de-deck-picker {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 4px; margin-bottom: 14px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 999px;
+    justify-content: center;
+  }
+  .de-deck-pill {
+    background: transparent; border: none;
+    color: var(--muted); font-family: inherit;
+    font-size: 12.5px; font-weight: 600;
+    padding: 6px 14px; border-radius: 999px;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .de-deck-pill:hover { color: var(--text); }
+  .de-deck-pill.active {
+    background: var(--accent); color: #FFFFFF;
+  }
   .de-choices {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 10px; margin-top: 18px;
   }
   .de-choice {
@@ -2415,21 +2542,70 @@
         </div>
         <div class="de-prep-grid">
           <div class="de-prep-card">
-            <div class="de-prep-case">Nominativ</div>
-            <div class="de-prep-list">Subjekt — <em>wer? / was?</em></div>
+            <div class="de-prep-case">Nominativ <span class="de-prep-q">wer? / was?</span></div>
+            <div class="de-prep-list">The subject — who or what is doing the action.</div>
           </div>
           <div class="de-prep-card">
-            <div class="de-prep-case">Akkusativ</div>
+            <div class="de-prep-case">Akkusativ <span class="de-prep-q">wen? / was?</span></div>
             <div class="de-prep-list"><b>für</b>, <b>durch</b>, <b>ohne</b>, <b>um</b>, <b>gegen</b></div>
           </div>
           <div class="de-prep-card">
-            <div class="de-prep-case">Dativ</div>
+            <div class="de-prep-case">Dativ <span class="de-prep-q">wem?</span></div>
             <div class="de-prep-list"><b>aus</b>, <b>bei</b>, <b>mit</b>, <b>nach</b>, <b>seit</b>, <b>von</b>, <b>zu</b></div>
           </div>
           <div class="de-prep-card">
-            <div class="de-prep-case">Genitiv</div>
+            <div class="de-prep-case">Genitiv <span class="de-prep-q">wessen?</span></div>
             <div class="de-prep-list"><b>wegen</b>, <b>während</b>, <b>trotz</b>, <b>statt</b></div>
           </div>
+        </div>
+      </div>
+
+      <!-- Personal pronoun declension — Akk vs Dat table + trick note -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Personal pronouns — Akkusativ &amp; Dativ</div>
+        </div>
+        <div class="de-pron-header">
+          <div class="de-pron-header-card akk">
+            <div class="de-pron-header-q">wen / was?</div>
+            <div class="de-pron-header-name"><b>Akkusativ</b> = das Paket</div>
+            <div class="de-pron-header-sub">the thing being moved</div>
+          </div>
+          <div class="de-pron-header-card dat">
+            <div class="de-pron-header-q">wem?</div>
+            <div class="de-pron-header-name"><b>Dativ</b> = die Adresse</div>
+            <div class="de-pron-header-sub">who receives it</div>
+          </div>
+        </div>
+        <div class="de-pron-example">
+          <div class="de-pron-example-sent">Ich gebe <span class="de-dat">dir</span> <span class="de-akk">das Paket</span>.</div>
+          <div class="de-pron-example-key"><span class="de-dat">dir = Adresse (Dativ)</span> <span class="de-dot">·</span> <span class="de-akk">das Paket = Paket (Akkusativ)</span></div>
+        </div>
+        <div class="de-pron-table-wrap">
+          <table class="de-pron-table">
+            <thead>
+              <tr>
+                <th>Person</th>
+                <th>Nominativ</th>
+                <th><span class="de-akk">Akkusativ</span><br><span class="de-pron-th-sub">Paket</span></th>
+                <th><span class="de-dat">Dativ</span><br><span class="de-pron-th-sub">Adresse</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th>ich</th><td>ich</td><td>mich</td><td>mir</td></tr>
+              <tr><th>du</th><td>du</td><td>dich</td><td>dir</td></tr>
+              <tr><th>er</th><td>er</td><td>ihn</td><td>ihm</td></tr>
+              <tr><th>sie</th><td>sie</td><td>sie</td><td>ihr</td></tr>
+              <tr><th>es</th><td>es</td><td>es</td><td>ihm</td></tr>
+              <tr><th>wir</th><td>wir</td><td>uns</td><td>uns</td></tr>
+              <tr><th>ihr</th><td>ihr</td><td>euch</td><td>euch</td></tr>
+              <tr><th>Sie <span class="de-pron-tag">formal</span></th><td>Sie</td><td>Sie</td><td>Ihnen</td></tr>
+              <tr><th>sie <span class="de-pron-tag">plural</span></th><td>sie</td><td>sie</td><td>ihnen</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="de-pron-trick">
+          <b>Trick:</b> <b>er</b> and <b>es</b> share the same Dativ (<b>ihm</b>). <b>sie</b> singular and <b>sie</b> plural split at Dativ — <b>ihr</b> vs. <b>ihnen</b>. Capital <b>Ihnen</b> is reserved for the formal <b>Sie</b>.
         </div>
       </div>
 
@@ -5173,75 +5349,188 @@ const DE_NOUNS = [
 
 // Session-only state (no persistence for now — v1). Reset with the Reset button
 // or by refreshing the page; per-noun mastery tracking can come later.
-let deState = { order: [], idx: 0, seen: 0, correct: 0, revealed: false, pickedArticle: null };
+// Personal pronouns — Nom → Akk / Dat / Gen. Genitive forms of personal
+// pronouns are archaic in everyday German but included for completeness
+// since the user asked for "everything with dativ akkusativ genitiv etc".
+const DE_PRONOUNS = [
+  { nom: 'ich', akk: 'mich', dat: 'mir',   gen: 'meiner', hint: 'I' },
+  { nom: 'du',  akk: 'dich', dat: 'dir',   gen: 'deiner', hint: 'you (informal)' },
+  { nom: 'er',  akk: 'ihn',  dat: 'ihm',   gen: 'seiner', hint: 'he' },
+  { nom: 'sie', akk: 'sie',  dat: 'ihr',   gen: 'ihrer',  hint: 'she' },
+  { nom: 'es',  akk: 'es',   dat: 'ihm',   gen: 'seiner', hint: 'it' },
+  { nom: 'wir', akk: 'uns',  dat: 'uns',   gen: 'unser',  hint: 'we' },
+  { nom: 'ihr', akk: 'euch', dat: 'euch',  gen: 'euer',   hint: 'you (plural)' },
+  { nom: 'Sie', akk: 'Sie',  dat: 'Ihnen', gen: 'Ihrer',  hint: 'you (formal)' },
+  { nom: 'sie', akk: 'sie',  dat: 'ihnen', gen: 'ihrer',  hint: 'they' },
+];
 
-function deShuffle(n) {
-  const a = Array.from({ length: n }, (_, i) => i);
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-function deInitSession() {
-  deState.order = deShuffle(DE_NOUNS.length);
-  deState.idx = 0;
+// Article declension: base article in Nominativ → each case's form.
+const DE_ARTICLE_TABLE = {
+  der: { nom: 'der', akk: 'den', dat: 'dem', gen: 'des' },
+  die: { nom: 'die', akk: 'die', dat: 'der', gen: 'der' },
+  das: { nom: 'das', akk: 'das', dat: 'dem', gen: 'des' },
+};
+const DE_CASE_LABELS = { nom: 'Nominativ', akk: 'Akkusativ', dat: 'Dativ', gen: 'Genitiv' };
+
+// Deck registry. Each deck exposes a label + pickQuestion() that returns
+// a shape { prompt, reveal, options, correctValue }. The renderer is
+// deck-agnostic — swap decks by changing deState.deckId.
+const DE_DECKS = {
+  genders: {
+    label: 'Noun genders',
+    hint: 'Pick der / die / das for the noun',
+    pickQuestion() {
+      const c = DE_NOUNS[Math.floor(Math.random() * DE_NOUNS.length)];
+      return {
+        prompt: { main: c.noun },
+        reveal: { answer: `<span class="de-art de-${c.article}">${c.article}</span> ${c.noun}`, note: c.en },
+        options: [
+          { label: 'der', value: 'der', cls: 'de-der' },
+          { label: 'die', value: 'die', cls: 'de-die' },
+          { label: 'das', value: 'das', cls: 'de-das' },
+        ],
+        correctValue: c.article,
+      };
+    },
+  },
+  pronouns: {
+    label: 'Personal pronouns',
+    hint: 'Decline the pronoun for the given case',
+    pickQuestion() {
+      const p = DE_PRONOUNS[Math.floor(Math.random() * DE_PRONOUNS.length)];
+      const targetCases = ['akk', 'dat', 'gen'];
+      const caseId = targetCases[Math.floor(Math.random() * targetCases.length)];
+      const correct = p[caseId];
+      // Two plausible wrong options from the same pronoun's other cases, deduped
+      const seen = new Set([correct]);
+      const wrongs = [];
+      ['akk', 'dat', 'gen'].filter(k => k !== caseId).forEach(k => {
+        if (p[k] && !seen.has(p[k])) { seen.add(p[k]); wrongs.push(p[k]); }
+      });
+      // Not enough distinct? pull from other pronouns' same case
+      if (wrongs.length < 2) {
+        DE_PRONOUNS.forEach(other => {
+          if (wrongs.length >= 2) return;
+          if (other[caseId] && !seen.has(other[caseId])) {
+            seen.add(other[caseId]); wrongs.push(other[caseId]);
+          }
+        });
+      }
+      const options = [correct, ...wrongs.slice(0, 2)]
+        .sort(() => Math.random() - 0.5)
+        .map(v => ({ label: v, value: v }));
+      return {
+        prompt: { main: p.nom, context: p.hint, sub: DE_CASE_LABELS[caseId] },
+        reveal: { answer: `${p.nom} → <b>${correct}</b>`, note: p.hint + ' · ' + DE_CASE_LABELS[caseId] },
+        options,
+        correctValue: correct,
+      };
+    },
+  },
+  articles: {
+    label: 'Article cases',
+    hint: 'Pick the article for the noun + case',
+    pickQuestion() {
+      const noun = DE_NOUNS[Math.floor(Math.random() * DE_NOUNS.length)];
+      const cases = ['nom', 'akk', 'dat', 'gen'];
+      const caseId = cases[Math.floor(Math.random() * cases.length)];
+      const correct = DE_ARTICLE_TABLE[noun.article][caseId];
+      const genderHint = { der: 'm', die: 'f', das: 'n' }[noun.article];
+      return {
+        prompt: { main: `___ ${noun.noun}`, context: `${genderHint} · ${noun.en}`, sub: DE_CASE_LABELS[caseId] },
+        reveal: {
+          answer: `<span class="de-art de-${noun.article}">${correct}</span> ${noun.noun}`,
+          note: `${noun.en} · ${DE_CASE_LABELS[caseId]} (base ${noun.article})`,
+        },
+        options: [
+          { label: 'der', value: 'der', cls: 'de-der' },
+          { label: 'die', value: 'die', cls: 'de-die' },
+          { label: 'das', value: 'das', cls: 'de-das' },
+          { label: 'den', value: 'den', cls: 'de-der' },
+          { label: 'dem', value: 'dem', cls: 'de-der' },
+          { label: 'des', value: 'des', cls: 'de-der' },
+        ],
+        correctValue: correct,
+      };
+    },
+  },
+};
+
+let deState = {
+  deckId: 'genders',
+  question: null,
+  answered: false,
+  pickedValue: null,
+  pickedRight: null,
+  seen: 0,
+  correct: 0,
+};
+
+function deInitSession(preserveDeck) {
+  if (!preserveDeck) deState.deckId = deState.deckId || 'genders';
+  deState.question = DE_DECKS[deState.deckId].pickQuestion();
+  deState.answered = false;
+  deState.pickedValue = null;
+  deState.pickedRight = null;
   deState.seen = 0;
   deState.correct = 0;
-  deState.revealed = false;
-  deState.pickedArticle = null;
   deRender();
 }
-function deReset() { deInitSession(); }
-function dePick(article) {
-  if (deState.revealed) return;
-  const card = DE_NOUNS[deState.order[deState.idx]];
-  const isRight = card.article === article;
-  deState.revealed = true;
-  deState.pickedArticle = article;
+function deReset() { deInitSession(true); }
+function deSetDeck(deckId) {
+  if (!DE_DECKS[deckId]) return;
+  deState.deckId = deckId;
+  deInitSession(true);
+}
+function dePick(value) {
+  if (deState.answered || !deState.question) return;
+  const isRight = value === deState.question.correctValue;
+  deState.answered = true;
+  deState.pickedValue = value;
   deState.pickedRight = isRight;
   deState.seen++;
   if (isRight) deState.correct++;
   deRender();
 }
 function deNext() {
-  deState.idx++;
-  if (deState.idx >= deState.order.length) {
-    // End of deck — reshuffle so practice loops indefinitely
-    deState.order = deShuffle(DE_NOUNS.length);
-    deState.idx = 0;
-  }
-  deState.revealed = false;
-  deState.pickedArticle = null;
+  deState.question = DE_DECKS[deState.deckId].pickQuestion();
+  deState.answered = false;
+  deState.pickedValue = null;
   deState.pickedRight = null;
   deRender();
 }
 function deRender() {
   const root = document.getElementById('de-practice-root');
   if (!root) return;
-  if (!deState.order.length) deInitSession();
-  const card = DE_NOUNS[deState.order[deState.idx]];
-  const accuracy = deState.seen > 0 ? Math.round(deState.correct / deState.seen * 100) : 0;
-  const cardCls = deState.revealed ? (deState.pickedRight ? 'right' : 'wrong') : '';
-  const revealBlock = deState.revealed ? `
-    <div class="de-card-answer"><span class="de-art de-${card.article}">${card.article}</span> ${card.noun}</div>
-    <div class="de-card-en">${card.en}</div>
+  if (!deState.question) { deInitSession(true); return; }
+  const q = deState.question;
+  const acc = deState.seen > 0 ? Math.round(deState.correct / deState.seen * 100) : 0;
+  const cardCls = deState.answered ? (deState.pickedRight ? 'right' : 'wrong') : '';
+  const contextLine = q.prompt.context ? `<div class="de-card-context">${q.prompt.context}</div>` : '';
+  const subLine = q.prompt.sub ? `<div class="de-card-sub">${q.prompt.sub}</div>` : '';
+  const revealBlock = deState.answered ? `
+    <div class="de-card-answer">${q.reveal.answer}</div>
+    <div class="de-card-en">${q.reveal.note}</div>
   ` : '';
-  const controls = deState.revealed
+  const controls = deState.answered
     ? `<button class="de-next" onclick="deNext()">Next card →</button>`
-    : `<div class="de-choices">
-        <button class="de-choice de-der" onclick="dePick('der')">der</button>
-        <button class="de-choice de-die" onclick="dePick('die')">die</button>
-        <button class="de-choice de-das" onclick="dePick('das')">das</button>
+    : `<div class="de-choices de-choices-${q.options.length}">
+        ${q.options.map(o => `<button class="de-choice ${o.cls || ''}" onclick="dePick('${o.value.replace(/'/g, "\\'")}')">${o.label}</button>`).join('')}
       </div>`;
+  const deckPills = Object.entries(DE_DECKS).map(([id, d]) =>
+    `<button class="de-deck-pill${id === deState.deckId ? ' active' : ''}" onclick="deSetDeck('${id}')">${d.label}</button>`
+  ).join('');
   root.innerHTML = `
     <div class="de-practice">
+      <div class="de-deck-picker">${deckPills}</div>
       <div class="de-stats-bar">
-        <span><b>${deState.correct}</b>/${deState.seen}${deState.seen ? ' <span style="opacity:0.6">·</span> ' + accuracy + '%' : ''}</span>
+        <span><b>${deState.correct}</b>/${deState.seen}${deState.seen ? ' <span style="opacity:0.6">·</span> ' + acc + '%' : ''}</span>
         <button class="de-stats-reset" onclick="deReset()">Reset session</button>
       </div>
       <div class="de-card-wrap ${cardCls}">
-        <div class="de-card-noun">${card.noun}</div>
+        ${subLine}
+        <div class="de-card-noun">${q.prompt.main}</div>
+        ${contextLine}
         ${revealBlock}
       </div>
       ${controls}
