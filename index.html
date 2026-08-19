@@ -6296,6 +6296,7 @@ async function ghSaveSettings() {
     if (result.ok) {
       _ghSetStatus('ok');
       flLoad(); schLoad(); fitLoad(); checkRestoreAll(); updateProgress(); flUpdateStats();
+      if (typeof deRender === 'function') deRender();
       return;
     }
     if (result.reason === 'needs-password' || result.reason === 'wrong-password') {
@@ -6324,6 +6325,10 @@ function ghClearPAT() {
   fitLoad();
   checkRestoreAll();
   updateProgress();
+  // Seed the German practice deck now so the tab isn't empty when the user
+  // navigates in via the sidebar (deSwitchToPractice only fires on the tab
+  // button, not on the section-level nav).
+  if (typeof deRender === 'function') deRender();
   if (!ghGetPAT()) { _ghSetStatus('unconfigured'); return; }
   if (result.ok) _ghSetStatus('ok');
   else if (result.reason === 'needs-password' || result.reason === 'wrong-password') {
