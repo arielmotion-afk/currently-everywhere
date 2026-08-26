@@ -1113,6 +1113,113 @@
   }
   .de-mnemonic-verbs b { color: var(--text); }
 
+  /* German — Perfekt (haben oder sein) */
+  .de-perfekt-intro { font-size: 13.5px; color: var(--text); line-height: 1.6; margin-bottom: 14px; }
+  .de-verb-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 8px;
+  }
+  .de-verb-chip {
+    font-family: 'Lora', serif; font-size: 13px;
+    padding: 3px 10px; border-radius: 999px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(45,31,26,0.08);
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .de-mnemonic-half.dat .de-verb-chip { color: #4d7c62; border-color: rgba(120,165,110,0.28); }
+  .de-mnemonic-half.akk .de-verb-chip { color: #b07830; border-color: rgba(200,160,100,0.28); }
+
+  .de-perfekt-compare {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-top: 12px;
+  }
+  .de-perfekt-compare-row {
+    display: grid; grid-template-columns: 60px 1fr auto;
+    gap: 12px; align-items: center;
+    padding: 10px 14px; border-radius: 10px;
+    background: var(--bg); border: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .de-perfekt-tag {
+    font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 999px;
+    text-align: center;
+  }
+  .de-perfekt-tag.sein { background: rgba(120,165,110,0.15); color: #4d7c62; }
+  .de-perfekt-tag.haben { background: rgba(200,160,100,0.18); color: #b07830; }
+  .de-perfekt-sent { font-family: 'Lora', serif; font-size: 16px; letter-spacing: -0.01em; color: var(--text); }
+  .de-perfekt-sent b { color: var(--accent); font-weight: 600; }
+  .de-perfekt-note { font-size: 11.5px; color: var(--muted); font-style: italic; white-space: nowrap; }
+  @media (max-width: 540px) {
+    .de-perfekt-compare-row { grid-template-columns: 56px 1fr; }
+    .de-perfekt-note { grid-column: 1 / -1; text-align: right; }
+  }
+
+  .de-perfekt-tables {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-top: 16px;
+  }
+  @media (max-width: 540px) { .de-perfekt-tables { grid-template-columns: 1fr; } }
+  .de-perfekt-table {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px;
+  }
+  .de-perfekt-table-title {
+    font-family: 'Lora', serif; font-size: 18px;
+    letter-spacing: -0.02em; color: var(--accent);
+    margin-bottom: 6px; text-align: center;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .de-conj-table { width: 100%; border-collapse: collapse; }
+  .de-conj-table th, .de-conj-table td {
+    padding: 5px 4px; font-size: 13.5px;
+  }
+  .de-conj-table th {
+    text-align: left; font-weight: 500; color: var(--muted);
+    font-family: inherit;
+  }
+  .de-conj-table td {
+    text-align: right; font-weight: 600; color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .de-perfekt-warning {
+    background: linear-gradient(135deg, #FFFBF0 0%, #FFF3D6 100%);
+    border: 1px solid rgba(176,144,64,0.35);
+    border-radius: 12px;
+    padding: 14px 16px; margin-top: 16px;
+  }
+  .de-perfekt-warning-title { font-weight: 700; color: #8a6a2a; margin-bottom: 8px; font-size: 13.5px; }
+  .de-perfekt-warning-body { font-size: 13px; line-height: 1.65; color: var(--text); display: flex; flex-direction: column; gap: 4px; }
+  .de-perfekt-warning-body b.de-warn-a { color: #4d7c62; font-family: 'Lora', serif; font-size: 15px; }
+  .de-perfekt-warning-body b.de-warn-b { color: #a84d4d; font-family: 'Lora', serif; font-size: 15px; }
+  .de-perfekt-warning-foot { color: var(--muted); font-size: 12px; font-style: italic; margin-top: 4px; }
+
+  .de-perfekt-examples { margin-top: 16px; }
+  .de-perfekt-examples-title {
+    font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    font-weight: 700; margin-bottom: 8px;
+  }
+  .de-perfekt-ex {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px; color: var(--text);
+    line-height: 1.5;
+  }
+  .de-perfekt-ex:last-child { border-bottom: none; }
+  .de-perfekt-ex b { color: var(--accent); font-weight: 600; }
+  .de-perfekt-ex-note {
+    font-size: 11.5px; color: var(--muted);
+    font-style: italic; white-space: nowrap; flex-shrink: 0;
+  }
+  @media (max-width: 540px) {
+    .de-perfekt-ex { flex-direction: column; align-items: flex-start; gap: 2px; }
+  }
+
   /* German — Practice mode */
   .de-practice { max-width: 480px; margin: 0 auto; padding: 8px 0; }
   .de-stats-bar {
@@ -2658,6 +2765,108 @@
         </div>
         <div class="de-mnemonic-verbs">
           <b>🏠-only verbs (no package needed):</b> <b>helfen</b> (help) · <b>danken</b> (thank) · <b>folgen</b> (follow) · <b>gefallen</b> (please) · <b>gehören</b> (belong to). These always take Dativ alone — even with one noun, it's still an address, not a package.
+        </div>
+      </div>
+
+      <!-- Perfekt: haben oder sein? -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:#6b8e6b"></div>Perfekt — haben oder sein?</div>
+        </div>
+        <p class="de-perfekt-intro">Every Perfekt sentence needs a helper verb (<b>haben</b> or <b>sein</b>) + a past participle at the end. Picking the wrong helper is the single most common mistake — here's the rule.</p>
+
+        <div class="de-mnemonic-grid">
+          <div class="de-mnemonic-half dat">
+            <div class="de-mnemonic-title">🚶 sein — motion or change</div>
+            <p class="de-mnemonic-p">Only for verbs of <b>motion from A to B</b> or a <b>change of state</b>.</p>
+            <div class="de-verb-chips">
+              <span class="de-verb-chip">fahren</span>
+              <span class="de-verb-chip">gehen</span>
+              <span class="de-verb-chip">kommen</span>
+              <span class="de-verb-chip">fliegen</span>
+              <span class="de-verb-chip">laufen</span>
+              <span class="de-verb-chip">aufstehen</span>
+              <span class="de-verb-chip">werden</span>
+              <span class="de-verb-chip">sterben</span>
+            </div>
+          </div>
+          <div class="de-mnemonic-half akk">
+            <div class="de-mnemonic-title">🏠 haben — everything else</div>
+            <p class="de-mnemonic-p">The default. If the action just happens <b>in place</b>, use haben.</p>
+            <div class="de-verb-chips">
+              <span class="de-verb-chip">arbeiten</span>
+              <span class="de-verb-chip">machen</span>
+              <span class="de-verb-chip">schreiben</span>
+              <span class="de-verb-chip">essen</span>
+              <span class="de-verb-chip">sehen</span>
+              <span class="de-verb-chip">kaufen</span>
+              <span class="de-verb-chip">helfen</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="de-mnemonic-scene">
+          <b>Quick test:</b> does the subject <em>physically go somewhere</em> or <em>change state</em>? If yes → sein. If it's an action happening in place → haben.
+        </div>
+
+        <div class="de-perfekt-compare">
+          <div class="de-perfekt-compare-row">
+            <span class="de-perfekt-tag sein">sein</span>
+            <span class="de-perfekt-sent">Ich <b>bin</b> gefahren.</span>
+            <span class="de-perfekt-note">motion → sein</span>
+          </div>
+          <div class="de-perfekt-compare-row">
+            <span class="de-perfekt-tag haben">haben</span>
+            <span class="de-perfekt-sent">Ich <b>habe</b> gearbeitet.</span>
+            <span class="de-perfekt-note">no motion → haben</span>
+          </div>
+        </div>
+
+        <div class="de-perfekt-tables">
+          <div class="de-perfekt-table">
+            <div class="de-perfekt-table-title">haben</div>
+            <table class="de-conj-table">
+              <tbody>
+                <tr><th>ich</th><td>habe</td></tr>
+                <tr><th>du</th><td>hast</td></tr>
+                <tr><th>er / sie / es</th><td>hat</td></tr>
+                <tr><th>wir</th><td>haben</td></tr>
+                <tr><th>ihr</th><td>habt</td></tr>
+                <tr><th>sie / Sie</th><td>haben</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="de-perfekt-table">
+            <div class="de-perfekt-table-title">sein</div>
+            <table class="de-conj-table">
+              <tbody>
+                <tr><th>ich</th><td>bin</td></tr>
+                <tr><th>du</th><td>bist</td></tr>
+                <tr><th>er / sie / es</th><td>ist</td></tr>
+                <tr><th>wir</th><td>sind</td></tr>
+                <tr><th>ihr</th><td>seid</td></tr>
+                <tr><th>sie / Sie</th><td>sind</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="de-perfekt-warning">
+          <div class="de-perfekt-warning-title">⚠️ seid vs. seit — don't mix these up</div>
+          <div class="de-perfekt-warning-body">
+            <div><b class="de-warn-a">seid</b> — the <em>ihr</em>-form of <b>sein</b> (a verb): <em>"Seid ihr gekommen?"</em> (Did you all come?)</div>
+            <div><b class="de-warn-b">seit</b> — a Dativ preposition meaning "since / for": <em>"seit einem Jahr"</em> (for a year)</div>
+            <div class="de-perfekt-warning-foot">They sound identical but do completely different jobs — one conjugates a verb, the other starts a time phrase.</div>
+          </div>
+        </div>
+
+        <div class="de-perfekt-examples">
+          <div class="de-perfekt-examples-title">Worked examples</div>
+          <div class="de-perfekt-ex">Julian, wie lange <b>hast</b> du heute gearbeitet? <span class="de-perfekt-ex-note">arbeiten → haben</span></div>
+          <div class="de-perfekt-ex"><b>Ist</b> Carlos mit dir in die Stadt gefahren? <span class="de-perfekt-ex-note">fahren → sein</span></div>
+          <div class="de-perfekt-ex">Wer <b>hat</b> die Fotos gemacht? <span class="de-perfekt-ex-note">machen → haben</span></div>
+          <div class="de-perfekt-ex"><b>Seid</b> ihr pünktlich gekommen? <span class="de-perfekt-ex-note">kommen → sein</span></div>
+          <div class="de-perfekt-ex">Wir <b>sind</b> zehn Minuten zu spät gekommen. <span class="de-perfekt-ex-note">kommen → sein</span></div>
         </div>
       </div>
     </div>
