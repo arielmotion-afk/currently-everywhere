@@ -1204,20 +1204,23 @@
     font-weight: 700; margin-bottom: 8px;
   }
   .de-perfekt-ex {
-    display: flex; align-items: baseline; justify-content: space-between;
+    display: flex; align-items: baseline;
     gap: 12px; padding: 8px 12px;
     border-bottom: 1px solid var(--border);
     font-size: 14px; color: var(--text);
     line-height: 1.5;
   }
   .de-perfekt-ex:last-child { border-bottom: none; }
+  .de-perfekt-ex-sent { flex: 1; min-width: 0; }
   .de-perfekt-ex b { color: var(--accent); font-weight: 600; }
   .de-perfekt-ex-note {
     font-size: 11.5px; color: var(--muted);
     font-style: italic; white-space: nowrap; flex-shrink: 0;
+    text-align: right;
   }
   @media (max-width: 540px) {
     .de-perfekt-ex { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .de-perfekt-ex-note { text-align: left; }
   }
 
   /* German — Practice mode */
@@ -2862,11 +2865,11 @@
 
         <div class="de-perfekt-examples">
           <div class="de-perfekt-examples-title">Worked examples</div>
-          <div class="de-perfekt-ex">Julian, wie lange <b>hast</b> du heute gearbeitet? <span class="de-perfekt-ex-note">arbeiten → haben</span></div>
-          <div class="de-perfekt-ex"><b>Ist</b> Carlos mit dir in die Stadt gefahren? <span class="de-perfekt-ex-note">fahren → sein</span></div>
-          <div class="de-perfekt-ex">Wer <b>hat</b> die Fotos gemacht? <span class="de-perfekt-ex-note">machen → haben</span></div>
-          <div class="de-perfekt-ex"><b>Seid</b> ihr pünktlich gekommen? <span class="de-perfekt-ex-note">kommen → sein</span></div>
-          <div class="de-perfekt-ex">Wir <b>sind</b> zehn Minuten zu spät gekommen. <span class="de-perfekt-ex-note">kommen → sein</span></div>
+          <div class="de-perfekt-ex"><span class="de-perfekt-ex-sent">Julian, wie lange <b>hast</b> du heute gearbeitet?</span><span class="de-perfekt-ex-note">arbeiten → haben</span></div>
+          <div class="de-perfekt-ex"><span class="de-perfekt-ex-sent"><b>Ist</b> Carlos mit dir in die Stadt gefahren?</span><span class="de-perfekt-ex-note">fahren → sein</span></div>
+          <div class="de-perfekt-ex"><span class="de-perfekt-ex-sent">Wer <b>hat</b> die Fotos gemacht?</span><span class="de-perfekt-ex-note">machen → haben</span></div>
+          <div class="de-perfekt-ex"><span class="de-perfekt-ex-sent"><b>Seid</b> ihr pünktlich gekommen?</span><span class="de-perfekt-ex-note">kommen → sein</span></div>
+          <div class="de-perfekt-ex"><span class="de-perfekt-ex-sent">Wir <b>sind</b> zehn Minuten zu spät gekommen.</span><span class="de-perfekt-ex-note">kommen → sein</span></div>
         </div>
       </div>
     </div>
