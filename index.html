@@ -1223,6 +1223,130 @@
     .de-perfekt-ex-note { text-align: left; }
   }
 
+  /* German — Voice Practice cheat sheets */
+  .de-voice-banner {
+    background: linear-gradient(135deg, #f0e8d8 0%, #e8dfc8 100%);
+    border: 1px solid rgba(150,130,90,0.25);
+  }
+  .de-voice-banner-eyebrow {
+    font-size: 11px; color: #8a6a2a; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.09em;
+    margin-bottom: 6px;
+  }
+  .de-voice-banner-title {
+    font-family: 'Lora', serif; font-size: 22px;
+    font-weight: 500; letter-spacing: -0.02em;
+    color: var(--text); margin: 0 0 6px;
+  }
+  .de-voice-banner-p {
+    font-size: 13.5px; color: var(--muted);
+    line-height: 1.6; margin: 0;
+  }
+
+  .de-voice-block { margin-top: 14px; }
+  .de-voice-block:first-of-type { margin-top: 12px; }
+  .de-voice-block + .de-voice-block {
+    padding-top: 14px;
+    border-top: 1px dashed var(--border);
+  }
+  .de-voice-block-title {
+    font-size: 11.5px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    font-weight: 700; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .de-voice-block-title em { font-style: italic; text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .de-voice-block-tag {
+    font-size: 9.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 2px 7px; border-radius: 999px;
+  }
+  .de-voice-block-tag.akk { background: rgba(168,77,77,0.14); color: #a84d4d; }
+  .de-voice-block-tag.dat { background: rgba(61,102,128,0.14); color: #3d6680; }
+
+  .de-voice-rule {
+    font-size: 12.5px; color: var(--muted);
+    margin-bottom: 8px; font-style: italic;
+  }
+  .de-voice-rule b { color: var(--text); font-style: normal; font-weight: 600; }
+
+  .de-voice-ex {
+    display: flex; align-items: baseline; gap: 12px;
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14.5px; color: var(--text);
+    line-height: 1.5;
+  }
+  .de-voice-ex:last-child { border-bottom: none; }
+  .de-voice-ex.compact { padding: 5px 10px; font-size: 13.5px; }
+  .de-voice-ex-sent {
+    flex: 1; min-width: 0;
+    font-family: 'Lora', serif;
+  }
+  .de-voice-ex-sent b { color: var(--accent); font-weight: 600; }
+  .de-voice-ex-hint {
+    font-size: 11.5px; color: var(--muted);
+    font-style: italic; flex-shrink: 0; text-align: right;
+  }
+  @media (max-width: 540px) {
+    .de-voice-ex { flex-direction: column; align-items: flex-start; gap: 2px; padding: 6px 8px; }
+    .de-voice-ex-hint { text-align: left; }
+  }
+
+  /* Single conjugation table centered */
+  .de-perfekt-tables.de-single-table { grid-template-columns: 1fr; max-width: 280px; margin-left: auto; margin-right: auto; }
+
+  /* Imperative — 3-column grid */
+  .de-imp-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-top: 12px;
+  }
+  @media (max-width: 640px) { .de-imp-grid { grid-template-columns: 1fr; } }
+  .de-imp-col {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px;
+  }
+  .de-imp-title {
+    font-family: 'Lora', serif; font-size: 17px;
+    color: var(--accent); font-weight: 600;
+    margin-bottom: 8px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .de-imp-title span {
+    font-family: 'Nunito Sans', system-ui, sans-serif;
+    font-size: 11px; color: var(--muted);
+    font-weight: 400; margin-left: 4px;
+  }
+
+  /* Compact single-row pronoun strip */
+  .de-pron-strip th, .de-pron-strip td { padding: 8px 6px !important; font-size: 13px !important; }
+  .de-pron-strip td { font-family: 'Lora', serif; font-size: 15px !important; font-weight: 600; }
+  @media (max-width: 640px) {
+    .de-pron-strip th, .de-pron-strip td { padding: 6px 2px !important; font-size: 10.5px !important; }
+    .de-pron-strip td { font-size: 12.5px !important; }
+  }
+
+  /* Body parts grid */
+  .de-body-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 540px) { .de-body-grid { grid-template-columns: 1fr; } }
+  .de-body-col {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+    font-family: 'Lora', serif; font-size: 13.5px;
+    color: var(--text); line-height: 1.6;
+  }
+  .de-body-gen {
+    font-size: 15px; font-weight: 600;
+    margin-bottom: 4px; letter-spacing: -0.01em;
+  }
+  .de-body-gen.der { color: #4d7c62; }
+  .de-body-gen.die { color: #b07830; }
+  .de-body-gen.das { color: #6b8ca8; }
+
   /* German — Practice mode */
   .de-practice { max-width: 480px; margin: 0 auto; padding: 8px 0; }
   .de-stats-bar {
@@ -2872,6 +2996,242 @@
           <div class="de-perfekt-ex"><span class="de-perfekt-ex-sent">Wir <b>sind</b> zehn Minuten zu spät gekommen.</span><span class="de-perfekt-ex-note">kommen → sein</span></div>
         </div>
       </div>
+
+      <!-- ============================================================= -->
+      <!-- VOICE PRACTICE CHEAT SHEETS                                    -->
+      <!-- Quick-reference blocks for speaking out loud with a voice AI.  -->
+      <!-- ============================================================= -->
+      <div class="card de-voice-banner">
+        <div class="de-voice-banner-eyebrow">🎙️ Voice practice</div>
+        <h2 class="de-voice-banner-title">Cheat sheets for speaking out loud</h2>
+        <p class="de-voice-banner-p">Compact reference blocks to keep open while practicing spoken German with a ChatGPT voice tutor — glance down mid-conversation when you blank on a form.</p>
+      </div>
+
+      <!-- Dieser / Diese / Dieses -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:#6b8e6b"></div>Dieser / Diese / Dieses — "this"</div>
+        </div>
+        <p class="de-perfekt-intro">Same endings as <b>der / die / das</b> — swap the stem to <b>dies-</b>.</p>
+
+        <div class="de-table-wrap">
+          <table class="de-table">
+            <thead>
+              <tr><th></th><th>der (m)</th><th>die (f)</th><th>das (n)</th><th>plural</th></tr>
+            </thead>
+            <tbody>
+              <tr><th>Nom.</th><td>dieser</td><td>diese</td><td>dieses</td><td>diese</td></tr>
+              <tr><th>Akk.</th><td class="de-akk">diesen</td><td>diese</td><td>dieses</td><td>diese</td></tr>
+              <tr><th>Dat.</th><td class="de-dat">diesem</td><td class="de-dat">dieser</td><td class="de-dat">diesem</td><td class="de-dat">diesen</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">🏠 Household requests <span class="de-voice-block-tag akk">Akk.</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Gib mir bitte <b>den</b> Teller.</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Möchtest du <b>diesen</b> hier?</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Ich möchte gerne <b>dieses</b> Buch kaufen.</span></div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">🍴 With "mit" / "aus" <span class="de-voice-block-tag dat">Dat.</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Ich koche mit <b>diesem</b> Topf.</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Ich esse mit <b>dieser</b> Gabel.</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Ich trinke aus <b>diesem</b> Glas.</span></div>
+        </div>
+      </div>
+
+      <!-- Sollen + Household chores -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:#c8965b"></div>Sollen — "should" + chore verbs</div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">🧹 Household chores</div>
+          <div class="de-verb-chips">
+            <span class="de-verb-chip">aufräumen</span>
+            <span class="de-verb-chip">putzen</span>
+            <span class="de-verb-chip">staubsaugen</span>
+            <span class="de-verb-chip">wischen</span>
+            <span class="de-verb-chip">abspülen</span>
+            <span class="de-verb-chip">Wäsche waschen</span>
+            <span class="de-verb-chip">Müll rausbringen</span>
+          </div>
+        </div>
+
+        <div class="de-perfekt-tables de-single-table">
+          <div class="de-perfekt-table">
+            <div class="de-perfekt-table-title">sollen</div>
+            <table class="de-conj-table">
+              <tbody>
+                <tr><th>ich</th><td>soll</td></tr>
+                <tr><th>du</th><td>sollst</td></tr>
+                <tr><th>er / sie / es</th><td>soll</td></tr>
+                <tr><th>wir</th><td>sollen</td></tr>
+                <tr><th>ihr</th><td>sollt</td></tr>
+                <tr><th>sie / Sie</th><td>sollen</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">In action</div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Du <b>sollst</b> die Küche aufräumen.</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Ich <b>soll</b> das Geschirr abspülen.</span></div>
+        </div>
+      </div>
+
+      <!-- Präteritum (haben + sein) -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:#a06565"></div>Präteritum — spoken past for haben & sein</div>
+        </div>
+        <p class="de-perfekt-intro">In conversation, use Perfekt for everything <em>except</em> <b>haben</b> and <b>sein</b> — those almost always show up in Präteritum.</p>
+
+        <div class="de-perfekt-tables">
+          <div class="de-perfekt-table">
+            <div class="de-perfekt-table-title">haben → hatte</div>
+            <table class="de-conj-table">
+              <tbody>
+                <tr><th>ich</th><td>hatte</td></tr>
+                <tr><th>du</th><td>hattest</td></tr>
+                <tr><th>er / sie / es</th><td>hatte</td></tr>
+                <tr><th>wir</th><td>hatten</td></tr>
+                <tr><th>ihr</th><td>hattet</td></tr>
+                <tr><th>sie / Sie</th><td>hatten</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="de-perfekt-table">
+            <div class="de-perfekt-table-title">sein → war</div>
+            <table class="de-conj-table">
+              <tbody>
+                <tr><th>ich</th><td>war</td></tr>
+                <tr><th>du</th><td>warst</td></tr>
+                <tr><th>er / sie / es</th><td>war</td></tr>
+                <tr><th>wir</th><td>waren</td></tr>
+                <tr><th>ihr</th><td>wart</td></tr>
+                <tr><th>sie / Sie</th><td>waren</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ordinals / Dates / Years -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:#8b7db5"></div>Ordinals, Dates & Years</div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">Ordinal numbers</div>
+          <div class="de-voice-rule">1st–19th: add <b>-te</b> · 20th and up: add <b>-ste</b></div>
+          <div class="de-verb-chips">
+            <span class="de-verb-chip">erste</span>
+            <span class="de-verb-chip">zweite</span>
+            <span class="de-verb-chip">dritte</span>
+            <span class="de-verb-chip">vierte</span>
+            <span class="de-verb-chip">fünfte</span>
+            <span class="de-verb-chip">…</span>
+            <span class="de-verb-chip">zwanzigste</span>
+            <span class="de-verb-chip">einundzwanzigste</span>
+            <span class="de-verb-chip">zweiundzwanzigste</span>
+            <span class="de-verb-chip">dreißigste</span>
+          </div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">📅 Dates</div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Heute ist <b>der sechste September</b>.</span><span class="de-voice-ex-hint">Nom. — "today is the 6th"</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent"><b>am vierundzwanzigsten</b> Dezember.</span><span class="de-voice-ex-hint">Dat. — "on the 24th"</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">gestern · heute · morgen · übermorgen</span><span class="de-voice-ex-hint">yesterday · today · tomorrow · day after</span></div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">Years</div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent"><b>2025</b> = zweitausendfünfundzwanzig</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent"><b>2026</b> = zweitausendsechsundzwanzig</span></div>
+        </div>
+      </div>
+
+      <!-- Imperative -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:#78a56e"></div>Imperative — giving commands</div>
+        </div>
+        <p class="de-perfekt-intro">Three forms depending on who you're talking to.</p>
+
+        <div class="de-imp-grid">
+          <div class="de-imp-col">
+            <div class="de-imp-title">du <span>(informal)</span></div>
+            <div class="de-voice-ex compact"><span class="de-voice-ex-sent">Bleib im Bett!</span></div>
+            <div class="de-voice-ex compact"><span class="de-voice-ex-sent">Schlaf im Bett!</span></div>
+            <div class="de-voice-ex compact"><span class="de-voice-ex-sent">Nimm Tabletten!</span></div>
+            <div class="de-voice-ex compact"><span class="de-voice-ex-sent">Geh zum Arzt!</span></div>
+          </div>
+          <div class="de-imp-col">
+            <div class="de-imp-title">ihr <span>(plural)</span></div>
+            <div class="de-voice-ex compact"><span class="de-voice-ex-sent">Bleibt im Bett!</span></div>
+            <div class="de-voice-ex compact"><span class="de-voice-ex-sent">Trinkt viel Wasser!</span></div>
+          </div>
+          <div class="de-imp-col">
+            <div class="de-imp-title">Sie <span>(formal)</span></div>
+            <div class="de-voice-ex compact"><span class="de-voice-ex-sent">Bleiben Sie im Bett!</span></div>
+            <div class="de-voice-ex compact"><span class="de-voice-ex-sent">Essen Sie viel Suppe!</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dative essentials: pronouns, verbs, body -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left"><div class="dot" style="background:#3d6680"></div>Dative essentials — pronouns, verbs, body</div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">Dative pronouns</div>
+          <div class="de-table-wrap">
+            <table class="de-table de-pron-strip">
+              <thead>
+                <tr><th>ich</th><th>du</th><th>er/es</th><th>sie</th><th>wir</th><th>ihr</th><th>sie</th><th>Sie</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="de-dat">mir</td><td class="de-dat">dir</td><td class="de-dat">ihm</td><td class="de-dat">ihr</td><td class="de-dat">uns</td><td class="de-dat">euch</td><td class="de-dat">ihnen</td><td class="de-dat">Ihnen</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">Dative verbs — subject is the <em>thing</em>, person is Dat.</div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Die Jacke gefällt <b>mir</b>.</span><span class="de-voice-ex-hint">= I like the jacket</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Die Schuhe passen <b>dir</b>.</span><span class="de-voice-ex-hint">= the shoes fit you</span></div>
+          <div class="de-voice-ex"><span class="de-voice-ex-sent">Die Mütze steht <b>ihr</b> gut.</span><span class="de-voice-ex-hint">= the hat suits her</span></div>
+        </div>
+
+        <div class="de-voice-block">
+          <div class="de-voice-block-title">🧍 Body parts</div>
+          <div class="de-body-grid">
+            <div class="de-body-col">
+              <div class="de-body-gen der">der</div>
+              der Kopf · der Hals · der Bauch
+            </div>
+            <div class="de-body-col">
+              <div class="de-body-gen die">die</div>
+              die Hand · die Schulter · die Nase
+            </div>
+            <div class="de-body-col">
+              <div class="de-body-gen das">das</div>
+              das Auge · das Ohr · das Knie
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </div><!-- end german section -->
