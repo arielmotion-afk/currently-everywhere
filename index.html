@@ -1223,6 +1223,56 @@
     .de-perfekt-ex-note { text-align: left; }
   }
 
+  /* German Reference — sticky jump nav */
+  .de-ref-nav {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(253, 249, 242, 0.94);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    box-shadow: 0 2px 12px rgba(45,31,26,0.04);
+  }
+  .de-ref-nav-group {
+    display: grid; grid-template-columns: 82px 1fr;
+    gap: 10px; align-items: center;
+  }
+  .de-ref-nav-label {
+    font-size: 10.5px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    font-weight: 700; text-align: right;
+  }
+  .de-ref-nav-chips {
+    display: flex; flex-wrap: wrap; gap: 5px;
+    min-width: 0;
+  }
+  .de-ref-chip {
+    font-size: 12px; padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+    text-decoration: none;
+    user-select: none;
+  }
+  .de-ref-chip:hover { background: rgba(0,0,0,0.04); border-color: rgba(45,31,26,0.18); }
+  .de-ref-chip:active { background: var(--accent-tint, rgba(224,122,95,0.15)); }
+  @media (max-width: 540px) {
+    .de-ref-nav { padding: 8px 10px; }
+    .de-ref-nav-group { grid-template-columns: 1fr; gap: 4px; }
+    .de-ref-nav-label { text-align: left; }
+    .de-ref-chip { font-size: 11.5px; padding: 4px 9px; }
+  }
+  /* Scroll offset so the sticky nav doesn't cover the top of the target card */
+  #tab-german-reference [id^="ref-"] { scroll-margin-top: 110px; }
+  @media (max-width: 540px) { #tab-german-reference [id^="ref-"] { scroll-margin-top: 180px; } }
+
   /* German — Voice Practice cheat sheets */
   .de-voice-banner {
     background: linear-gradient(135deg, #f0e8d8 0%, #e8dfc8 100%);
@@ -2748,8 +2798,35 @@
 
     <!-- REFERENCE -->
     <div class="tab-panel" id="tab-german-reference">
+      <!-- Jump nav (sticky) -->
+      <div class="de-ref-nav">
+        <div class="de-ref-nav-group">
+          <div class="de-ref-nav-label">Grammar</div>
+          <div class="de-ref-nav-chips">
+            <a class="de-ref-chip" data-target="ref-declension">der / die / das</a>
+            <a class="de-ref-chip" data-target="ref-prepositions">Prepositions</a>
+            <a class="de-ref-chip" data-target="ref-pronouns">Pronouns</a>
+            <a class="de-ref-chip" data-target="ref-contractions">Contractions</a>
+            <a class="de-ref-chip" data-target="ref-package-address">Akk vs Dat</a>
+            <a class="de-ref-chip" data-target="ref-perfekt">Perfekt</a>
+          </div>
+        </div>
+        <div class="de-ref-nav-group">
+          <div class="de-ref-nav-label">🎙️ Voice practice</div>
+          <div class="de-ref-nav-chips">
+            <a class="de-ref-chip" data-target="ref-voice-banner">Overview</a>
+            <a class="de-ref-chip" data-target="ref-dieser">Dieser</a>
+            <a class="de-ref-chip" data-target="ref-sollen">Sollen + chores</a>
+            <a class="de-ref-chip" data-target="ref-praeteritum">Präteritum</a>
+            <a class="de-ref-chip" data-target="ref-numbers">Numbers</a>
+            <a class="de-ref-chip" data-target="ref-imperative">Imperative</a>
+            <a class="de-ref-chip" data-target="ref-dative-essentials">Dative</a>
+          </div>
+        </div>
+      </div>
+
       <!-- Declension table -->
-      <div class="card">
+      <div class="card" id="ref-declension">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Declension — der/die/das across cases</div>
         </div>
@@ -2770,7 +2847,7 @@
       </div>
 
       <!-- Preposition triggers -->
-      <div class="card">
+      <div class="card" id="ref-prepositions">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:var(--blue)"></div>Preposition triggers</div>
         </div>
@@ -2795,7 +2872,7 @@
       </div>
 
       <!-- Personal pronoun declension — Akk vs Dat table + trick note -->
-      <div class="card">
+      <div class="card" id="ref-pronouns">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:var(--accent)"></div>Personal pronouns — Akkusativ &amp; Dativ</div>
         </div>
@@ -2844,7 +2921,7 @@
       </div>
 
       <!-- Contractions -->
-      <div class="card">
+      <div class="card" id="ref-contractions">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:var(--yellow)"></div>Common Dativ contractions</div>
         </div>
@@ -2857,7 +2934,7 @@
       </div>
 
       <!-- Package vs Address mnemonic -->
-      <div class="card">
+      <div class="card" id="ref-package-address">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:var(--green)"></div>Akkusativ &amp; Dativ — the package and the address</div>
         </div>
@@ -2896,7 +2973,7 @@
       </div>
 
       <!-- Perfekt: haben oder sein? -->
-      <div class="card">
+      <div class="card" id="ref-perfekt">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:#6b8e6b"></div>Perfekt — haben oder sein?</div>
         </div>
@@ -3001,14 +3078,14 @@
       <!-- VOICE PRACTICE CHEAT SHEETS                                    -->
       <!-- Quick-reference blocks for speaking out loud with a voice AI.  -->
       <!-- ============================================================= -->
-      <div class="card de-voice-banner">
+      <div class="card de-voice-banner" id="ref-voice-banner">
         <div class="de-voice-banner-eyebrow">🎙️ Voice practice</div>
         <h2 class="de-voice-banner-title">Cheat sheets for speaking out loud</h2>
         <p class="de-voice-banner-p">Compact reference blocks to keep open while practicing spoken German with a ChatGPT voice tutor — glance down mid-conversation when you blank on a form.</p>
       </div>
 
       <!-- Dieser / Diese / Dieses -->
-      <div class="card">
+      <div class="card" id="ref-dieser">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:#6b8e6b"></div>Dieser / Diese / Dieses — "this"</div>
         </div>
@@ -3043,7 +3120,7 @@
       </div>
 
       <!-- Sollen + Household chores -->
-      <div class="card">
+      <div class="card" id="ref-sollen">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:#c8965b"></div>Sollen — "should" + chore verbs</div>
         </div>
@@ -3085,7 +3162,7 @@
       </div>
 
       <!-- Präteritum (haben + sein) -->
-      <div class="card">
+      <div class="card" id="ref-praeteritum">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:#a06565"></div>Präteritum — spoken past for haben & sein</div>
         </div>
@@ -3122,7 +3199,7 @@
       </div>
 
       <!-- Ordinals / Dates / Years -->
-      <div class="card">
+      <div class="card" id="ref-numbers">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:#8b7db5"></div>Ordinals, Dates & Years</div>
         </div>
@@ -3159,7 +3236,7 @@
       </div>
 
       <!-- Imperative -->
-      <div class="card">
+      <div class="card" id="ref-imperative">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:#78a56e"></div>Imperative — giving commands</div>
         </div>
@@ -3187,7 +3264,7 @@
       </div>
 
       <!-- Dative essentials: pronouns, verbs, body -->
-      <div class="card">
+      <div class="card" id="ref-dative-essentials">
         <div class="card-title">
           <div class="card-title-left"><div class="dot" style="background:#3d6680"></div>Dative essentials — pronouns, verbs, body</div>
         </div>
@@ -6114,6 +6191,16 @@ function deSwitchToPractice(btn) {
   if (!deState.order.length) deInitSession();
   else deRender();
 }
+
+// Reference tab jump nav — smooth-scroll to the target card
+document.addEventListener('click', (e) => {
+  const chip = e.target.closest('.de-ref-chip');
+  if (!chip) return;
+  e.preventDefault();
+  const id = chip.dataset.target;
+  const el = id && document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 // ── FITNESS ──
 const FIT_DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
