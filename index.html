@@ -1225,7 +1225,7 @@
 
   /* German Reference — sticky jump nav */
   .de-ref-nav {
-    position: sticky; top: 0; z-index: 20;
+    position: sticky; top: calc(var(--sb-height) + 8px); z-index: 20;
     background: rgba(253, 249, 242, 0.94);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
@@ -1269,9 +1269,9 @@
     .de-ref-nav-label { text-align: left; }
     .de-ref-chip { font-size: 11.5px; padding: 4px 9px; }
   }
-  /* Scroll offset so the sticky nav doesn't cover the top of the target card */
-  #tab-german-reference [id^="ref-"] { scroll-margin-top: 110px; }
-  @media (max-width: 540px) { #tab-german-reference [id^="ref-"] { scroll-margin-top: 180px; } }
+  /* Scroll offset so the topbar + sticky nav don't cover the target card */
+  #tab-german-reference [id^="ref-"] { scroll-margin-top: 170px; }
+  @media (max-width: 540px) { #tab-german-reference [id^="ref-"] { scroll-margin-top: 240px; } }
 
   /* German — Voice Practice cheat sheets */
   .de-voice-banner {
