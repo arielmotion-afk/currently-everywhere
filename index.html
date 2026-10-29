@@ -1987,6 +1987,81 @@
     border-radius: 18px;
     box-shadow: 0 1px 3px rgba(45,31,26,0.03), 0 8px 28px rgba(45,31,26,0.04);
   }
+
+  /* Freelance — Archive strip */
+  .fl-archive-btn {
+    background: transparent;
+    color: var(--muted);
+    border-color: var(--border);
+  }
+  .fl-archive-btn:hover {
+    background: #fff4e8;
+    border-color: #c8965b;
+    color: #8a6a2a;
+  }
+  .fl-arch-wrap {
+    margin-top: 8px; margin-bottom: 20px;
+  }
+  .fl-arch-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    font-size: 12.5px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.12s, color 0.12s, background 0.12s;
+  }
+  .fl-arch-toggle:hover { border-color: var(--muted); color: var(--text); }
+  .fl-arch-chev {
+    display: inline-block; font-size: 9px;
+    transition: transform 0.15s;
+  }
+  .fl-arch-toggle.open .fl-arch-chev { transform: rotate(90deg); }
+  .fl-arch-count {
+    background: rgba(0,0,0,0.06); color: var(--muted);
+    padding: 1px 7px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .fl-arch-list {
+    margin-top: 10px;
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .fl-arch-row {
+    display: grid;
+    grid-template-columns: 10px 1fr auto auto;
+    gap: 10px; align-items: center;
+    padding: 6px 2px;
+    font-size: 13px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .fl-arch-row:last-child { border-bottom: none; }
+  .fl-arch-swatch {
+    width: 10px; height: 10px; border-radius: 50%;
+    display: inline-block;
+  }
+  .fl-arch-name { color: var(--text); font-weight: 500; }
+  .fl-arch-meta { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .fl-arch-unarchive {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 999px; padding: 4px 12px;
+    font-size: 11.5px; cursor: pointer;
+    color: var(--text); font-family: inherit;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .fl-arch-unarchive:hover { border-color: var(--accent); background: #fff5f0; color: var(--accent); }
+  @media (max-width: 540px) {
+    .fl-arch-row { grid-template-columns: 10px 1fr auto; gap: 8px; }
+    .fl-arch-meta { grid-column: 2 / 3; grid-row: 2; font-size: 11px; margin-top: -2px; }
+    .fl-arch-unarchive { grid-row: 1 / 3; }
+  }
   .fl-logo {
     width: 44px; height: 44px; border-radius: 10px;
     border: 1.5px solid var(--border);
@@ -3444,6 +3519,8 @@
 
     <div id="fl-client-cards"></div>
 
+    <div id="fl-archived-wrap"></div>
+
     </div><!-- end tab-freelance-clients -->
 
     <div class="tab-panel" id="tab-freelance-daily">
@@ -3868,39 +3945,122 @@ function flRemoveClient(id) {
 function flMoveClient(cid, dir) {
   const idx = flClients.findIndex(x => x.id === cid);
   if (idx < 0) return;
-  const newIdx = idx + dir;
-  if (newIdx < 0 || newIdx >= flClients.length) return;
+  // Walk past archived neighbors so visible-only moves work naturally.
+  let swapIdx = idx + dir;
+  while (swapIdx >= 0 && swapIdx < flClients.length && flClients[swapIdx].archived) {
+    swapIdx += dir;
+  }
+  if (swapIdx < 0 || swapIdx >= flClients.length) return;
   // Swap in the data model
-  const [c] = flClients.splice(idx, 1);
-  flClients.splice(newIdx, 0, c);
-  // Mirror the move in the DOM
+  [flClients[idx], flClients[swapIdx]] = [flClients[swapIdx], flClients[idx]];
+  // Mirror the move in the DOM — direct swap between the two actual visible cards
   const container = document.getElementById('fl-client-cards');
   const cardEl = document.getElementById(`fl-card-${cid}`);
-  if (container && cardEl) {
-    if (dir < 0) {
-      // Moving up: insert before what used to be at idx-1 (now still above at newIdx)
-      const beforeEl = container.children[newIdx];
-      if (beforeEl && beforeEl !== cardEl) container.insertBefore(cardEl, beforeEl);
-    } else {
-      // Moving down: insert after what used to be at idx+1 (now at newIdx-1)
-      const afterEl = container.children[newIdx];
-      if (afterEl && afterEl !== cardEl) container.insertBefore(cardEl, afterEl.nextSibling);
-    }
+  const otherEl = document.getElementById(`fl-card-${flClients[idx].id}`);
+  if (container && cardEl && otherEl) {
+    if (dir < 0) container.insertBefore(cardEl, otherEl);
+    else container.insertBefore(otherEl, cardEl);
   }
   flUpdateReorderButtons();
   flUpdateStats(); flSave();
 }
 
 // Re-sync the disabled state on every up/down button after a reorder or
-// removal — no full re-render needed.
+// removal — no full re-render needed. Counts visible (non-archived) only.
 function flUpdateReorderButtons() {
-  const total = flClients.length;
-  flClients.forEach((c, i) => {
+  const visible = flClients.filter(c => !c.archived);
+  const total = visible.length;
+  visible.forEach((c, i) => {
     const up = document.getElementById(`fl-up-${c.id}`);
     const down = document.getElementById(`fl-down-${c.id}`);
     if (up) up.disabled = (i === 0);
     if (down) down.disabled = (i === total - 1);
   });
+}
+
+// Archive a client: hide the card from the main dashboard but keep every
+// entry, project, brief, task, logo and link. The data still flows into
+// the Report tab's historical totals.
+function flArchiveClient(cid) {
+  const c = flClients.find(x => x.id === cid);
+  if (!c) return;
+  c.archived = true;
+  const cardEl = document.getElementById(`fl-card-${cid}`);
+  if (cardEl && cardEl.parentNode) cardEl.parentNode.removeChild(cardEl);
+  flRenderArchivedList();
+  flUpdateReorderButtons();
+  flUpdateStats(); flSave();
+}
+
+function flUnarchiveClient(cid) {
+  const c = flClients.find(x => x.id === cid);
+  if (!c) return;
+  c.archived = false;
+  // Rebuild the main card and insert it at the client's natural position
+  // in flClients, measured against the other visible clients.
+  const container = document.getElementById('fl-client-cards');
+  if (!container) return;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = flClientCardHTML(c);
+  const cardEl = wrap.firstElementChild;
+  const myIdx = flClients.findIndex(x => x.id === cid);
+  // Find the first visible client that sits after this one in flClients.
+  let nextVisible = null;
+  for (let i = myIdx + 1; i < flClients.length; i++) {
+    if (!flClients[i].archived) {
+      nextVisible = document.getElementById(`fl-card-${flClients[i].id}`);
+      if (nextVisible) break;
+    }
+  }
+  if (nextVisible) container.insertBefore(cardEl, nextVisible);
+  else container.appendChild(cardEl);
+  flRenderProjects(cid);
+  flRenderMonthly(cid);
+  flRenderBriefs(cid);
+  flRenderTasks(cid);
+  const di = document.getElementById(`fl-new-date-${cid}`);
+  if (di && !di.value) di.valueAsDate = new Date();
+  flRenderArchivedList();
+  flUpdateReorderButtons();
+  flUpdateStats(); flSave();
+}
+
+// Collapsible footer that lists archived clients. Keeps the main view
+// clean while preserving one-click Unarchive.
+let _flArchivedOpen = false;
+function flToggleArchivedList() {
+  _flArchivedOpen = !_flArchivedOpen;
+  flRenderArchivedList();
+}
+function flRenderArchivedList() {
+  const root = document.getElementById('fl-archived-wrap');
+  if (!root) return;
+  const archived = flClients.filter(c => c.archived);
+  if (archived.length === 0) { root.innerHTML = ''; return; }
+  const rows = archived.map(c => {
+    // Lifetime hours — a quick sanity check so the user remembers who this was.
+    let hours = 0;
+    (c.projects || []).forEach(p => (p.entries || []).forEach(e => { hours += (e.hours || 0); }));
+    const hoursTxt = hours > 0 ? `${flFmtHExact(hours)} logged` : 'no hours';
+    return `
+      <div class="fl-arch-row">
+        <span class="fl-arch-swatch" style="background:${c.color}"></span>
+        <span class="fl-arch-name">${c.name.replace(/</g, '&lt;')}</span>
+        <span class="fl-arch-meta">${hoursTxt} · ₪${c.rate}/hr</span>
+        <button class="fl-arch-unarchive" onclick="flUnarchiveClient(${c.id})" title="Restore to the main view">↩ Unarchive</button>
+      </div>`;
+  }).join('');
+  root.innerHTML = `
+    <div class="fl-arch-wrap">
+      <button class="fl-arch-toggle${_flArchivedOpen ? ' open' : ''}" onclick="flToggleArchivedList()">
+        <span class="fl-arch-chev">▸</span>
+        <span>Archived</span>
+        <span class="fl-arch-count">${archived.length}</span>
+      </button>
+      <div class="fl-arch-list"${_flArchivedOpen ? '' : ' hidden'}>
+        ${rows}
+      </div>
+    </div>`;
 }
 
 // ── PROJECT MANAGEMENT ──
@@ -5065,6 +5225,7 @@ function flLoad() {
       c.todos = c.todos || [];
       c.months = c.months || {};
       c.collapsed = c.collapsed || false;
+      c.archived = c.archived || false;
       if (c.links) c.links.figma = c.links.figma || '';
       // ── Migrate flat entries → projects ──
       if (!c.projects || c.projects.length === 0) {
@@ -5094,18 +5255,21 @@ function flLoad() {
         if (p.open === undefined) p.open = false;
       });
       flClients.push(c);
-      const wrap = document.createElement('div');
-      wrap.innerHTML = flClientCardHTML(c);
-      document.getElementById('fl-client-cards').appendChild(wrap.firstElementChild);
-      flRenderProjects(c.id);
-      flRenderMonthly(c.id);
-      flRenderBriefs(c.id);
-      flRenderTasks(c.id);
-      // Set date input default to today
-      const di = document.getElementById(`fl-new-date-${c.id}`);
-      if (di && !di.value) di.valueAsDate = new Date();
+      if (!c.archived) {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = flClientCardHTML(c);
+        document.getElementById('fl-client-cards').appendChild(wrap.firstElementChild);
+        flRenderProjects(c.id);
+        flRenderMonthly(c.id);
+        flRenderBriefs(c.id);
+        flRenderTasks(c.id);
+        // Set date input default to today
+        const di = document.getElementById(`fl-new-date-${c.id}`);
+        if (di && !di.value) di.valueAsDate = new Date();
+      }
     } catch(e) { console.warn('Error loading client', c.name, e); }
   });
+  flRenderArchivedList();
   flUpdateStats(); // safe — never calls flSave() now
 }
 
@@ -5638,9 +5802,10 @@ function flClientCardHTML(c) {
   const logoStyle = c.logo ? `background-image:url(${c.logo});background-size:72%;background-repeat:no-repeat;background-position:center;background-color:#ffffff` : `background:${c.color}22;border-color:${c.color}`;
   const logoInner = c.logo ? '' : `<span style="font-size:18px;color:${c.color}">＋</span>`;
   const chevronStyle = c.collapsed ? 'transform:rotate(-90deg)' : '';
-  const idx = flClients.findIndex(x => x.id === c.id);
-  const isFirst = idx <= 0;
-  const isLast = idx >= flClients.length - 1;
+  const visible = flClients.filter(x => !x.archived);
+  const vIdx = visible.findIndex(x => x.id === c.id);
+  const isFirst = vIdx <= 0;
+  const isLast = vIdx >= visible.length - 1;
 
   const cardBg = `linear-gradient(135deg, ${c.color}0A 0%, ${c.color}24 100%), #FFFFFF`;
   return `<div class="card fl-client-card" id="fl-card-${c.id}" style="margin-bottom:20px;border-left-color:${c.color};background:${cardBg}">
@@ -5674,9 +5839,10 @@ function flClientCardHTML(c) {
         <option value="paused" ${c.status==='paused'?'selected':''}>Paused</option>
       </select>
     </div>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px;align-items:center">
       <button class="btn btn-primary" onclick="flSaveClientInfo(${c.id})" style="font-size:12px;padding:6px 12px">Save changes</button>
       <button class="btn" onclick="flToggleEditPanel(${c.id})" style="font-size:12px;padding:6px 12px">Cancel</button>
+      <button class="btn fl-archive-btn" onclick="flArchiveClient(${c.id})" title="Hide from main view but keep the data" style="margin-left:auto;font-size:12px;padding:6px 12px">📦 Archive</button>
     </div>
   </div>
 
