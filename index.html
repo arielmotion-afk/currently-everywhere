@@ -2058,9 +2058,9 @@
   }
   .fl-arch-unarchive:hover { border-color: var(--accent); background: #fff5f0; color: var(--accent); }
   @media (max-width: 540px) {
-    .fl-arch-row { grid-template-columns: 10px 1fr auto; gap: 8px; }
+    .fl-arch-row { grid-template-columns: 10px 1fr auto auto; gap: 6px; }
     .fl-arch-meta { grid-column: 2 / 3; grid-row: 2; font-size: 11px; margin-top: -2px; }
-    .fl-arch-unarchive { grid-row: 1 / 3; }
+    .fl-arch-unarchive { grid-row: 1 / 3; padding: 4px 8px; font-size: 11px; }
   }
   .fl-logo {
     width: 44px; height: 44px; border-radius: 10px;
@@ -2239,6 +2239,88 @@
   .fl-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
   .btn-red { background: var(--red-light); color: var(--red); border-color: transparent; }
   .btn-red:hover { background: #f5dede; border-color: var(--red); }
+
+  /* Contract summary modal */
+  .fl-summary-modal {
+    width: 560px; max-width: 100%;
+    max-height: 85vh;
+    display: flex; flex-direction: column;
+    padding: 22px 24px 20px;
+  }
+  .fl-sum-head {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .fl-sum-head h3 {
+    font-family: 'Lora', serif;
+    font-size: 20px; font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .fl-sum-meta {
+    font-size: 12.5px; color: var(--muted);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .fl-sum-meta b { color: var(--text); font-weight: 600; }
+  .fl-sum-dot { opacity: 0.4; }
+  .fl-sum-body {
+    flex: 1; overflow-y: auto;
+    padding-right: 4px;
+    margin-right: -4px;
+  }
+  .fl-sum-month {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .fl-sum-month:last-of-type { border-bottom: none; }
+  .fl-sum-month-head {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px; align-items: baseline;
+    padding: 6px 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .fl-sum-month-label {
+    font-family: 'Lora', serif; font-size: 15px;
+    font-weight: 500; color: var(--text);
+  }
+  .fl-sum-month-hours { font-size: 12.5px; color: var(--muted); min-width: 52px; text-align: right; }
+  .fl-sum-month-income { font-size: 13px; color: var(--text); font-weight: 600; min-width: 76px; text-align: right; }
+  .fl-sum-proj {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px; align-items: baseline;
+    padding: 4px 2px 4px 14px;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+  .fl-sum-proj-name { color: var(--text); }
+  .fl-sum-proj-hours { min-width: 52px; text-align: right; }
+  .fl-sum-proj-income { min-width: 76px; text-align: right; }
+  .fl-sum-grand {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px; align-items: baseline;
+    padding: 12px 2px 0;
+    margin-top: 10px;
+    border-top: 2px solid var(--border);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .fl-sum-grand-hours { min-width: 52px; text-align: right; color: var(--muted); }
+  .fl-sum-grand-income { min-width: 76px; text-align: right; color: var(--accent); }
+  @media (max-width: 540px) {
+    .fl-summary-modal { padding: 18px 16px; }
+    .fl-sum-month-head, .fl-sum-proj, .fl-sum-grand {
+      grid-template-columns: 1fr auto auto; gap: 8px;
+    }
+    .fl-sum-proj { padding-left: 10px; font-size: 12px; }
+    .fl-sum-month-income, .fl-sum-proj-income, .fl-sum-grand-income { min-width: 64px; }
+  }
   /* GITHUB SYNC */
   .gh-toast {
     position: fixed; bottom: 24px; right: 24px; z-index: 600;
@@ -4047,6 +4129,7 @@ function flRenderArchivedList() {
         <span class="fl-arch-swatch" style="background:${c.color}"></span>
         <span class="fl-arch-name">${c.name.replace(/</g, '&lt;')}</span>
         <span class="fl-arch-meta">${hoursTxt} · ₪${c.rate}/hr</span>
+        <button class="fl-arch-unarchive" onclick="flClientSummary(${c.id})" title="Contract summary">📄 Summary</button>
         <button class="fl-arch-unarchive" onclick="flUnarchiveClient(${c.id})" title="Restore to the main view">↩ Unarchive</button>
       </div>`;
   }).join('');
@@ -4650,6 +4733,158 @@ function flDownloadReport() {
   const a = document.createElement('a');
   a.href = url;
   a.download = `invoice-${sel.value}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Client contract summary ──
+// Per-client lifetime breakdown: every month that has entries, each with
+// its project split and totals, then a grand total. Useful at the end of
+// a contract when the client wants a single document to review.
+function flBuildClientSummary(cid) {
+  const c = flClients.find(x => x.id === cid);
+  if (!c) return null;
+  // mk -> { projects: { pname: {hours, income} }, hours, income }
+  const months = new Map();
+  (c.projects || []).forEach(p => {
+    (p.entries || []).forEach(e => {
+      if (!e.date) return;
+      const mk = e.date.slice(0, 7);
+      let m = months.get(mk);
+      if (!m) { m = { mk, projects: new Map(), hours: 0, income: 0 }; months.set(mk, m); }
+      const curr = m.projects.get(p.name) || { hours: 0, income: 0 };
+      curr.hours += (e.hours || 0);
+      curr.income += (e.hours || 0) * (c.rate || 0);
+      m.projects.set(p.name, curr);
+      m.hours += (e.hours || 0);
+      m.income += (e.hours || 0) * (c.rate || 0);
+    });
+  });
+  const sorted = [...months.values()].sort((a, b) => a.mk.localeCompare(b.mk));
+  const monthList = sorted.map(m => {
+    const [y, mo] = m.mk.split('-');
+    const d = new Date(parseInt(y), parseInt(mo) - 1, 1);
+    const label = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    const projects = [...m.projects.entries()].map(([name, agg]) => ({ name, hours: agg.hours, income: agg.income }));
+    projects.sort((a, b) => b.hours - a.hours);
+    return { mk: m.mk, label, projects, hours: m.hours, income: m.income };
+  });
+  const totalHours = sorted.reduce((s, m) => s + m.hours, 0);
+  const totalIncome = sorted.reduce((s, m) => s + m.income, 0);
+  const span = monthList.length === 0 ? ''
+    : monthList.length === 1 ? monthList[0].label
+    : `${monthList[0].label} → ${monthList[monthList.length - 1].label}`;
+  return { client: c, months: monthList, totalHours, totalIncome, span };
+}
+
+function flSummaryToText(summary) {
+  const { client: c, months, totalHours, totalIncome, span } = summary;
+  const lines = [];
+  const title = `${c.name} — Contract summary`;
+  lines.push(title);
+  lines.push('='.repeat(title.length));
+  lines.push(`Rate: ₪${c.rate}/hr`);
+  if (span) lines.push(`Period: ${span}`);
+  lines.push('');
+  if (months.length === 0) {
+    lines.push('No hours logged.');
+    return lines.join('\n');
+  }
+  months.forEach(m => {
+    lines.push(m.label);
+    lines.push('-'.repeat(m.label.length));
+    m.projects.forEach(p => {
+      lines.push(`  • ${p.name}: ${flFmtHExact(p.hours)}  →  ₪${Math.round(p.income).toLocaleString()}`);
+    });
+    lines.push(`  Subtotal: ${flFmtHExact(m.hours)}  →  ₪${Math.round(m.income).toLocaleString()}`);
+    lines.push('');
+  });
+  lines.push('='.repeat(40));
+  lines.push(`Grand total: ${flFmtHExact(totalHours)}  →  ₪${Math.round(totalIncome).toLocaleString()}`);
+  return lines.join('\n');
+}
+
+let _flSummaryCid = null;
+function flClientSummary(cid) {
+  const summary = flBuildClientSummary(cid);
+  if (!summary) return;
+  _flSummaryCid = cid;
+  const { client: c, months, totalHours, totalIncome, span } = summary;
+  const body = document.getElementById('fl-summary-body');
+  const titleEl = document.getElementById('fl-summary-title');
+  const metaEl = document.getElementById('fl-summary-meta');
+  const textEl = document.getElementById('fl-summary-text');
+  if (!body || !titleEl || !metaEl || !textEl) return;
+
+  titleEl.textContent = `${c.name} — Contract summary`;
+  titleEl.style.color = c.color;
+  metaEl.innerHTML = `
+    <span>₪${c.rate}/hr</span>
+    ${span ? `<span class="fl-sum-dot">·</span><span>${span}</span>` : ''}
+    <span class="fl-sum-dot">·</span>
+    <span><b>${flFmtHExact(totalHours)}</b> total</span>
+    <span class="fl-sum-dot">·</span>
+    <span><b>₪${Math.round(totalIncome).toLocaleString()}</b></span>
+  `;
+  if (months.length === 0) {
+    body.innerHTML = `<div class="fl-report-empty">No hours logged for this client.</div>`;
+  } else {
+    body.innerHTML = months.map(m => `
+      <div class="fl-sum-month">
+        <div class="fl-sum-month-head">
+          <span class="fl-sum-month-label">${m.label}</span>
+          <span class="fl-sum-month-hours">${flFmtHExact(m.hours)}</span>
+          <span class="fl-sum-month-income">₪${Math.round(m.income).toLocaleString()}</span>
+        </div>
+        ${m.projects.map(p => `
+          <div class="fl-sum-proj">
+            <span class="fl-sum-proj-name">${p.name.replace(/</g, '&lt;')}</span>
+            <span class="fl-sum-proj-hours">${flFmtHExact(p.hours)}</span>
+            <span class="fl-sum-proj-income">₪${Math.round(p.income).toLocaleString()}</span>
+          </div>`).join('')}
+      </div>
+    `).join('') + `
+      <div class="fl-sum-grand">
+        <span>Grand total</span>
+        <span class="fl-sum-grand-hours">${flFmtHExact(totalHours)}</span>
+        <span class="fl-sum-grand-income">₪${Math.round(totalIncome).toLocaleString()}</span>
+      </div>`;
+  }
+  textEl.value = flSummaryToText(summary);
+  flShowModal('fl-summary-modal');
+}
+
+function flCopySummary() {
+  const ta = document.getElementById('fl-summary-text');
+  if (!ta) return;
+  const btn = document.getElementById('fl-summary-copy-btn');
+  const orig = btn ? btn.textContent : '';
+  const flash = () => {
+    if (!btn) return;
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = orig; }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value).then(flash).catch(() => {
+      ta.select(); document.execCommand('copy'); flash();
+    });
+  } else {
+    ta.select(); document.execCommand('copy'); flash();
+  }
+}
+
+function flDownloadSummary() {
+  const ta = document.getElementById('fl-summary-text');
+  if (!ta || _flSummaryCid == null) return;
+  const c = flClients.find(x => x.id === _flSummaryCid);
+  const safeName = (c && c.name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const blob = new Blob([ta.value], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `contract-summary-${safeName}.txt`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -5821,6 +6056,7 @@ function flClientCardHTML(c) {
       <span id="fl-client-status-${c.id}" class="tag ${statusClass}">${c.status}</span>
       <button id="fl-up-${c.id}" onclick="flMoveClient(${c.id}, -1)" class="fl-act-btn" title="Move up" ${isFirst ? 'disabled' : ''} style="padding:4px 6px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><polyline points="18 15 12 9 6 15"/></svg></button>
       <button id="fl-down-${c.id}" onclick="flMoveClient(${c.id}, 1)" class="fl-act-btn" title="Move down" ${isLast ? 'disabled' : ''} style="padding:4px 6px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <button onclick="flClientSummary(${c.id})" class="fl-act-btn" title="Contract summary — every month with this client" style="padding:3px 8px">📄</button>
       <button onclick="flToggleEditPanel(${c.id})" class="fl-act-btn" title="Edit client info" style="padding:3px 8px"> Edit</button>
       <button onclick="flRemoveClient(${c.id})" class="fl-act-btn" title="Remove client">&times;</button>
       <button onclick="flToggleCollapse(${c.id})" class="fl-act-btn" title="${c.collapsed?'Expand':'Minimize'}" style="padding:4px 7px"><svg id="fl-card-chevron-${c.id}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;transition:transform 0.15s;${chevronStyle}"><polyline points="6 9 12 15 18 9"/></svg></button>
@@ -7307,6 +7543,23 @@ function ghClearPAT() {
     <div class="fl-modal-actions">
       <button class="btn" onclick="flHideModal('fl-edit-modal')">Cancel</button>
       <button class="btn btn-primary" onclick="flEditSave()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTRACT SUMMARY MODAL -->
+<div class="fl-modal-overlay" id="fl-summary-modal" onclick="if(event.target===this)flHideModal('fl-summary-modal')">
+  <div class="fl-modal fl-summary-modal">
+    <div class="fl-sum-head">
+      <h3 id="fl-summary-title" style="margin:0 0 6px"></h3>
+      <div id="fl-summary-meta" class="fl-sum-meta"></div>
+    </div>
+    <div id="fl-summary-body" class="fl-sum-body"></div>
+    <textarea id="fl-summary-text" readonly style="position:absolute;left:-9999px;top:-9999px;opacity:0" aria-hidden="true"></textarea>
+    <div class="fl-modal-actions">
+      <button class="btn" onclick="flHideModal('fl-summary-modal')">Close</button>
+      <button class="btn" onclick="flDownloadSummary()">Download .txt</button>
+      <button id="fl-summary-copy-btn" class="btn btn-primary" onclick="flCopySummary()">Copy</button>
     </div>
   </div>
 </div>
