@@ -1548,11 +1548,13 @@
   .fl-report-row:hover { background: rgba(0,0,0,0.025); }
   .fl-report-row.open { background: rgba(224,122,95,0.06); }
   .fl-report-expand {
-    color: var(--muted); font-size: 10px;
-    transition: transform 0.15s;
+    color: var(--muted); font-size: 11px;
+    opacity: 0.7;
+    transition: transform 0.15s, opacity 0.15s, color 0.15s;
     display: inline-block;
     text-align: center;
   }
+  .fl-report-row:hover .fl-report-expand { opacity: 1; }
   .fl-report-row.open .fl-report-expand { transform: rotate(90deg); color: var(--accent); }
   .fl-report-proj-name { color: var(--text); }
   .fl-report-hours { color: var(--muted); text-align: right; min-width: 52px; }
@@ -1601,7 +1603,7 @@
     display: grid;
     grid-template-columns: 1fr auto auto;
     gap: 14px; align-items: center;
-    padding: 10px 4px 0;
+    padding: 10px 4px 0 28px;
     margin-top: 8px;
     border-top: 1px solid var(--border);
     font-size: 13.5px;
