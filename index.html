@@ -4893,6 +4893,188 @@ function flDownloadSummary() {
   URL.revokeObjectURL(url);
 }
 
+// Download a self-contained, offline-safe HTML archive of the client.
+// Same editorial design as the published artifact: Dappas-style teal mark,
+// warm paper neutrals, per-month cards. Inlined CSS, system-font fallbacks,
+// no network — opens in any browser, suitable for saving to Drive.
+function flEscHTML(s) {
+  return String(s || '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+function flBuildSummaryHTML(cid) {
+  const summary = flBuildClientSummary(cid);
+  if (!summary) return '';
+  const { client: c, months, totalHours, totalIncome, span } = summary;
+  const accent = c.color || '#0D7A7A';
+  const initial = (c.name || '?').trim().charAt(0).toUpperCase();
+  const monthBlocks = months.map(m => `
+    <article class="month">
+      <header class="month-head">
+        <h3 class="month-title">${flEscHTML(m.label)}</h3>
+        <div class="month-right">
+          <span class="month-hrs">${flFmtHExact(m.hours)}</span>
+          <b>₪${Math.round(m.income).toLocaleString()}</b>
+        </div>
+      </header>
+      <ul class="projects">
+        ${m.projects.map(p => `
+          <li>
+            <span class="proj-name">${flEscHTML(p.name)}</span>
+            <span class="proj-hrs">${flFmtHExact(p.hours)}</span>
+            <span class="proj-income">₪${Math.round(p.income).toLocaleString()}</span>
+          </li>`).join('')}
+      </ul>
+    </article>`).join('');
+
+  const empty = months.length === 0
+    ? '<div class="empty">No hours logged for this client.</div>'
+    : '';
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${flEscHTML(c.name)} — Contract summary</title>
+<style>
+  :root {
+    --bg: #FAF7F1;
+    --surface: #FFFFFF;
+    --fg: #1F2A2A;
+    --fg-soft: #3F4C4C;
+    --muted: #7A8484;
+    --border: rgba(31, 42, 42, 0.10);
+    --accent: ${accent};
+    --display: "Lora", "Iowan Old Style", Georgia, serif;
+    --body: "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); }
+  body { font-family: var(--body); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .page { max-width: 760px; margin: 0 auto; padding: 48px 28px 64px; }
+  .hero {
+    display: grid; grid-template-columns: auto 1fr;
+    gap: 20px 24px; align-items: start;
+    padding-bottom: 32px; border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .mark {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: var(--accent); color: #fff;
+    font-family: var(--display); font-weight: 600; font-size: 24px;
+    letter-spacing: -0.02em; display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .hero-meta {
+    text-transform: uppercase; letter-spacing: 0.11em;
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .hero h1 {
+    font-family: var(--display); font-weight: 500;
+    font-size: 36px; line-height: 1.1; letter-spacing: -0.025em;
+    margin: 0 0 10px; color: var(--fg); text-wrap: balance;
+  }
+  .hero-sub { color: var(--muted); font-size: 14px; }
+  .hero-sub b { color: var(--fg-soft); font-weight: 600; }
+  .month {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 22px; margin-bottom: 14px;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .month-head {
+    display: flex; flex-wrap: wrap; gap: 10px 14px;
+    align-items: baseline; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 10px;
+  }
+  .month-title {
+    font-family: var(--display); font-size: 20px; font-weight: 500;
+    letter-spacing: -0.015em; color: var(--fg); margin: 0;
+  }
+  .month-right { display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; }
+  .month-right b {
+    font-family: var(--display); font-size: 17px; font-weight: 500;
+    color: var(--fg); letter-spacing: -0.01em;
+  }
+  .month-right .month-hrs { font-size: 12.5px; color: var(--muted); }
+  .projects { list-style: none; padding: 0; margin: 0; }
+  .projects li {
+    display: grid; grid-template-columns: 1fr auto auto;
+    gap: 14px; padding: 6px 0; font-size: 14px; color: var(--fg-soft);
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px dashed var(--border);
+  }
+  .projects li:last-child { border-bottom: none; }
+  .proj-name { color: var(--fg); }
+  .proj-hrs { color: var(--muted); min-width: 56px; text-align: right; font-size: 13px; }
+  .proj-income { color: var(--fg); min-width: 80px; text-align: right; font-weight: 500; }
+  .empty {
+    padding: 24px; text-align: center; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  }
+  .footer-line {
+    margin-top: 32px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 11.5px;
+  }
+  @media print {
+    body { background: var(--bg); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 32px 20px; }
+  }
+  @media (max-width: 540px) {
+    .page { padding: 32px 18px 48px; }
+    .hero { grid-template-columns: 1fr; gap: 16px; padding-bottom: 24px; margin-bottom: 24px; }
+    .mark { width: 48px; height: 48px; font-size: 20px; border-radius: 12px; }
+    .hero h1 { font-size: 28px; }
+    .month { padding: 16px 18px; }
+    .month-title { font-size: 18px; }
+    .projects li { font-size: 13px; }
+    .proj-income { min-width: 70px; font-size: 13px; }
+    .proj-hrs { min-width: 46px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="mark">${flEscHTML(initial)}</div>
+      <div>
+        <div class="hero-meta">Contract summary</div>
+        <h1>${flEscHTML(c.name)}</h1>
+        <div class="hero-sub">
+          <b>₪${c.rate}/hr</b>${span ? ' · Period: ' + flEscHTML(span) : ''} · <b>${flFmtHExact(totalHours)}</b> total · <b>₪${Math.round(totalIncome).toLocaleString()}</b>
+        </div>
+      </div>
+    </header>
+    ${empty || monthBlocks}
+    <div class="footer-line">Exported ${today} · Billed at ₪${c.rate}/hr · Hours logged in 0.25h increments.</div>
+  </div>
+</body>
+</html>`;
+}
+
+function flDownloadSummaryHTML() {
+  if (_flSummaryCid == null) return;
+  const c = flClients.find(x => x.id === _flSummaryCid);
+  if (!c) return;
+  const html = flBuildSummaryHTML(_flSummaryCid);
+  const safeName = (c.name || 'client').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `contract-summary-${safeName}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function flRenderReport() {
   const root = document.getElementById('fl-report-root');
   if (!root) return;
@@ -7560,7 +7742,8 @@ function ghClearPAT() {
     <textarea id="fl-summary-text" readonly style="position:absolute;left:-9999px;top:-9999px;opacity:0" aria-hidden="true"></textarea>
     <div class="fl-modal-actions">
       <button class="btn" onclick="flHideModal('fl-summary-modal')">Close</button>
-      <button class="btn" onclick="flDownloadSummary()">Download .txt</button>
+      <button class="btn" onclick="flDownloadSummary()">.txt</button>
+      <button class="btn" onclick="flDownloadSummaryHTML()" title="Self-contained styled page — save to Drive">💾 HTML</button>
       <button id="fl-summary-copy-btn" class="btn btn-primary" onclick="flCopySummary()">Copy</button>
     </div>
   </div>
